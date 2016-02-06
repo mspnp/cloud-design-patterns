@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{82CB4032-CAF0-480F-9DDD-B6811D957E09}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "ComputeResourceConsolidation", "ComputeResourceConsolidation\ComputeResourceConsolidation.ccproj", "{E7A2FBC1-D01E-4147-9927-FEEE0BF1D7D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComputeResourceConsolidation.Worker", "ComputeResourceConsolidation.Worker\ComputeResourceConsolidation.Worker.csproj", "{D5710863-4C68-4D0B-85EE-879FCB8D53FE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E7A2FBC1-D01E-4147-9927-FEEE0BF1D7D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7A2FBC1-D01E-4147-9927-FEEE0BF1D7D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7A2FBC1-D01E-4147-9927-FEEE0BF1D7D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7A2FBC1-D01E-4147-9927-FEEE0BF1D7D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5710863-4C68-4D0B-85EE-879FCB8D53FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5710863-4C68-4D0B-85EE-879FCB8D53FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5710863-4C68-4D0B-85EE-879FCB8D53FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5710863-4C68-4D0B-85EE-879FCB8D53FE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
