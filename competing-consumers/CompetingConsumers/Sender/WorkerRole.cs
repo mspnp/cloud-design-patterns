@@ -5,7 +5,7 @@ namespace Sender
     using System.Net;
     using System.Threading;
     using CompetingConsumers.Shared;
-    using Microsoft.WindowsAzure;
+    using Microsoft.Azure;
     using Microsoft.WindowsAzure.ServiceRuntime;
 
     public class WorkerRole : RoleEntryPoint
