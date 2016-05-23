@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceDefinition name="ExternalConfigurationStore" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2013-10.2.2">
+  <WorkerRole name="ExternalConfigurationStore.Cloud" vmsize="Small">
+    <Imports>
+      <Import moduleName="Diagnostics" />
+    </Imports>
+    <ConfigurationSettings>
+      <Setting name="storageAccount" />
+      <Setting name="environment" />
+    </ConfigurationSettings>
+  </WorkerRole>
+</ServiceDefinition>

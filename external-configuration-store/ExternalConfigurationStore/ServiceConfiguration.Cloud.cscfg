@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="ExternalConfigurationStore" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="3" osVersion="*" schemaVersion="2013-10.2.2">
+  <Role name="ExternalConfigurationStore.Cloud">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="UseDevelopmentStorage=true" />
+      <Setting name="storageAccount" value="UseDevelopmentStorage=true" />
+      <Setting name="environment" value="production" />
+    </ConfigurationSettings>
+  </Role>
+</ServiceConfiguration>
