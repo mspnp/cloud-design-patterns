@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="HealthEndpointMonitoring.Cloud" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="4" osVersion="*" schemaVersion="2013-10.2.2">
+  <Role name="HealthEndpointMonitoring.Web">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="UseDevelopmentStorage=true" />
+      <Setting name="Test.ReturnStatusCode" value="200" />
+      <Setting name="Test.ObscurePath" value="F3CJ34X9" />
+      <Setting name="StorageAccount" value="UseDevelopmentStorage=true" />
+    </ConfigurationSettings>
+  </Role>
+</ServiceConfiguration>

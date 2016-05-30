@@ -1,0 +1,32 @@
+/* MNP Overrides */
+
+.msviSearchBox
+{
+    width:150px;
+    margin-top:6px;
+    margin-right:4px;
+    padding:2px;
+}
+
+.msviGoButton
+{
+    position:relative;
+    height:26px;
+    width:26px;
+    top:1px;
+}
+
+#msviMasthead
+{
+    display:none;
+}
+
+#msviFooter
+{
+    display:none;
+}
+
+#msviFooter2
+{
+	display:none;
+}
