@@ -1,6 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6A8D047E-09DF-416B-92DB-684BAB3F30A8}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.md = Readme.md
+	EndProjectSection
+EndProject
 Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "LeaderElection", "LeaderElection\LeaderElection.ccproj", "{CE498D7F-CA27-4B80-A344-42246B2F8F88}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaderElection.Worker", "LeaderElection\LeaderElection.Worker\LeaderElection.Worker.csproj", "{7BD1B811-E6FA-4404-8365-C61B7B8035B8}"
@@ -8,19 +15,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedMutex", "DistributedMutex\DistributedMutex.csproj", "{9C695186-E886-422E-B2E1-AE6AA83E5B4B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeaderElection.Tests", "LeaderElection.Tests\LeaderElection.Tests.csproj", "{91E74A26-0DA1-4AAF-943E-53809209C77D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{3A05403E-F9F5-441A-9D8B-84105E1CD211}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6A8D047E-09DF-416B-92DB-684BAB3F30A8}"
-	ProjectSection(SolutionItems) = preProject
-		Readme.htm = Readme.htm
-		ReleaseNotes.htm = ReleaseNotes.htm
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
