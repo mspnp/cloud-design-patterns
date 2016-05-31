@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceDefinition name="PriorityQueue" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2013-10.2.2">
+  <WorkerRole name="PriorityQueue.High" vmsize="Small">
+    <Imports>
+    </Imports>
+    <ConfigurationSettings>
+      <Setting name="ServiceBusConnectionString" />
+      <Setting name="TopicName" />
+      <Setting name="SubscriptionName" />
+    </ConfigurationSettings>
+  </WorkerRole>
+  <WorkerRole name="PriorityQueue.Low" vmsize="Small">
+    <Imports>
+    </Imports>
+    <ConfigurationSettings>
+      <Setting name="ServiceBusConnectionString" />
+      <Setting name="TopicName" />
+      <Setting name="SubscriptionName" />
+    </ConfigurationSettings>
+  </WorkerRole>
+  <WorkerRole name="PriorityQueue.Sender" vmsize="Small">
+    <Imports>
+    </Imports>
+    <ConfigurationSettings>
+      <Setting name="ServiceBusConnectionString" />
+      <Setting name="TopicName" />
+    </ConfigurationSettings>
+  </WorkerRole>
+</ServiceDefinition>
