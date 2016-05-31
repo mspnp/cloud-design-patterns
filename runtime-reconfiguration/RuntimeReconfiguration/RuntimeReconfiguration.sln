@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "RuntimeReconfiguration", "RuntimeReconfiguration.ccproj", "{EDE19C5A-EE9B-40B3-8E09-4304F536A386}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuntimeReconfiguration.Web", "RuntimeReconfiguration.Web\RuntimeReconfiguration.Web.csproj", "{67732273-1489-4DE1-A342-6AA551873813}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EDE19C5A-EE9B-40B3-8E09-4304F536A386}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDE19C5A-EE9B-40B3-8E09-4304F536A386}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDE19C5A-EE9B-40B3-8E09-4304F536A386}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDE19C5A-EE9B-40B3-8E09-4304F536A386}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67732273-1489-4DE1-A342-6AA551873813}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67732273-1489-4DE1-A342-6AA551873813}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67732273-1489-4DE1-A342-6AA551873813}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67732273-1489-4DE1-A342-6AA551873813}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
