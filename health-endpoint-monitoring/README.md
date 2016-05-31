@@ -1,6 +1,6 @@
 # Health Endpoint Monitoring Pattern
 
-This document describes the External Configuration Store Pattern example from the guide [Cloud Design Patterns](http://aka.ms/Cloud-Design-Patterns).
+This document describes the Health Endpoint Monitoring Pattern example from the guide [Cloud Design Patterns](http://aka.ms/Cloud-Design-Patterns).
 
 ## System Requirements
 
