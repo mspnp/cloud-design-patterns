@@ -1,6 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B194DC16-FB90-41B2-9FEF-BA0B1B1DAE59}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.md = Readme.md
+	EndProjectSection
+EndProject
 Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "PipesAndFilters.Cloud", "PipesAndFilters.Cloud\PipesAndFilters.Cloud.ccproj", "{543E2829-B046-4066-9599-91B444F07915}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipesAndFilters.Shared", "PipesAndFilters.Shared\PipesAndFilters.Shared.csproj", "{AF41098B-9D2E-4D7D-988C-29B0CC57B365}"
@@ -12,19 +19,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipeFilterB", "PipeFilterB\PipeFilterB.csproj", "{F17AFA15-2B1C-4726-9C82-247509FABC6E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinalReceiver", "FinalReceiver\FinalReceiver.csproj", "{36475FF4-5103-4936-8687-D641A45E550D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B194DC16-FB90-41B2-9FEF-BA0B1B1DAE59}"
-	ProjectSection(SolutionItems) = preProject
-		Readme.htm = Readme.htm
-		ReleaseNotes.htm = ReleaseNotes.htm
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8C5048E0-0617-47E7-90D5-069A1F47E4E3}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
