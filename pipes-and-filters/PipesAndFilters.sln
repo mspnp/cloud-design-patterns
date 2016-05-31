@@ -1,0 +1,63 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "PipesAndFilters.Cloud", "PipesAndFilters.Cloud\PipesAndFilters.Cloud.ccproj", "{543E2829-B046-4066-9599-91B444F07915}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipesAndFilters.Shared", "PipesAndFilters.Shared\PipesAndFilters.Shared.csproj", "{AF41098B-9D2E-4D7D-988C-29B0CC57B365}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InitialSender", "InitialSender\InitialSender.csproj", "{2AB59C16-D5B6-4741-90D6-4EC3510C19A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipeFilterA", "PipeFilterA\PipeFilterA.csproj", "{289DEBF1-B637-4C74-8795-E5985E52D235}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PipeFilterB", "PipeFilterB\PipeFilterB.csproj", "{F17AFA15-2B1C-4726-9C82-247509FABC6E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinalReceiver", "FinalReceiver\FinalReceiver.csproj", "{36475FF4-5103-4936-8687-D641A45E550D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B194DC16-FB90-41B2-9FEF-BA0B1B1DAE59}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.htm = Readme.htm
+		ReleaseNotes.htm = ReleaseNotes.htm
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8C5048E0-0617-47E7-90D5-069A1F47E4E3}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{543E2829-B046-4066-9599-91B444F07915}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{543E2829-B046-4066-9599-91B444F07915}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{543E2829-B046-4066-9599-91B444F07915}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{543E2829-B046-4066-9599-91B444F07915}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF41098B-9D2E-4D7D-988C-29B0CC57B365}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF41098B-9D2E-4D7D-988C-29B0CC57B365}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF41098B-9D2E-4D7D-988C-29B0CC57B365}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF41098B-9D2E-4D7D-988C-29B0CC57B365}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AB59C16-D5B6-4741-90D6-4EC3510C19A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AB59C16-D5B6-4741-90D6-4EC3510C19A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AB59C16-D5B6-4741-90D6-4EC3510C19A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AB59C16-D5B6-4741-90D6-4EC3510C19A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{289DEBF1-B637-4C74-8795-E5985E52D235}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{289DEBF1-B637-4C74-8795-E5985E52D235}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{289DEBF1-B637-4C74-8795-E5985E52D235}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{289DEBF1-B637-4C74-8795-E5985E52D235}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F17AFA15-2B1C-4726-9C82-247509FABC6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F17AFA15-2B1C-4726-9C82-247509FABC6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F17AFA15-2B1C-4726-9C82-247509FABC6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F17AFA15-2B1C-4726-9C82-247509FABC6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36475FF4-5103-4936-8687-D641A45E550D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36475FF4-5103-4936-8687-D641A45E550D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36475FF4-5103-4936-8687-D641A45E550D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36475FF4-5103-4936-8687-D641A45E550D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
