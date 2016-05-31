@@ -23,7 +23,7 @@ This example shows how you can set up a web endpoint that checks the health of d
 
 You can run this example locally in the Visual Studio Windows Azure emulator. You can also run this example by deploying it to a Windows Azure Cloud Service.
 
-* SStart Visual Studio using an account that has Administrator privileges ("Run as Administrator").
+* Start Visual Studio using an account that has Administrator privileges ("Run as Administrator").
 * Open the solution you want to explore from the subfolders where you downloaded the examples.
 * Right-click on each role in Solution Explorer, select Properties, and ensure that the role is configured to generate diagnostic information.
 
