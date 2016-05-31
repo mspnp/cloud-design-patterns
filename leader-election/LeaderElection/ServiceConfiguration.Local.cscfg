@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="LeaderElection" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="4" osVersion="*" schemaVersion="2013-10.2.2">
+  <Role name="LeaderElection.Worker">
+    <Instances count="2" />
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="UseDevelopmentStorage=true" />
+      <Setting name="Storage" value="UseDevelopmentStorage=true" />
+    </ConfigurationSettings>
+  </Role>
+</ServiceConfiguration>

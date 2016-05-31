@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceDefinition name="LeaderElection" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2013-10.2.2">
+  <WorkerRole name="LeaderElection.Worker" vmsize="Small">
+    <Imports>
+      <Import moduleName="Diagnostics" />
+    </Imports>
+    <ConfigurationSettings>
+      <Setting name="Storage" />
+    </ConfigurationSettings>
+  </WorkerRole>
+</ServiceDefinition>
