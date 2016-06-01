@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <title>Cloud Design Patterns - Release Notes</title>
+    <link rel="stylesheet" href="readme_files/styles/main.css" type="text/css" />
+    <link rel="stylesheet" href="readme_files/styles/mnp.css" type="text/css" />
+    <style type="text/css">
+
+ p.MsoNormal
+  {margin-bottom:.0001pt;
+  font-size:11.0pt;
+  font-family:"Calibri","sans-serif";
+          margin-left: 0in;
+            margin-right: 0in;
+            margin-top: 0in;
+        }
+    .auto-style1 {
+  color: #1155A8;
+}
+    </style>
+</head>
+<body>
+    <a name="top"></a>
+    <div id="commonWrapper">
+        <div id="pageWrapper">
+            <!--   START HEADER   -->
+            <div class="page_header">
+                <div class="page_header_logo">
+                    <table>
+                        <tr>
+                            <td>
+                                <a href="Readme.htm">
+                                    <div class="page_header_title">
+                                        Cloud Design Patterns</div>
+                                </a>
+                                <div class="page_header_subtitle">
+                                    Release Notes</div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <!--   END HEADER   -->
+            <div id="Main">
+                <div id="MainMid">
+                    <!-- START NAVIGATION BAR -->
+                    <div id="TopNavigation">
+                        <div class="topnav_item" id="topnav1">
+                            <a tabindex="1" href="Readme.htm"><span class="topnav_item_left"></span><span
+                                class="topnav_item_middle"><span class="topnav_item_text">Readme</span>
+                            </span><span class="topnav_item_right_selected"></span></a>
+                            <a tabindex="1" href="ReleaseNotes.htm"><span class="topnav_item_selected"></span><span
+                                class="topnav_item_middle_selected"><span class="topnav_item_text">Release notes</span>
+                            </span><span class="topnav_item_right"></span></a>
+                        </div>
+                        <div class="topnav_item_divider">
+                        </div>
+                    </div>
+                    <!-- END NAVIGATION BAR -->
+                    <div id="Content">
+                        <div class="content_table_home">
+                            <div class="homePgImgWide">
+                                <div class="homearea">
+                                    <div class="pageTitle">
+                                        <div class="maintitle">Release Notes</div>
+                                    </div>
+                                    <div class="newpromo">
+                                        <a href="http://msdn.microsoft.com/practices">
+                                            <img src="readme_files/images/pnp_logo.gif" alt="Microsoft Patterns & Practices" />
+                                        </a>
+                                    </div>
+                                    <div class="content_header_text">
+<p><b>System Requirements</b></p>
+<p>&nbsp;</p>
+<ul>
+  <li>Microsoft Windows 7, Microsoft Windows 8, Microsoft Windows 8.1, or Microsoft Windows Server 2012 (32 bit or 64 bit editions)</li>
+  <li><a href="http://go.microsoft.com/?linkid=9831986" target="_blank">Microsoft .NET Framework version 4.5</a></li>
+  <li><a href="http://www.microsoft.com/visualstudio/en-us/products/" target="_blank">Microsoft Visual Studio</a> 2012 Ultimate, Premium, or Professional edition with Update 3 installed, or Visual Studio 2013 Ultimate, Premium, or Professional edition</li>
+  <li><a href="http://www.windowsazure.com/en-us/downloads/?sdk=net" target="_blank">Windows Azure SDK for .NET</a> version 2.2</li>
+  <li><a href="http://msdn.microsoft.com/en-us/data/gg577610" target="_blank">Windows Reactive Extensions Library</a></li>
+</ul>
+<p>&nbsp;</p>
+<p><b>NOTE:</b> Ensure that you have installed all applicable updates for your computer from Windows Update.</p>
+
+<p>&nbsp;</p><hr /><p>&nbsp;</p>
+
+<p><b><a name="dependencies"></a>Allow NuGet to Download Missing Packages</b></p>
+<p>&nbsp;</p>
+<p>You must ensure that Visual Studio is configured to use the latest version of the NuGet package manager and allow it to download missing packages during the build process. To enable this:</p>
+<ol>
+<li>Open the Visual Studio <b>Extension Manager</b> dialog from the <b>Tools</b> menu.</li>
+<li>Check that the NuGet Package Manager is installed. If it is not already installed select <b>Online Gallery</b> and install it. You can use the Search feature to find it in the Gallery.</li>
+<li>If it is already installed select <b>Updates</b> and check if there is an update available. If there is, select <b>Update</b> to install it. If the update fails, uninstall the existing version and try again.</li>
+<li>Open the Visual Studio <b>Options</b> dialog from the <b>Tools</b> menu.</li>
+<li>Expand the section for <b>Package Manager</b> and select <b>General</b>.</li>
+<li>Ensure that <b>Allow NuGet to download missing packages during build</b> and <b>Automatically check for updates</b> are checked.</li>
+</ol>
+
+<hr /><p>&nbsp;</p>
+
+<p><b><a name="knownissues"></a>Known Issues When Running the Examples</b></p>
+<p>&nbsp;</p>
+<p>You must run the projects and solutions under an account that has Administrator privileges.</p>
+<p>&nbsp;</p>
+<p>If you receive a "MonAgentHost Error MA Event for WinHttpGetprocxyForURL" error when running the examples you can ignore this. It is a known
+issue in the current relase of the Windows Azure SDK.</p>
+<p>&nbsp;</p>
+<p>Report any issues your come across or post suggestions at <a href="http://wag.codeplex.com/">http://wag.codeplex.com</a>.</p>
+
+<p>&nbsp;</p>
+
+                  </div>
+                                    <br />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="footerstrip">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="clear">
+    </div>
+</body>
+</html>
