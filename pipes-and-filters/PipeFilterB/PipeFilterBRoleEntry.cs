@@ -43,7 +43,7 @@ namespace PipeFilterB
                 // DOING SOME FILTER B WORK
                 await Task.Delay(500);
 
-                Trace.TraceInformation("Filter A processed message:{0} at {1}", msg.MessageId, DateTime.UtcNow);
+                Trace.TraceInformation("Filter B processed message:{0} at {1}", msg.MessageId, DateTime.UtcNow);
 
                 newMsg.Properties.Add(Constants.FilterBMessageKey, "Complete");
 
