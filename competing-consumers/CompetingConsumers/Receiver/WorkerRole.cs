@@ -8,8 +8,8 @@ namespace Receiver
     using System.Threading;
     using System.Threading.Tasks;
     using CompetingConsumers.Shared;
+    using Microsoft.Azure;
     using Microsoft.ServiceBus.Messaging;
-    using Microsoft.WindowsAzure;
     using Microsoft.WindowsAzure.ServiceRuntime;
 
     public class WorkerRole : RoleEntryPoint
