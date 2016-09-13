@@ -1,0 +1,25 @@
+{
+  "build": {
+    "content":
+      [
+        {
+          "files": ["**/**.md"],
+          "exclude": ["**/obj/**"]
+        }
+      ],
+    "resource": [
+        {
+          "files": ["**/images/**"],
+          "exclude": ["**/obj/**"]
+        }
+    ],
+    "globalMetadata": {
+        "ROBOTS": "NOINDEX, NOFOLLOW",
+        "breadcrumb_path": "design-patterns/toc.json"
+    },
+    "externalReference": [
+    ],
+    "template": "op.html",
+    "dest": "design-patterns"
+  }
+}
