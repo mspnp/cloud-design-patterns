@@ -166,7 +166,7 @@ private bool IsTransient(Exception ex)
 }
 ```
 
-## Next steps <<RBC: Still think this heading is dorky.>>
+## Related patterns and guidance
 
 - [Circuit Breaker pattern](circuit-breaker.md). The Retry pattern is useful for handling transient faults. If a failure is expected to be more long lasting, it might be more appropriate to implement the Circuit Breaker pattern. The Retry pattern can also be used in conjunction with a circuit breaker to provide a comprehensive approach to handling faults.
 - [Transient Fault Handling Application Block](https://msdn.microsoft.com/library/hh680934.aspx).
