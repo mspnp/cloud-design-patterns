@@ -35,7 +35,7 @@ For the more common transient failures, the period between retries should be cho
 
 If the request still fails, the application can wait and make another attempt. If necessary, this process can be repeated with increasing delays between retry attempts until some maximum number of requests have been attempted and failed. The delay time can be increased incrementally, or a timing strategy such as exponential back off  <<RBC: Will someone reading this pattern know what this strategy is? Should we provide a link? Maybe to: https://msdn.microsoft.com/en-us/library/hh680901(v=pandp.50).aspx :) Actually, it's mentioned in the note below, but it might be useful to provide the info earlier.>> can be used, depending on the type of failure and the probability that it'll be corrected during this time. 
 
-The figure illustrates this pattern. If the request is unsuccessful after a predefined number of attempts, the application should treat the fault as an exception and handle it accordingly. 
+The figure illustrates invoking an operation in a hosted service using this pattern. If the request is unsuccessful after a predefined number of attempts, the application should treat the fault as an exception and handle it accordingly. 
 
 ![Figure 1 - Invoking an operation in a hosted service using the Retry pattern](images/retry-pattern.png)
 
