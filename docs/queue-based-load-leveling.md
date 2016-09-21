@@ -27,7 +27,6 @@ Refactor the solution and introduce a queue between the task and the service. Th
 
 ![Figure 1 - Using a queue to level the load on a service](images/queue-based-load-leveling-pattern.png) 
 
-
 The queue decouples the tasks from the service, and the service can handle the messages at its own pace regardless of the volume of requests from concurrent tasks. Additionally, there's no delay to a task if the service isn't available at the time it posts a message to the queue. 
 
 This pattern provides the following benefits:
