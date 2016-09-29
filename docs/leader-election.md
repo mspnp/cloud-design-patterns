@@ -11,7 +11,7 @@ ms.date: 06/20/2016
    
 # Leader Election
 
-Coordinate the actions performed by a collection of collaborating tasks in a distributed application by electing one as the leader that assumes responsibility for managing the others. <<RBC: Does this still work without all the "instances" in it? I left the one in the next sentence to reinforce the point.>> This can help to ensure that task instances don't conflict with each other, cause contention for shared resources, or inadvertently interfere with the work that other task instances are performing.
+Coordinate the actions performed by a collection of collaborating instances in a distributed application by electing one instance as the leader that assumes responsibility for managing the others. This can help to ensure that instances don't conflict with each other, cause contention for shared resources, or inadvertently interfere with the work that other instances are performing.
 
 ## Context and problem
 
@@ -20,7 +20,8 @@ A typical cloud application has many tasks acting in a coordinated manner. These
 The task instances might run separately for much of the time, but it might also be necessary to coordinate the actions of each instance to ensure that they don’t conflict, cause contention for shared resources, or accidentally interfere with the work that other task instances are performing. 
 
 For example:
-- In a cloud-based system that implements horizontal scaling, multiple instances of the same task could be running at the same time with each instance working for <<RBC: does this work? When I look up "servicing" the thesaurus gives me all "repair" type suggestions, which isn't what we mean here.>> a different user. If these instances write to a shared resource, it's necessary to coordinate their actions to prevent each instance from overwriting the changes made by the others. 
+
+- In a cloud-based system that implements horizontal scaling, multiple instances of the same task could be running at the same time with each instance serving a different user. If these instances write to a shared resource, it's necessary to coordinate their actions to prevent each instance from overwriting the changes made by the others. 
 - If the tasks are performing individual elements of a complex calculation in parallel, the results need to be aggregated when they all complete.
 
 The task instances are all peers, so there isn't a natural leader that can act as the coordinator or aggregator. 
@@ -33,8 +34,8 @@ The system must provide a method <RBC: To me, mechanism seems to imply a mechani
 
 There are several strategies for electing a leader among a set of tasks in a distributed environment, including: 
 - Selecting the task instance with the lowest-ranked instance or process ID.
-- Racing to obtain a shared, distributed mutex. <<RBC: We go back and forth between "obtain" and "acquire" in this pattern. Originally I changed to obtain because that seemed like a more straightforward word. However, as I got further in the doc and saw "acquire" was in some method names I rethought that decision. The question I have is should we standardize on acquire? Or leave as is?>> The first task instance that acquires the mutex is the leader. However, the system must ensure that, if the leader terminates or becomes disconnected from the rest of the system, the mutex is released to allow another task instance to become the leader. 
-- Implementing one of the common leader election algorithms such as the [Bully Algorithm](http://www.cs.colostate.edu/~cs551/CourseNotes/Synchronization/BullyExample.html) or the [Ring Algorithm](http://www.cs.colostate.edu/~cs551/CourseNotes/Synchronization/RingElectExample.html). <<RBC: If we're not going to discuss the more sophisticated techniques why even mention them?>> These algorithms assume that each candidate in the election has a unique ID, and that it can communicate with the other candidates reliably. 
+- Racing to acquire a shared, distributed mutex. The first task instance that acquires the mutex is the leader. However, the system must ensure that, if the leader terminates or becomes disconnected from the rest of the system, the mutex is released to allow another task instance to become the leader. 
+- Implementing one of the common leader election algorithms such as the [Bully Algorithm](http://www.cs.colostate.edu/~cs551/CourseNotes/Synchronization/BullyExample.html) or the [Ring Algorithm](http://www.cs.colostate.edu/~cs551/CourseNotes/Synchronization/RingElectExample.html). These algorithms assume that each candidate in the election has a unique ID, and that it can communicate with the other candidates reliably. 
 
 ## Issues and considerations
 
@@ -55,18 +56,18 @@ Use this pattern when the tasks in a distributed application, such as a cloud-ho
 This pattern might not be useful if:
 - There's a natural leader or dedicated process that can always act as the leader. For example, it might be possible to implement a singleton process that coordinates the task instances. If this process fails or becomes unhealthy, the system can shut it down and restart it.
 - The coordination between tasks can be achieved using a more lightweight method. For example, if several task instances simply need coordinated access to a shared resource, a better solution is to use optimistic or pessimistic locking to control access. 
-- A third-party solution is more appropriate. For example, the Microsoft Azure HDInsight service (based on Apache Hadoop) uses the services provided by Apache Zookeeper to coordinate the map and reduce tasks that collect and summarize data. <<RBC: I question whether the info that follows this is necessary in a pattern. Especially in the section about when not to use the pattern. Should this possibly be moved to the guidance section?>>It’s also possible to install and configure Zookeeper on an Azure Virtual Machine and integrate it into your own solutions, or use the Zookeeper prebuilt virtual machine image available from Microsoft Open Technologies. For more information, see [Apache Zookeeper on Microsoft Azure](https://msopentech.com/opentech-projects/apache-zookeeper-on-windows-azure-2/).
+- A third-party solution is more appropriate. For example, the Microsoft Azure HDInsight service (based on Apache Hadoop) uses the services provided by Apache Zookeeper to coordinate the map and reduce tasks that collect and summarize data. 
 
 ## Example
 
-The DistributedMutex project in the LeaderElection solution (a sample that demonstrates this pattern is available on [GitHub](https://github.com/mspnp/cloud-design-patterns/tree/master/samples/leader-election)) shows how to use a lease on an Azure storage blob <<RBC: Should "storage" be capped here? I'm pretty sure this shouldn't be "Azure Blob Storage" but I could be wrong.>> to provide a mechanism for implementing a shared, distributed mutex. This mutex can be used to elect a leader among a group of role instances in an Azure cloud service. The first role instance to acquire the lease is elected the leader, and remains the leader until it releases the lease or isn't able to renew the lease. Other role instances can continue to monitor the blob lease in case the leader is no longer available.
+The DistributedMutex project in the LeaderElection solution (a sample that demonstrates this pattern is available on [GitHub](https://github.com/mspnp/cloud-design-patterns/tree/master/samples/leader-election)) shows how to use a lease on an Azure Storage blob to provide a mechanism for implementing a shared, distributed mutex. This mutex can be used to elect a leader among a group of role instances in an Azure cloud service. The first role instance to acquire the lease is elected the leader, and remains the leader until it releases the lease or isn't able to renew the lease. Other role instances can continue to monitor the blob lease in case the leader is no longer available.
 
 >  A blob lease is an exclusive write lock over a blob. A single blob can be the subject of only one lease at any point in time. A role instance can request a lease over a specified blob, and it'll be granted the lease if no other role instance holds a lease over the same blob. Otherwise the request will throw an exception. 
 
->  <<RBC: The published version of this pattern includes this para in the note. It's kind of hard to read because there's no line break between the paras. Not sure if there's a way to force that. Also, do you only need the doohickey at the first line of the note?>> To avoid a faulted role instance retaining the lease indefinitely, specify a lifetime for the lease. When this expires, the lease becomes available. However, while a role instance holds the lease it can request that the lease is renewed, and it'll be granted the lease for a further period of time. The role instance can continually repeat this process if it wants to retain the lease. 
+> To avoid a faulted role instance retaining the lease indefinitely, specify a lifetime for the lease. When this expires, the lease becomes available. However, while a role instance holds the lease it can request that the lease is renewed, and it'll be granted the lease for a further period of time. The role instance can continually repeat this process if it wants to retain the lease. 
 For more information on how to lease a blob, see [Lease Blob (REST API)](https://msdn.microsoft.com/library/azure/ee691972.aspx). 
 
-The `BlobDistributedMutex` class in the C# example below contains the `RunTaskWhenMutexAquired` method that enables a role instance to attempt to obtain a lease over a specified blob. The details of the blob (the name, container, and storage account) are passed to the constructor in a `BlobSettings` object when the `BlobDistributedMutex` object is created (this object is a simple struct that is included in the sample code). The constructor also accepts a `Task` that references the code that the role instance should run if it successfully acquires the lease over the blob and is elected the leader. Note that the code that handles the low-level details of obtaining the lease is implemented in a separate helper class named `BlobLeaseManager`.
+The `BlobDistributedMutex` class in the C# example below contains the `RunTaskWhenMutexAquired` method that enables a role instance to attempt to acquire a lease over a specified blob. The details of the blob (the name, container, and storage account) are passed to the constructor in a `BlobSettings` object when the `BlobDistributedMutex` object is created (this object is a simple struct that is included in the sample code). The constructor also accepts a `Task` that references the code that the role instance should run if it successfully acquires the lease over the blob and is elected the leader. Note that the code that handles the low-level details of acquiring the lease is implemented in a separate helper class named `BlobLeaseManager`.
 
 ```
 public class BlobDistributedMutex
@@ -91,7 +92,7 @@ public class BlobDistributedMutex
   ...
 ```
 
-The `RunTaskWhenMutexAquired` method in the code sample above invokes the `RunTaskWhenBlobLeaseAcquired` method shown in the following code sample to actually acquire the lease. The `RunTaskWhenBlobLeaseAcquired` method runs asynchronously. If the lease is successfully acquired, the role instance has been elected the leader. The purpose of the `taskToRunWhenLeaseAcquired` delegate is to perform the work that coordinates the other role instances. If the lease isn't acquired, another role instance has been elected as the leader and the current role instance remains a subordinate. Note that the `TryAcquireLeaseOrWait` method is a helper method that uses the `BlobLeaseManager` object to obtain the lease. 
+The `RunTaskWhenMutexAquired` method in the code sample above invokes the `RunTaskWhenBlobLeaseAcquired` method shown in the following code sample to actually acquire the lease. The `RunTaskWhenBlobLeaseAcquired` method runs asynchronously. If the lease is successfully acquired, the role instance has been elected the leader. The purpose of the `taskToRunWhenLeaseAcquired` delegate is to perform the work that coordinates the other role instances. If the lease isn't acquired, another role instance has been elected as the leader and the current role instance remains a subordinate. Note that the `TryAcquireLeaseOrWait` method is a helper method that uses the `BlobLeaseManager` object to acquire the lease. 
 
 ```
   private async Task RunTaskWhenBlobLeaseAcquired(
@@ -154,12 +155,12 @@ If the lease fails to be renewed or the task is cancelled (possibly as a result 
 }
 ```
 
-The `KeepRenewingLease` method is another helper method that uses the `BlobLeaseManager` object to renew the lease. The `CancelAllWhenAnyCompletes` method cancels the tasks specified as the first two parameters. The figure illustrates using the `BlobDistributedMutex` class to elect a leader and run a task that coordinates operations. <<RBC: Weirdly the intro for the figure was missing, but I've moved the caption up and tweaked.>>
+The `KeepRenewingLease` method is another helper method that uses the `BlobLeaseManager` object to renew the lease. The `CancelAllWhenAnyCompletes` method cancels the tasks specified as the first two parameters. The following diagram illustrates using the `BlobDistributedMutex` class to elect a leader and run a task that coordinates operations. 
 
 ![Figure 1 illustrates the functions of the BlobDistributedMutex class](images/leader-election-diagram.png)
 
 
-The following code example shows how to use the `BlobDistributedMutex` class in a worker role. This code obtains a lease over a blob named `MyLeaderCoordinatorTask` in the lease's container in development storage, and specifies that the code defined in the `MyLeaderCoordinatorTask` method should run if the role instance is elected the leader. 
+The following code example shows how to use the `BlobDistributedMutex` class in a worker role. This code acquires a lease over a blob named `MyLeaderCoordinatorTask` in the lease's container in development storage, and specifies that the code defined in the `MyLeaderCoordinatorTask` method should run if the role instance is elected the leader. 
 
 ```
 var settings = new BlobSettings(CloudStorageAccount.DevelopmentStorageAccount, 
@@ -177,9 +178,9 @@ private static async Task MyLeaderCoordinatorTask(CancellationToken token)
 ```
 
 Note the following points about the sample solution:
-- The blob is a potential single point of failure. If the blob service becomes unavailable, or is inaccessible, the leader won't be able to renew the lease and no other role instance will be able to obtain the lease. In this case, no role instance will be able to act as the leader. However, the blob service is designed to be resilient, so complete failure of the blob service is considered to be extremely unlikely.
-- If the task being performed by the leader stalls, the leader might continue to renew the lease, preventing any other role instance from obtaining the lease and taking over the leader role in order to coordinate tasks. In the real world, the health of the leader should be checked at frequent intervals. 
-- The election process is nondeterministic. You can't make any assumptions about which role instance will obtain the blob lease and become the leader.
+- The blob is a potential single point of failure. If the blob service becomes unavailable, or is inaccessible, the leader won't be able to renew the lease and no other role instance will be able to acquire the lease. In this case, no role instance will be able to act as the leader. However, the blob service is designed to be resilient, so complete failure of the blob service is considered to be extremely unlikely.
+- If the task being performed by the leader stalls, the leader might continue to renew the lease, preventing any other role instance from acquiring the lease and taking over the leader role in order to coordinate tasks. In the real world, the health of the leader should be checked at frequent intervals. 
+- The election process is nondeterministic. You can't make any assumptions about which role instance will acquire the blob lease and become the leader.
 - The blob used as the target of the blob lease shouldn't be used for any other purpose. If a role instance attempts to store data in this blob, this data won't be accessible unless the role instance is the leader and holds the blob lease.
 
 ## Related patterns and guidance

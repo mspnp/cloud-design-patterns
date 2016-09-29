@@ -15,7 +15,7 @@ Implement functional checks in an application that external tools can access thr
 
 ## Context and problem
 
-It's a good practice <<RBC: won't devs know whether it is or isn't a business requirement fortheir org, do we need to spell that out? Also, does middle-tier refer to services? Could we simplify that in any way? Would "shared" cover this point adequately?>> to monitor web applications, and middle-tier and shared services, to ensure that they're available and performing correctly. However, it's more difficult to monitor services running in the cloud than it is to monitor on-premises services. For example, you don't have full control of the hosting environment, and the services typically depend on other services provided by platform vendors and others. 
+It's a good practice, and often a business requirement, to monitor web applications and back-end services, to ensure they're available and performing correctly. However, it's more difficult to monitor services running in the cloud than it is to monitor on-premises services. For example, you don't have full control of the hosting environment, and the services typically depend on other services provided by platform vendors and others. 
 
 There are many factors that affect cloud-hosted applications such as network latency, the performance and availability of the underlying compute and storage systems, and the network bandwidth between them. The service can fail entirely or partially due to any of these factors. Therefore, you must verify at regular intervals that the service is performing correctly to ensure the required level of availability, which might be part of your service level agreement (SLA).
 
@@ -32,9 +32,10 @@ Other checks that might be carried out by the health monitoring code in the appl
 - Checking cloud storage or a database for availability and response time.
 - Checking other resources or services located in the application, or located elsewhere but used by the application.
 
-Several services and tools are available for monitoring web applications by submitting a request to a configurable set of endpoints, and evaluating the results against a set of configurable rules. It's relatively easy to create a service endpoint whose sole purpose is to perform some functional tests on the system. <<RBC: I don't get the point of this paragraph. If you're not telling them where to find the tools or how to create the endpoint why bother? As it is, I have no idea what those tools are or where to find them.>>
+Services and tools are available that monitor web applications by submitting a request to a configurable set of endpoints, and evaluating the results against a set of configurable rules. It's relatively easy to create a service endpoint whose sole purpose is to perform some functional tests on the system. 
 
-Typical checks that can be performed by the monitoring tools include: <<RBC: If we delete the para above we need to change this to something like "...the available (or third party) monitoring tools..." or whatever is appropriate>>
+Typical checks that can be performed by the monitoring tools include: 
+
 - Validating the response code. For example, an HTTP response of 200 (OK) indicates that the application responded without error. The monitoring system might also check for other response codes to give more comprehensive results.
 - Checking the content of the response to detect errors, even when a 200 (OK) status code is returned. This can detect errors that affect only a section of the returned web page or service response. For example, checking the title of a page or looking for a specific phrase that indicates the correct page was returned.
 - Measuring the response time, which indicates a combination of the network latency and the time that the application took to execute the request. An increasing value can indicate an emerging problem with the application or network. 
@@ -73,9 +74,9 @@ How to configure security for the monitoring endpoints to protect them from publ
     
      >  DoS attacks are likely to have less impact on a separate endpoint that performs basic functional tests without compromising the operation of the application. Ideally, avoid using a test that might expose sensitive information. If you must return information that might be useful to an attacker, consider how you'll protect the endpoint and the data from unauthorized access. In this case just relying on obscurity isn't enough. You should also consider using an HTTPS connection and encrypting any sensitive data, although this will increase the load on the server. 
       
-How to access an endpoint that's secured using authentication. Not all tools and frameworks can be configured to include credentials with the health verification request. For example, Microsoft Azure built-in health verification features can't provide authentication credentials. Some third-party alternatives are [Pingdom](https://www.pingdom.com/), [Panopta](http://www.panopta.com/), [NewRelic](https://newrelic.com/), and [Statuscake](https://www.statuscake.com/). <<RBC: The links to these used to be here and in the more info section, but didn't make it into this version apparently. Do we need them both places or just here?>>
+- How to access an endpoint that's secured using authentication. Not all tools and frameworks can be configured to include credentials with the health verification request. For example, Microsoft Azure built-in health verification features can't provide authentication credentials. Some third-party alternatives are [Pingdom](https://www.pingdom.com/), [Panopta](http://www.panopta.com/), [NewRelic](https://newrelic.com/), and [Statuscake](https://www.statuscake.com/). 
 
-How to ensure that the monitoring agent is performing correctly. One approach is to expose an endpoint that simply returns a value from the application configuration or a random value that can be used to test the agent. 
+- How to ensure that the monitoring agent is performing correctly. One approach is to expose an endpoint that simply returns a value from the application configuration or a random value that can be used to test the agent. 
 
    >  Also ensure that the monitoring system performs checks on itself, such as a self-test and built-in test, to avoid it issuing false positive results.  
 
@@ -166,7 +167,7 @@ public ActionResult TestResponseFromConfig()
 
 Some options for monitoring endpoints in Azure applications are:
 
-- Use the built-in features of Azure, such as management services <<RBC: Should this be "data managment services" or just "management services" there's nothing in the Azure style guide with this proper (capped) name.>> or Azure Traffic Manager.
+- Use the built-in monitoring features of Azure.
 
 - Use a third-party service or a framework such as Microsoft System Center Operations Manager.
 
@@ -184,7 +185,7 @@ In addition to routing requests, Traffic Manager pings a URL, port, and relative
 
 However, Traffic Manager will only wait ten seconds to receive a response from the monitoring URL. Therefore, you should ensure that your health verification code executes in this time, allowing for network latency for the round trip from Traffic Manager to your application and back again. 
 
->  Read more information about using [Traffic Manager to monitor your applications](https://azure.microsoft.com/documentation/services/traffic-manager/).<<RBC: This link just takes you to a aearch page.>> Traffic Manager is also discussed in [Multiple Datacenter Deployment Guidance](https://msdn.microsoft.com/library/dn589779.aspx).  
+>  Read more information about using [Traffic Manager to monitor your applications](https://azure.microsoft.com/documentation/services/traffic-manager/). Traffic Manager is also discussed in [Multiple Datacenter Deployment Guidance](https://msdn.microsoft.com/library/dn589779.aspx).  
 
 ## Related guidance
 

@@ -11,7 +11,7 @@ ms.date: 06/20/2016
 
 # Retry
 
-Enable an application to handle anticipated, temporary failures when it tries to connect to a service or network resource by transparently retrying an operation that's previously failed. This can improve the stability of the application. <<RBC: Since we say that the pattern is for anticipated temporary failures do we really need the "in the expectation that the cause of the failure is transient." portion of the sentence? I'm trying to simplify this a bit.>>
+Enable an application to handle transient failures when it tries to connect to a service or network resource, by transparently retrying a failed operation. This can improve the stability of the application. 
 
 ## Context and problem
 
@@ -23,34 +23,31 @@ These faults are typically self correcting, and if the action that triggered a f
 
 In the cloud, transient faults aren't uncommon and an application should be designed to handle them elegantly and transparently. This minimizes the effects faults can have on the business tasks the application is performing.
 
-If an application detects a failure when it tries to send a request to a remote service, it can handle the failure using the following strategies: <<RBC: I briefly thought about adding bold "cancel, retry, retry after delay" at the beginning of the bullets, but there are only 3 of them and I'm not sure that really adds much value.>>
+If an application detects a failure when it tries to send a request to a remote service, it can handle the failure using the following strategies: 
 
-- If the fault indicates that the failure isn't transient or is unlikely to be successful if repeated, the application should cancel the operation and report an exception. For example, an authentication failure caused by providing invalid credentials is not likely to succeed no matter how many times it's attempted.
+- **Cancel**. If the fault indicates that the failure isn't transient or is unlikely to be successful if repeated, the application should cancel the operation and report an exception. For example, an authentication failure caused by providing invalid credentials is not likely to succeed no matter how many times it's attempted.
 
-- If the specific fault reported is unusual or rare, it might have been caused by unusual circumstances such as a network packet becoming corrupted while it was being transmitted. In this case, the application could retry the failing request again immediately because the same failure is unlikely to be repeated and the request will probably be successful. 
+- **Retry**. If the specific fault reported is unusual or rare, it might have been caused by unusual circumstances such as a network packet becoming corrupted while it was being transmitted. In this case, the application could retry the failing request again immediately because the same failure is unlikely to be repeated and the request will probably be successful. 
 
-- If the fault is caused by one of the more commonplace connectivity or busy failures, the network or service might need a short period while the connectivity issues are corrected or the backlog of work is cleared. The application should wait for a suitable time before retrying the request. 
+- **Retry after delay.** If the fault is caused by one of the more commonplace connectivity or busy failures, the network or service might need a short period while the connectivity issues are corrected or the backlog of work is cleared. The application should wait for a suitable time before retrying the request. 
 
 For the more common transient failures, the period between retries should be chosen to spread requests from multiple instances of the application as evenly as possible. This reduces the chance of a busy service continuing to be overloaded. If many instances of an application are continually overwhelming a service with retry requests, it'll take the service longer to recover.
 
-If the request still fails, the application can wait and make another attempt. If necessary, this process can be repeated with increasing delays between retry attempts until some maximum number of requests have been attempted and failed. The delay time can be increased incrementally, or a timing strategy such as exponential back off  <<RBC: Will someone reading this pattern know what this strategy is? Should we provide a link? Maybe to: https://msdn.microsoft.com/en-us/library/hh680901(v=pandp.50).aspx :) Actually, it's mentioned in the note below, but it might be useful to provide the info earlier.>> can be used, depending on the type of failure and the probability that it'll be corrected during this time. 
+If the request still fails, the application can wait and make another attempt. If necessary, this process can be repeated with increasing delays between retry attempts, until some maximum number of requests have been attempted. The delay can be increased incrementally or exponentially, depending on the type of failure and the probability that it'll be corrected during this time. 
 
-The figure illustrates invoking an operation in a hosted service using this pattern. If the request is unsuccessful after a predefined number of attempts, the application should treat the fault as an exception and handle it accordingly. 
+The following diagram illustrates invoking an operation in a hosted service using this pattern. If the request is unsuccessful after a predefined number of attempts, the application should treat the fault as an exception and handle it accordingly. 
 
 ![Figure 1 - Invoking an operation in a hosted service using the Retry pattern](images/retry-pattern.png)
 
+The application should wrap all attempts to access a remote service in code that implements a retry policy matching one of the strategies listed above. Requests sent to different services can be subject to different policies. Some vendors provide libraries that implement retry policies, where the application can specify the maximum number of retries, the time between retry attempts, and other parameters.
 
-<<RBC: When I removed the figure caption I got a red arrow, when I started to type I got a green bar. Not sure what it thinks is happening. When I hit return after my comment they went away so they're probably nothing.>>
-
-The application should wrap all attempts to access a remote service in code that implements a retry policy matching one of the strategies listed above. Requests sent to different services can be subject to different policies. Some vendors provide libraries that implement policies that are parameterized, and the application developer can specify values for items such as the number of retries and the time between retry attempts. <<RBC: I don't know "what approach" you're talking about. I don't see the value of this phrase. Why not just say, some vendors provide libraries that implement policies that are parameterized..." combining this sentence with the next. That's what I did, if it's wrong in some way, you'll fix it.>>
-
-An application should log the details of faults and failing operations. <<RBC: Does this work? The whole the code in an application..." seems very odd to me, but maybe this isn't detailed enough?>> This information is useful to operators. If a service is frequently unavailable or busy, it's often because the service has exhausted its resources. You can reduce the frequency of these faults by scaling out the service. For example, if a database service is continually overloaded, it might be beneficial to partition the database and spread the load across multiple servers.
+An application should log the details of faults and failing operations. This information is useful to operators. If a service is frequently unavailable or busy, it's often because the service has exhausted its resources. You can reduce the frequency of these faults by scaling out the service. For example, if a database service is continually overloaded, it might be beneficial to partition the database and spread the load across multiple servers.
 
 >  Microsoft Azure provides extensive support for the Retry pattern. The patterns & practices [Transient Fault Handling Block](https://msdn.microsoft.com/library/hh680934.aspx) enables an application to handle transient faults in many Azure services using a range of retry strategies. The [Microsoft Entity Framework version 6](https://msdn.microsoft.com/en-us/data/dn456835.aspx) provides facilities for retrying database operations. Additionally, many of the Azure Service Bus and Azure Storage APIs implement retry logic transparently. 
 
 ## Issues and considerations
 
-You should consider the following points when deciding how to implement this pattern. <<RBC: Took out the bullets so it's not a wall of text. >>
+You should consider the following points when deciding how to implement this pattern. 
 
 The retry policy should be tuned to match the business requirements of the application and the nature of the failure. For some noncritical operations, it's better to fail fast rather than retry several times and impact the throughput of the application. For example, in an interactive web application accessing a remote service, it's better to fail after a smaller number of retries with only a short delay between retry attempts, and display a suitable message to the user (for example, “please try again later”). For a batch application, it might be more appropriate to increase the number of retry attempts with an exponentially increasing delay between attempts.
 
@@ -58,7 +55,7 @@ An aggressive retry policy with minimal delay between attempts, and a large numb
 
 If a request still fails after a significant number of retries, it's better for the application to prevent further requests going to the same resource and simply report a failure immediately. When the period expires, the application can tentatively allow one or more requests through to see whether they're successful. For more details of this strategy, see the [Circuit Breaker pattern](circuit-breaker.md).
 
-The operations in a service that are invoked by an application with a retry policy might need to be idempotent.<<RBC: Wow, I know this sentence can be simplified, but I'm unsure which words are crucial. Is there a shorter way to say "operations in a service" like for example, "service operations" or is that wrong technically? I did tweak it some.>> For example, a request sent to a service might be received and processed successfully but, due to a transient fault, it's unable to send a response indicating that the processing has completed. The retry logic in the application might then try to repeat the request on the assumption that the first request wasn't received. 
+Consider whether the operation is idempotent. If so, it's inherently safe to retry. Otherwise, retries could cause the operation to be executed more than once, with unintended side effects. For example, a service might receive the request, process the request successfully, but fail to send a response. At that point, the retry logic might re-send the request, assuming that the first request wasn't received.    
 
 A request to a service can fail for a variety of reasons raising different exceptions depending on the nature of the failure. Some exceptions indicate a failure that can be resolved quickly, while others indicate that the failure is longer lasting. It's useful for the retry policy to adjust the time between retry attempts based on the type of the exception.
 

@@ -34,7 +34,7 @@ When the item is next required, using the cache-aside strategy will cause the up
 
 ## Issues and considerations
 
-Consider the following points when deciding how to implement this pattern: <<RBC: This isn't a super long list, but some of the bullets are dense so a little white space seemed warranted.>>
+Consider the following points when deciding how to implement this pattern: 
 
 **Lifetime of cached data**. Many caches implement an expiration policy that invalidates data and removes it from the cache if it's not accessed for a specified period. For cache-aside to be effective, ensure that the expiration policy matches the pattern of access for applications that use the data. Don't make the expiration period too short because this can cause applications to continually retrieve data from the data store and add it to the cache. Similarly, don't make the expiration period so long that the cached data is likely to become stale. Remember that caching is most effective for relatively static data, or data that is read frequently.
 
@@ -142,7 +142,7 @@ private string GetAsyncCacheKey(int objectId)
 }
 ```
 
-## Related guidance <<RBC: Not sure if you want to be consistent with this heading. But there are no patterns listed so it seems better to be accurate than consistent.>>
+## Related guidance 
 
 The following information may be relevant when implementing this pattern:
 

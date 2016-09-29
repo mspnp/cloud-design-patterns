@@ -11,11 +11,11 @@ ms.date: 06/20/2016
 
 # Circuit Breaker
 
-Handle faults that might take a variable amount of time to fix when connecting to a remote service or resource. This can improve the stability and resiliency of an application. <<RBC: NOte I updated the description above to remove "rectify" and replace with "fix" not sure exactly how that's used? Search description?.>>
+Handle faults that might take a variable amount of time to recover from, when connecting to a remote service or resource. This can improve the stability and resiliency of an application. 
 
 ## Context and problem
 
-In a distributed environment such as the cloud, applications may access remote resources and services, it's possible for these operations to fail due to transient faults such as slow network connections, timeouts, or the resources being overcommitted or temporarily unavailable. <<RBC: I was trying to simplify this sentence. I wondered if we could also take out the phrase "such as the cloud" because these are cloud patterns?>> These faults typically correct themselves after a short period of time, and a robust cloud application should be prepared to handle them by using a strategy such as the [Retry pattern](retry.md).
+In a distributed environment, calls to remote resources and services can fail due to transient faults, such as slow network connections, timeouts, or the resources being overcommitted or temporarily unavailable. These faults typically correct themselves after a short period of time, and a robust cloud application should be prepared to handle them by using a strategy such as the [Retry pattern](retry.md).
 
 However, there can also be situations where faults are due to unanticipated events, and that might take much longer to fix. These faults can range in severity from a partial loss of connectivity to the complete failure of a service. In these situations it might be pointless for an application to continually retry an operation that is unlikely to succeed, and instead the application should quickly accept that the operation has failed and handle this failure accordingly.
 
@@ -59,7 +59,7 @@ You should consider the following points when deciding how to implement this pat
 
 **Types of Exceptions**. A request might fail for many reasons, some of which might indicate a more severe type of failure than others. For example, a request might fail because a remote service has crashed and will take several minutes to recover, or because of a timeout due to the service being temporarily overloaded. A circuit breaker might be able to examine the types of exceptions that occur and adjust its strategy depending on the nature of these exceptions. For example, it might require a larger number of timeout exceptions to trip the circuit breaker to the **Open** state compared to the number of failures due to the service being completely unavailable.
 
-**Logging**. A circuit breaker should log all failed requests (and possibly successful requests) to enable an administrator to monitor the health of the operation that it covers. <<RBC: Encapsulates means summarizes, captures, or condenses, none of which seem appropriate here. Does this work from a technical perspective?>>
+**Logging**. A circuit breaker should log all failed requests (and possibly successful requests) to enable an administrator to monitor the health of the operation. 
 
 **Recoverability**. You should configure the circuit breaker to match the likely recovery pattern of the operation it's protecting. For example, if the circuit breaker remains in the **Open** state for a long period, it could raise exceptions even if the reason for the failure has been resolved. Similarly, a circuit breaker could fluctuate and reduce the response times of applications if it switches from the **Open** state to the **Half-Open** state too quickly.
 
@@ -71,9 +71,9 @@ You should consider the following points when deciding how to implement this pat
 
 **Resource Differentiation**. Be careful when using a single circuit breaker for one type of resource if there might be multiple underlying independent providers. For example, in a data store that contains multiple shards, one shard might be fully accessible while another is experiencing a temporary issue. If the error responses in these scenarios are merged, an application might try to access some shards even when failure is highly likely, while access to other shards might be blocked even though it's likely to succeed.
 
-**Accelerated Circuit Breaking**. Sometimes a failure response can contain enough information for the circuit breaker implementation to <<RBC: Software doesn't know things, does removing this still work?>> trip immediately and stay tripped for a minimum amount of time. For example, the error response from a shared resource that's overloaded could indicate that an immediate retry isn't recommended and that the application should instead try again in a few minutes.
+**Accelerated Circuit Breaking**. Sometimes a failure response can contain enough information for the circuit breaker to trip immediately and stay tripped for a minimum amount of time. For example, the error response from a shared resource that's overloaded could indicate that an immediate retry isn't recommended and that the application should instead try again in a few minutes.
 
-    > The HTTP protocol defines the “HTTP 503 Service Unavailable” response that can be returned if a requested service is not currently available on a particular web server. This response can include additional information, such as the anticipated duration of the delay.
+    > A service can return HTTP 429 (Too Many Requests) if it is throttling the client, or HTTP 503 (Service Unavailable) if the  service is not currently available. The response can include additional information, such as the anticipated duration of the delay.
 
 **Replaying Failed Requests**. In the **Open** state, rather than simply failing quickly, a circuit breaker could also record the details of each request to a journal and arrange for these requests to be replayed when the remote resource or service becomes available.
 
@@ -123,7 +123,7 @@ The `State` property indicates the current state of the circuit breaker, and wil
 
 The `InMemoryCircuitBreakerStateStore` class in the example contains an implementation of the `ICircuitBreakerStateStore` interface. The `CircuitBreaker` class creates an instance of this class to hold the state of the circuit breaker.
 
-The `ExecuteAction` method in the `CircuitBreaker` class wraps an operation (in the form of an `Action` delegate) that could fail. When this method runs, it first checks the state of the circuit breaker. If it's closed (the local `IsOpen` property, which returns true if the circuit breaker is open or half open, is false) <<RBC: I find the parenthetical confusing as written, I'm not sure it even needs to be there. I deleted it, then thought that maybe it was crucial, but might be better as a separate sentence. Thoughts?>> the `ExecuteAction` method tries to invoke the `Action` delegate. If this operation fails, an exception handler executes the `TrackException` method that sets the state of the circuit breaker to open by calling the `Trip` method of the `InMemoryCircuitBreakerStateStore` object. The following code example highlights this flow.
+The `ExecuteAction` method in the `CircuitBreaker` class wraps an operation, specified as an `Action` delegate. If the circuit breaker is closed, `ExecuteAction` invokes the `Action` delegate. If the operation fails, an exception handler calls `TrackException`, which sets the circuit breaker state to open. The following code example highlights this flow.
 
 ```csharp
 public class CircuitBreaker
