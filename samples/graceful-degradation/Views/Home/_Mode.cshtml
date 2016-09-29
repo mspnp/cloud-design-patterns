@@ -1,0 +1,18 @@
+﻿<div style="padding: 5px">
+    <label class="control-label">Demo Operation Mode:</label>
+    @{ var mode = Model as string; }
+    <div class="btn-toolbar">
+        <div class="btn-group">
+            @Html.ActionLink("Unprotected (Default)", "Index", new { mode = "Unprotected" }, new { @class = "btn btn-warning" + (mode == "Unprotected" ? " active" : "") })
+        </div>
+        <div class="btn-group">
+            @Html.ActionLink("Broken Image", "Index", new { mode = "Broken" }, new { @class = "btn btn-danger" + (mode == "Broken" ? " active" : "") })
+            @Html.ActionLink("Slow Image", "Index", new { mode = "Slow" }, new { @class = "btn btn-danger" + (mode == "Slow" ? " active" : "") })
+        </div>
+        <br /><br />
+        <div class="btn-group">
+            @Html.ActionLink("Broken Image (Graceful)", "Index", new { mode = "BrokenGraceful" }, new { @class = "btn btn-success" + (mode == "BrokenGraceful" ? " active" : "") })
+            @Html.ActionLink("Slow Image (Graceful)", "Index", new { mode = "SlowGraceful" }, new { @class = "btn btn-success" + (mode == "SlowGraceful" ? " active" : "") })
+        </div>
+    </div>
+</div>

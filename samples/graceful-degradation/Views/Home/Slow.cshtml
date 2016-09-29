@@ -1,0 +1,34 @@
+﻿@model ResiliencyDemos.Models.Book
+@{
+    ViewBag.Title = "Graceful Degredation Demo";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <h2>@ViewBag.Title</h2>
+    </div>
+    <div class="col-md-6">
+        @{ Html.RenderPartial("_Mode", "Slow"); }
+    </div>
+</div>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+
+        <!--
+        This demonstrates the user experience when an image takes a long time to load.
+        The DelayedImage action will force an artificial delay in returning the image to the browser.
+        Because there is no graceful degredation strategy in place, the user experience is impacted.
+        -->
+
+        <img class="img-responsive" src="@Url.Action("DelayedImage", new {uri = Model.ImageUri})" alt="@Model.ShortTitle" />
+
+    </div>
+    <div class="col-md-8">
+        <h1 class="media-heading">@Model.Title</h1>
+        <h3>@Model.Author</h3>
+        @Html.FormatParagraphs(Model.Summary)
+    </div>
+</div>

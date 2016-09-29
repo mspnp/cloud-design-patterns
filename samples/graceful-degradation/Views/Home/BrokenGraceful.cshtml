@@ -1,0 +1,62 @@
+﻿@model ResiliencyDemos.Models.Book
+@{
+    ViewBag.Title = "Graceful Degredation Demo";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <h2>@ViewBag.Title</h2>
+    </div>
+    <div class="col-md-6">
+        @{ Html.RenderPartial("_Mode", "BrokenGraceful"); }
+    </div>
+</div>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+
+        <!--
+        This demonstrates the user experience when an image is broken, but a graceful degredation strategy is in place.
+
+        The source uri of the below <img> tag is invalid to simulate the failure.
+        The same experience occurs if retrieving the image returns an HTTP error, such as 401, 403, 404 or 500.
+        However, because the failure is detected, an alternate text and background image can be displayed.
+
+        Note that the background image is embedded in the CSS, which would typically not be served from the same source
+        as the original product image. It also prevents having to load this fall-back image separately, as it's already
+        available to the browser.
+        -->
+
+        @section scripts {
+            <script type="text/javascript" src="~/Scripts/graceful-degredation.js"></script>
+        }
+
+        <div class="book-container">
+
+            <!-- This is the normal cover image, with a broken src url (to simulate an unretrievable image) -->
+            <img class="img-responsive" id="coverImage" src="#" alt="@Model.ImageUri" style="position: absolute"/>
+
+            <!-- This div is displayed when the cover image could not be loaded -->
+            <div id="coverText" class="book-bg" style="display: none; position: absolute">
+                <div class="book-txt">
+                    <h1>
+                        <b>@Model.ShortTitle</b>
+                    </h1>
+                    <h3>@Model.Author</h3>
+                </div>
+                <div align="center" class="book-txt-bottom">
+                    <em>Cover image currently not available.</em>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <div class="col-md-8">
+        <h1 class="media-heading">@Model.Title</h1>
+        <h3>@Model.Author</h3>
+        @Html.FormatParagraphs(Model.Summary)
+    </div>
+</div>
