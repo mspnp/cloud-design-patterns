@@ -276,6 +276,6 @@ catch (Exception ex)
 
 The following patterns might also be useful when implementing this pattern:
 
-- [Retry Pattern](retry.md). Describes how an application can handle anticipated temporary failures when it tries to connect to a service or network resource by transparently retrying an operation that has previously failed. <<RBC: Made a similar comment in the retry pattern file. If you decide to keep the language there we should probably add it back in here as well.>>
+- [Retry Pattern](retry.md). Describes how an application can handle anticipated temporary failures when it tries to connect to a service or network resource by transparently retrying an operation that has previously failed. 
 
 - [Health Endpoint Monitoring Pattern](health-endpoint-monitoring.md). A circuit breaker might be able to test the health of a service by sending a request to an endpoint exposed by the service. The service should return information indicating its status.
