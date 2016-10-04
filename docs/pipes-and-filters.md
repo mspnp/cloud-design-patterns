@@ -1,6 +1,6 @@
 ---
 title: Pipes and Filters
-description: Decompose a task that performs complex processing into a series of discrete elements that can be reused.
+description: Break down a task that performs complex processing into a series of separate elements that can be reused.
 categories: [design-implementation, messaging]
 keywords: design pattern
 layout: designpattern
@@ -11,39 +11,32 @@ ms.date: 06/20/2016
    
 # Pipes and Filters
 
-Decompose a task that performs complex processing into a series of discrete elements that can be reused. This pattern can improve performance, scalability, and reusability by allowing task elements that perform the processing to be deployed and scaled independently.
+Break down <<RBC: I hate the word decompose, because I always think of somthing rotting, plus it's not actually used that much in tech docs if you search MSDN.>> a task that performs complex processing into a series of separate elements that can be reused. This can improve performance, scalability, and reusability by allowing task elements that perform the processing to be deployed and scaled independently.
 
 ## Context and problem
 
-An applications is required to perform a variety of tasks of varying complexity on the information that it processes. A straightforward but inflexible approach to implementing an application is to perform this processing as a monolithic module. However, this approach is likely to reduce the opportunities for refactoring the code, optimizing it, or reusing it if parts of the same processing are required elsewhere within the application. 
+An applications is required to perform a variety of tasks of varying complexity on the information that it processes. A straightforward but inflexible approach to implementing an application is to perform this processing as a monolithic <<RBC: I thought about replacing "monolithic" but I'm not actually sure what would be better. Also, it would affect the first image. Thoughts?>> module. However, this approach is likely to reduce the opportunities for refactoring the code, optimizing it, or reusing it if parts of the same processing are required elsewhere within the application. 
 
-Figure 1 illustrates the issues with processing data by using the monolithic approach. An application receives and processes data from two sources. The data from each source is processed by a separate module that performs a series of tasks to transform this data, before passing the result to the business logic of the application. 
+The figure illustrates the issues with processing data using the monolithic approach. An application receives and processes data from two sources. The data from each source is processed by a separate module that performs a series of tasks to transform this data, before passing the result to the business logic of the application. 
 
-![Figure 1 - A solution implemented by using monolithic modules](images/pipes-and-filters-modules.png) 
-
-
-_Figure 1: A solution implemented by using monolithic modules_
+![Figure 1 - A solution implemented using monolithic modules](images/pipes-and-filters-modules.png) 
 
 Some of the tasks that the monolithic modules perform are functionally very similar, but the modules have been designed separately. The code that implements the tasks is closely coupled in a module, and has been developed with little or no thought given to reuse or scalability. 
 
-However, the processing tasks performed by each module, or the deployment requirements for each task, could change as business requirements are amended. Some tasks might be compute-intensive and could benefit from running on powerful hardware, while others might not require such expensive resources. Also, additional processing might be required in the future, or the order in which the tasks performed by the processing could change. A solution is required that addresses these issues, and increases the possibilities for code reuse. 
+However, the processing tasks performed by each module, or the deployment requirements for each task, could change as business requirements are updated. Some tasks might be compute intensive and could benefit from running on powerful hardware, while others might not require such expensive resources. Also, additional processing might be required in the future, or the order in which the tasks performed by the processing could change. A solution is required that addresses these issues, and increases the possibilities for code reuse. 
 
 ## Solution
 
-Decompose the processing required for each stream into a set of discrete components (or filters), each of which performs a single task. By standardizing the format of the data that each component receives and sends, these filters can be combined together into a pipeline. This helps to avoid duplicating code, and makes it easy to remove, replace, or integrate additional components if the processing requirements change. Figure 2 shows an example of this.
+Break down the processing required for each stream into a set of separate components (or filters), each performing a single task. By standardizing the format of the data that each component receives and sends, these filters can be combined together into a pipeline. This helps to avoid duplicating code, and makes it easy to remove, replace, or integrate additional components if the processing requirements change. The next figure shows a solution implemented using pipes and filters.
 
-![Figure 2 - A solution implemented by using pipes and filters](images/pipes-and-filters-solution.png) 
+![Figure 2 - A solution implemented using pipes and filters](images/pipes-and-filters-solution.png) 
 
 
-_Figure 2: A solution implemented by using pipes and filters_
+The time it takes to process a single request depends on the speed of the slowest filter in the pipeline. One or more filters could be a bottleneck, especially if a large number of requests appear in a stream from a particular data source. A key advantage of the pipeline structure is that it provides opportunities for running parallel instances of slow filters, enabling the system to spread the load and improve throughput. 
 
-The time taken to process a single request depends on the speed of the slowest filter in the pipeline. One or more filters could be a bottleneck, especially if a large number of requests appear in a stream from a particular data source. A key advantage of the pipeline structure is that it provides opportunities for running parallel instances of slow filters, enabling the system to spread the load and improve throughput. 
-
-The filters that comprise a pipeline can run on different machines, enabling them to be scaled independently and take advantage of the elasticity that many cloud environments provide. A filter that is computationally intensive can run on high performance hardware, while other less demanding filters can be hosted on commodity (cheaper) hardware. The filters don't even have to be in the same data center or geographical location, which allows each element in a pipeline to run in an environment that is close to the resources it requires. 
+The filters that make up a pipeline can run on different machines, enabling them to be scaled independently and take advantage of the elasticity that many cloud environments provide. A filter that is computationally intensive can run on high performance hardware, while other less demanding filters can be hosted on less expensive <<RBC: What does commodity hardware even mean!?!?!>> hardware. The filters don't even have to be in the same data center or geographical location, which allows each element in a pipeline to run in an environment that is close to the resources it requires.  The next figure shows an example applied to the pipeline for the data from Source 1. 
 
 ![Figure 3 shows an example applied to the pipeline for the data from Source 1](images/pipes-and-filters-load-balancing.png)
-
-_Figure 3: Load-balancing components in a pipeline_
 
 If the input and output of a filter are structured as a stream, it's possible to perform the processing for each filter in parallel. The first filter in the pipeline can start its work and output its results, which are passed directly on to the next filter in the sequence before the first filter has completed its work.
 
@@ -54,22 +47,22 @@ Using the Pipes and Filters pattern in conjunction with the [Compensating Transa
 ## Issues and considerations
 
 You should consider the following points when deciding how to implement this pattern:
-- Complexity. The increased flexibility that this pattern provides can also introduce complexity, especially if the filters in a pipeline are distributed across different servers. 
+- **Complexity**. The increased flexibility that this pattern provides can also introduce complexity, especially if the filters in a pipeline are distributed across different servers. 
 
-- Reliability. Use an infrastructure that ensures that data flowing between filters in a pipeline won't be lost. 
+- **Reliability**. Use an infrastructure that ensures that data flowing between filters in a pipeline won't be lost. 
 
-- Idempotency. If a filter in a pipeline fails after receiving a message and the work is rescheduled to another instance of the filter, part of the work might have already been completed. If this work updates some aspect of the global state (such as information stored in a database), the same update could be repeated. A similar issue might arise if a filter fails after posting its results to the next filter in the pipeline, but before indicating that it's completed its work successfully. In these cases, the same work could be repeated by another instance of the filter, causing the same results to be posted twice. This could result in subsequent filters in the pipeline processing the same data twice. Therefore filters in a pipeline should be designed to be idempotent. For more information see [Idempotency Patterns](http://blog.jonathanoliver.com/idempotency-patterns/) on Jonathan Oliver’s blog.
+- **Idempotency**. If a filter in a pipeline fails after receiving a message and the work is rescheduled to another instance of the filter, part of the work might have already been completed. If this work updates some aspect of the global state (such as information stored in a database), the same update could be repeated. A similar issue might occur if a filter fails after posting its results to the next filter in the pipeline, but before indicating that it's completed its work successfully. In these cases, the same work could be repeated by another instance of the filter, causing the same results to be posted twice. This could result in subsequent filters in the pipeline processing the same data twice. Therefore filters in a pipeline should be designed to be idempotent. For more information see [Idempotency Patterns](http://blog.jonathanoliver.com/idempotency-patterns/) on Jonathan Oliver’s blog.
 
-- Repeated messages. If a filter in a pipeline fails after posting a message to the next stage of the pipeline, another instance of the filter might be run (as described by the idempotency issue above), and it'll post a copy of the same message to the pipeline. This could cause two instances of the same message to be passed to the next filter. To avoid this, the pipeline should detect and eliminate duplicate messages.
+- **Repeated messages**. If a filter in a pipeline fails after posting a message to the next stage of the pipeline, another instance of the filter might be run, and it'll post a copy of the same message to the pipeline. This could cause two instances of the same message to be passed to the next filter. To avoid this, the pipeline should detect and eliminate duplicate messages.
 
     >  If you're implementing the pipeline by using message queues (such as Microsoft Azure Service Bus queues), the message queuing infrastructure might provide automatic duplicate message detection and removal.  
 
-- Context and state. In a pipeline, each filter essentially runs in isolation and shouldn't make any assumptions about how it was invoked. This means that each filter should be provided with sufficient context to perform its work. This context could comprise a large amount of state information. 
+- **Context and state**. In a pipeline, each filter essentially runs in isolation and shouldn't make any assumptions about how it was invoked. This means that each filter should be provided with sufficient context to perform its work. This context could include a large amount of state information. 
 
 ## When to use this pattern
 
 Use this pattern when:
-- The processing required by an application can easily be decomposed into a set of discrete, independent steps.
+- The processing required by an application can easily be broken down into a set of independent steps.
 
 - The processing steps performed by an application have different scalability requirements.
 
@@ -88,16 +81,14 @@ This pattern might not be useful when:
 
 ## Example
 
-You can use a sequence of message queues to provide the infrastructure required to implement a pipeline. An initial message queue receives unprocessed messages. A component implemented as a filter task listens for a message on this queue, performs its work, and then posts the transformed message to the next queue in the sequence. Another filter task can listen for messages on this queue, process them, post the results to another queue, and so on until the fully transformed data appears in the final message in the queue.
+You can use a sequence of message queues to provide the infrastructure required to implement a pipeline. An initial message queue receives unprocessed messages. A component implemented as a filter task listens for a message on this queue, performs its work, and then posts the transformed message to the next queue in the sequence. Another filter task can listen for messages on this queue, process them, post the results to another queue, and so on until the fully transformed data appears in the final message in the queue. The next figure illustrates implementing a pipeline using message queues.
 
-![Figure 4 - Implementing a pipeline by using message queues](images/pipes-and-filters-message-queues.png)
+![Figure 4 - Implementing a pipeline using message queues](images/pipes-and-filters-message-queues.png)
 
-
-_Figure 4: Implementing a pipeline by using message queues_
 
 If you're building a solution on Azure you can use Service Bus queues to provide a reliable and scalable queuing mechanism. The `ServiceBusPipeFilter` class shown below in C# demonstrates how you can implement a filter that receives input messages from a queue, processes these messages, and posts the results to another queue.
 
->  The `ServiceBusPipeFilter` class is defined in the PipesAndFilters.Shared project in the PipesAndFilters solution. This sample is available for download with this guidance. 
+>  The `ServiceBusPipeFilter` class is defined in the PipesAndFilters.Shared project available from [GitHub](https://github.com/mspnp/cloud-design-patterns/tree/master/samples/pipes-and-filters).
 
 ```
 public class ServiceBusPipeFilter
@@ -166,7 +157,7 @@ public class ServiceBusPipeFilter
     // Pause the processing threads.
     this.pauseProcessingEvent.Reset();
 
-    // There's no clean approach for waiting for the threads to complete
+    // There's no clean approach <<RBC: Is the phrase "clean approach" meaningul for devs?>> for waiting for the threads to complete
     // the processing. This example simply stops any new processing, waits
     // for the existing thread to complete, then closes the message pump 
     // and finally returns.
@@ -180,11 +171,11 @@ public class ServiceBusPipeFilter
 }
 ```
 
-The `Start` method in the `ServiceBusPipeFilter` class connects to a pair of input and output queues, and the `Close` method disconnects from the input queue. The `OnPipeFilterMessageAsync` method performs the actual processing of messages; the `asyncFilterTask` parameter to this method specifies the processing to be performed. The `OnPipeFilterMessageAsync` method waits for incoming messages on the input queue, runs the code specified by the `asyncFilterTask` parameter over each message as it arrives, and posts the results to the output queue. The queues themselves are specified by the constructor. 
+The `Start` method in the `ServiceBusPipeFilter` class connects to a pair of input and output queues, and the `Close` method disconnects from the input queue. The `OnPipeFilterMessageAsync` method performs the actual processing of messages, the `asyncFilterTask` parameter to this method specifies the processing to be performed. The `OnPipeFilterMessageAsync` method waits for incoming messages on the input queue, runs the code specified by the `asyncFilterTask` parameter over each message as it arrives, and posts the results to the output queue. The queues themselves are specified by the constructor. 
 
-The sample solution implements filters in a set of worker roles. Each worker role can be scaled independently, depending on the complexity of the business processing that it performs or the resources that it requires to perform this processing. Additionally, multiple instances of each worker role can be run in parallel to improve throughput. 
+The sample solution implements filters in a set of worker roles. Each worker role can be scaled independently, depending on the complexity of the business processing that it performs or the resources required for processing. Additionally, multiple instances of each worker role can be run in parallel to improve throughput. 
 
-The following code shows an Azure worker role named `PipeFilterARoleEntry`, which is defined in the PipeFilterA project in the sample solution. 
+The following code shows an Azure worker role named `PipeFilterARoleEntry`, defined in the PipeFilterA project in the sample solution. 
 
 ```
 public class PipeFilterARoleEntry : RoleEntryPoint
@@ -210,7 +201,7 @@ public class PipeFilterARoleEntry : RoleEntryPoint
     {
       // Clone the message and update it.
       // Properties set by the broker (Deliver count, enqueue time, ...) 
-      // aren' cloned and must be copied over if required.
+      // aren't cloned and must be copied over if required.
       var newMsg = msg.Clone();
       
       await Task.Delay(500); // DOING WORK
@@ -230,11 +221,11 @@ public class PipeFilterARoleEntry : RoleEntryPoint
 }
 ```
 
-This role contains a `ServiceBusPipeFilter` object. The `OnStart` method in the role connects to the queues for receiving input messages and posting output messages (the names of the queues are defined in the `Constants` class). The `Run` method invokes the `OnPipeFilterMessagesAsync` method to perform some processing on each message that's received (in this example, the processing is simulated by waiting for a short period of time). When processing is complete, a new message is constructed containing the results (in this case, the input message is simply augmented with a custom property), and this message is posted to the output queue.
+This role contains a `ServiceBusPipeFilter` object. The `OnStart` method in the role connects to the queues for receiving input messages and posting output messages (the names of the queues are defined in the `Constants` class). The `Run` method invokes the `OnPipeFilterMessagesAsync` method to perform some processing on each message that's received (in this example, the processing is simulated by waiting for a short period of time). When processing is complete, a new message is constructed containing the results (in this case, the input message has a custom property added), and this message is posted to the output queue.
 
-The sample code contains another worker role named `PipeFilterBRoleEntry` in the PipeFilterB project. This role is similar to `PipeFilterARoleEntry` except that it performs different processing in the `Run` method. In the example solution, these two roles are combined to construct a pipeline; the output queue for the `PipeFilterARoleEntry` role is the input queue for the `PipeFilterBRoleEntry` role.
+The sample code contains another worker role named `PipeFilterBRoleEntry` in the PipeFilterB project. This role is similar to `PipeFilterARoleEntry` except that it performs different processing in the `Run` method. In the example solution, these two roles are combined to construct a pipeline, the output queue for the `PipeFilterARoleEntry` role is the input queue for the `PipeFilterBRoleEntry` role.
 
-The sample solution also provides two further roles named `InitialSenderRoleEntry` (in the InitialSender project) and `FinalReceiverRoleEntry` (in the FinalReceiver project). The `InitialSenderRoleEntry` role provides the initial message in the pipeline. The `OnStart` method connects to a single queue and the `Run` method posts a method to this queue. This queue is the input queue used by the `PipeFilterARoleEntry` role, so posting a message to it causes the message to be received and processed by the `PipeFilterARoleEntry` role. The processed message then passes through the `PipeFilterBRoleEntry` role.
+The sample solution also provides two additional roles named `InitialSenderRoleEntry` (in the InitialSender project) and `FinalReceiverRoleEntry` (in the FinalReceiver project). The `InitialSenderRoleEntry` role provides the initial message in the pipeline. The `OnStart` method connects to a single queue and the `Run` method posts a method to this queue. This queue is the input queue used by the `PipeFilterARoleEntry` role, so posting a message to it causes the message to be received and processed by the `PipeFilterARoleEntry` role. The processed message then passes through the `PipeFilterBRoleEntry` role.
 
 The input queue for the `FinalReceiveRoleEntry` role is the output queue for the `PipeFilterBRoleEntry` role. The `Run` method in the `FinalReceiveRoleEntry` role, shown below, receives the message and performs some final processing. Then it writes the values of the custom properties added by the filters in the pipeline to the trace output.
 
@@ -242,7 +233,7 @@ The input queue for the `FinalReceiveRoleEntry` role is the output queue for the
 public class FinalReceiverRoleEntry : RoleEntryPoint
 {
   ...
-  // Final queue/pipe in the pipeline from which to process data.
+  // Final queue/pipe in the pipeline to process data from.
   private ServiceBusPipeFilter queueFinal;
 
   public override bool OnStart()
@@ -276,11 +267,11 @@ public class FinalReceiverRoleEntry : RoleEntryPoint
 }
 ```
 
-Related patterns and guidance
+##Related patterns and guidance
 
 The following patterns and guidance might also be relevant when implementing this pattern:
-- This pattern has a sample application, [Cloud Design Patterns – Sample Code](http://aka.ms/cloud-design-patterns-sample) that you can download.
-- [Competing Consumers pattern](competing-consumers.md). A pipeline can contain multiple instances of one or more filters. This approach is useful for running parallel instances of slow filters, enabling the system to spread the load and improve throughput. Each instance of a filter will compete for input with the other instances; two instances of a filter shouldn't be able to process the same data. The Competing Consumers pattern provides more information on this approach.
-- [Compute Resource Consolidation pattern](compute-resource-consolidation.md). It might be possible to group filters that should scale together into the same process. The Compute Resource Consolidation pattern provides more information about the benefits and tradeoffs of this strategy.
-- [Compensating Transaction pattern](compensating-transaction.md). A filter can be implemented as an operation that can be reversed, or that has a compensating operation that restores the state to a previous version in the event of a failure. The Compensating Transaction pattern explains how this can be implemented to maintain or achieve eventual consistency. 
+- A sample that demonstrates this pattern is available on [GitHub](https://github.com/mspnp/cloud-design-patterns/tree/master/samples/pipes-and-filters).
+- [Competing Consumers pattern](competing-consumers.md). A pipeline can contain multiple instances of one or more filters. This approach is useful for running parallel instances of slow filters, enabling the system to spread the load and improve throughput. Each instance of a filter will compete for input with the other instances, two instances of a filter shouldn't be able to process the same data. Provides an explanation of this approach.
+- [Compute Resource Consolidation pattern](compute-resource-consolidation.md). It might be possible to group filters that should scale together into the same process. Provides more information about the benefits and tradeoffs of this strategy.
+- [Compensating Transaction pattern](compensating-transaction.md). A filter can be implemented as an operation that can be reversed, or that has a compensating operation that restores the state to a previous version in the event of a failure. Explains how this can be implemented to maintain or achieve eventual consistency. 
 - [Idempotency Patterns](http://blog.jonathanoliver.com/idempotency-patterns/) on Jonathan Oliver’s blog. 
