@@ -1,6 +1,6 @@
 ---
 title: Index Table 
-description: Create indexes over the fields in data stores that are frequently referenced by queries. <<RBC: "Criteria" seems like an odd word choice here. It's only used in this descripition. Is there a reason not to just say "queries" instead?>>
+description: Create indexes over the fields in data stores that are frequently referenced by queries. 
 categories: [data-management, performance-scalability]
 keywords: design pattern
 layout: designpattern
@@ -46,7 +46,7 @@ The second strategy is to create normalized index tables organized by different 
 
 This technique saves space and reduces the overhead of maintaining duplicate data. The disadvantage is that an application has to perform two lookup operations to find data using a secondary key. It has to find the primary key for the data in the index table, and then use the primary key to look up the data in the fact table.
 
-The third strategy is to create partially normalized index tables organized by different keys that duplicate frequently retrieved fields. Reference the original data in the fact table to access less frequently accessed fields. <<RBC: I'm not sure I get what we're trying to say with this sentence. I think "original data" is the confusing part, how do the partially normalized index tables relate to the original data? And how do I reference it? I'm sure this could be more clear. I added something, but I'm not sure it's the best solution.>> The next figure shows how commonly accessed data is duplicated in each index table.
+The third strategy is to create partially normalized index tables organized by different keys that duplicate frequently retrieved fields. Reference the fact table to access less frequently accessed fields. The next figure shows how commonly accessed data is duplicated in each index table.
 
 ![Figure 4 - Commonly accessed data is duplicated in each index table](images/index-table-figure-4.png)
 

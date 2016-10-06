@@ -27,7 +27,7 @@ Users typically prefer to use the same credentials for all these applications.
 
 ## Solution
 
-Implement an authentication mechanism that can use federated identity. Separate user authentication from the application code, and delegate authentication to a trusted identity provider. This can simplify development and allow users to authenticate using a wider range of identity providers (IdP) <<RBC: Do we REALLY need to define plural and singular of acronyms? How stupid do we think people are!?!?!>> while minimizing the administrative overhead. It also allows you to clearly decouple authentication from authorization.
+Implement an authentication mechanism that can use federated identity. Separate user authentication from the application code, and delegate authentication to a trusted identity provider. This can simplify development and allow users to authenticate using a wider range of identity providers (IdP) while minimizing the administrative overhead. It also allows you to clearly decouple authentication from authorization.
 
 The trusted identity providers include corporate directories, on-premises federation services, other security token services (STS) provided by business partners, or social identity providers that can authenticate users who have, for example, a Microsoft, Google, Yahoo!, or Facebook account.
 
@@ -50,7 +50,7 @@ Consider the following when designing applications that implement federated auth
 
 - Authentication can be a single point of failure. If you deploy your application to multiple datacenters, consider deploying your identity management mechanism to the same datacenters to maintain application reliability and availability.
 
-- Authentication tools make it possible to configure access control based on role claims contained in the authentication token. This is often referred to as role-based access control, <<RBC: Typically I don't like to define acronyms that aren't used again in the doc. Unless you think people will know it more by it's acronym than what the acronym stands for.>> and it can allow a more granular level of control over access to features and resources.
+- Authentication tools make it possible to configure access control based on role claims contained in the authentication token. This is often referred to as role-based access control (RBAC), and it can allow a more granular level of control over access to features and resources.
 
 - Unlike a corporate directory, claims-based authentication using social identity providers doesn't usually provide information about the authenticated user other than an email address, and perhaps a name. Some social identity providers, such as a Microsoft account, provide only a unique identifier. The application usually needs to maintain some information on registered users, and be able to match this information to the identifier contained in the claims in the token. Typically this is done through registration when the user first accesses the application, and information is then injected into the token as additional claims after each authentication.
 
@@ -60,7 +60,7 @@ Consider the following when designing applications that implement federated auth
 
 This pattern is useful for scenarios such as:
 
-- **Single sign-on in the enterprise**. In this scenario you need to authenticate employees for corporate applications that are hosted in the cloud outside the corporate security boundary, without requiring them to sign in every time they visit an application. The user experience is the same as when using on-premises applications where they're authenticated when signing in to a corporate network, and from then on have access to all relevant applications without needing to sign in again. <<RBC: SSO is the technology, but the user signs in to things. Note, I did a little searching, and other docs make this distinction.>>
+- **Single sign-on in the enterprise**. In this scenario you need to authenticate employees for corporate applications that are hosted in the cloud outside the corporate security boundary, without requiring them to sign in every time they visit an application. The user experience is the same as when using on-premises applications where they're authenticated when signing in to a corporate network, and from then on have access to all relevant applications without needing to sign in again. 
 
 - **Federated identity with multiple partners**. In this scenario you need to authenticate both corporate employees and business partners who don't have accounts in the corporate directory. This is common in business-to-business applications, applications that integrate with third-party services, and where companies with different IT systems have merged or shared resources.
 

@@ -67,7 +67,6 @@ This pattern is useful for:
 - As a complementary store for some of the settings for applications, perhaps allowing applications to override some or all of the centrally-stored settings.
 
 - As a way to simplify administration of multiple applications, and optionally for monitoring use of configuration settings by logging some or all types of access to the configuration store. 
-<<RBC: No situations where this pattern isn't useful?>>
 
 ## Example
 
@@ -92,7 +91,7 @@ This interface defines methods for retrieving and updating configuration setting
 
 >  By design, this simple solution exposes all configuration settings as string values rather than typed values.
 
-The `ExternalConfigurationManager` class provides a wrapper around a `BlobSettingsStore` object. An application can use this class to store and retrieve configuration information. This class uses the Microsoft Reactive Extensions library <<RBC: Should this be a link, or does it not matter? And if so, link to the explanation or directly to the class library?>> to expose any changes made to the configuration through an implementation of the `IObservable` interface. If a setting is modified by calling the `SetAppSetting` method, the `Changed` event is raised and all subscribers to this event will be notified.
+The `ExternalConfigurationManager` class provides a wrapper around a `BlobSettingsStore` object. An application can use this class to store and retrieve configuration information. This class uses the Microsoft [Reactive Extensions](https://msdn.microsoft.com/en-us/library/hh242985(v=vs.103).aspx) library to expose any changes made to the configuration through an implementation of the `IObservable` interface. If a setting is modified by calling the `SetAppSetting` method, the `Changed` event is raised and all subscribers to this event will be notified.
 
 Note that all settings are also cached in a `Dictionary` object inside the `ExternalConfigurationManager` class for fast access. The `SetAppSetting` method updates this cache, and the `GetSetting` method used to retrieve a configuration setting reads the data from the cache. If the setting isn't found in the cache, it's retrieved from the `BlobSettingsStore` object instead.
 

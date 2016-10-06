@@ -1,6 +1,6 @@
 ---
 title: Compute Resource Consolidation 
-description: Consolidate multiple tasks or operations into a single computational unit <<RBC: Original text is from the cache-aside pattern. I'm not sure where this is used because when I search for the phrase "computational unit" I see the first para below as the web description.>>
+description: Consolidate multiple tasks or operations into a single computational unit
 categories: [design-implementation]
 keywords: design pattern
 layout: designpattern
@@ -15,7 +15,7 @@ Consolidate multiple tasks or operations into a single computational unit. This 
 
 ## Context and problem
 
-A cloud application often implements a variety of operations. In some solutions it makes sense to follow the design principle of separation of concerns initially, and divide these operations into separate computational units that are hosted and deployed individually (for example, as separate roles in a Microsoft Azure Cloud Service, separate websites, <<RBC: It appears from the style guide that this is no longer a thing. Is this parenthetical even necessary?>> or separate Virtual Machines). However, although this strategy can help simplify the logical design of the solution, deploying a large number of computational units as part of the same application can increase runtime hosting costs and make management of the system more complex.
+A cloud application often implements a variety of operations. In some solutions it makes sense to follow the design principle of separation of concerns initially, and divide these operations into separate computational units that are hosted and deployed individually (for example, as separate App Service web apps, separate Virtual Machines, or separate Cloud Service roles). However, although this strategy can help simplify the logical design of the solution, deploying a large number of computational units as part of the same application can increase runtime hosting costs and make management of the system more complex.
 
 As an example, the figure shows the simplified structure of a cloud-hosted solution that is implemented using more than one computational unit. Each computational unit runs in its own virtual environment. Each function has been implemented as a separate task (labeled Task A through Task E) running in its own computational unit.
 

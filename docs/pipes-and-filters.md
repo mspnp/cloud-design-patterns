@@ -11,11 +11,11 @@ ms.date: 06/20/2016
    
 # Pipes and Filters
 
-Break down <<RBC: I hate the word decompose, because I always think of somthing rotting, plus it's not actually used that much in tech docs if you search MSDN.>> a task that performs complex processing into a series of separate elements that can be reused. This can improve performance, scalability, and reusability by allowing task elements that perform the processing to be deployed and scaled independently.
+Decompose a task that performs complex processing into a series of separate elements that can be reused. This can improve performance, scalability, and reusability by allowing task elements that perform the processing to be deployed and scaled independently.
 
 ## Context and problem
 
-An applications is required to perform a variety of tasks of varying complexity on the information that it processes. A straightforward but inflexible approach to implementing an application is to perform this processing as a monolithic <<RBC: I thought about replacing "monolithic" but I'm not actually sure what would be better. Also, it would affect the first image. Thoughts?>> module. However, this approach is likely to reduce the opportunities for refactoring the code, optimizing it, or reusing it if parts of the same processing are required elsewhere within the application. 
+An applications is required to perform a variety of tasks of varying complexity on the information that it processes. A straightforward but inflexible approach to implementing an application is to perform this processing as a monolithic module. However, this approach is likely to reduce the opportunities for refactoring the code, optimizing it, or reusing it if parts of the same processing are required elsewhere within the application. 
 
 The figure illustrates the issues with processing data using the monolithic approach. An application receives and processes data from two sources. The data from each source is processed by a separate module that performs a series of tasks to transform this data, before passing the result to the business logic of the application. 
 
@@ -34,7 +34,7 @@ Break down the processing required for each stream into a set of separate compon
 
 The time it takes to process a single request depends on the speed of the slowest filter in the pipeline. One or more filters could be a bottleneck, especially if a large number of requests appear in a stream from a particular data source. A key advantage of the pipeline structure is that it provides opportunities for running parallel instances of slow filters, enabling the system to spread the load and improve throughput. 
 
-The filters that make up a pipeline can run on different machines, enabling them to be scaled independently and take advantage of the elasticity that many cloud environments provide. A filter that is computationally intensive can run on high performance hardware, while other less demanding filters can be hosted on less expensive <<RBC: What does commodity hardware even mean!?!?!>> hardware. The filters don't even have to be in the same data center or geographical location, which allows each element in a pipeline to run in an environment that is close to the resources it requires.  The next figure shows an example applied to the pipeline for the data from Source 1. 
+The filters that make up a pipeline can run on different machines, enabling them to be scaled independently and take advantage of the elasticity that many cloud environments provide. A filter that is computationally intensive can run on high performance hardware, while other less demanding filters can be hosted on less expensive commodity hardware. The filters don't even have to be in the same data center or geographical location, which allows each element in a pipeline to run in an environment that is close to the resources it requires.  The next figure shows an example applied to the pipeline for the data from Source 1. 
 
 ![Figure 3 shows an example applied to the pipeline for the data from Source 1](images/pipes-and-filters-load-balancing.png)
 
@@ -157,7 +157,7 @@ public class ServiceBusPipeFilter
     // Pause the processing threads.
     this.pauseProcessingEvent.Reset();
 
-    // There's no clean approach <<RBC: Is the phrase "clean approach" meaningul for devs?>> for waiting for the threads to complete
+    // There's no clean approach for waiting for the threads to complete
     // the processing. This example simply stops any new processing, waits
     // for the existing thread to complete, then closes the message pump 
     // and finally returns.

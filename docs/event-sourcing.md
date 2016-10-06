@@ -11,7 +11,8 @@ ms.date: 06/20/2016
    
 # Event Sourcing
 
-Use an append-only store to record the full series of events that describe actions taken on data in a domain. The store can be used to materialize the domain objects, in contrast with only storing the current state. <<RBC: This seems less convoluted to me,but is it technically accurate?>> This can simplify tasks in complex domains by avoiding the requirement to synchronize the data model and the business domain, while improving performance, scalability, and responsiveness. It can also provide consistency for transactional data, and maintain full audit trails and history that can enable compensating actions.
+Instead of storing just the current state of the data in a domain, use an append-only store to record the full series of actions taken on that data.
+The store acts as the system of record and can be used to materialize the domain objects. This can simplify tasks in complex domains, by avoiding the need to synchronize the data model and the business domain, while improving performance, scalability, and responsiveness. It can also provide consistency for transactional data, and maintain full audit trails and history that can enable compensating actions.
 
 ## Context and problem
 
@@ -25,7 +26,7 @@ The CRUD approach has some limitations:
 
 - Unless there's an additional auditing mechanism that records the details of each operation in a separate log, history is lost.
 
->  For a deeper understanding of the limits of the CRUD approach see [CRUD, Only When You Can Afford It](https://msdn.microsoft.com/library/ms978509.aspx). <<RBC: I put a comment in another pattern that this is from 2004, still relevant?>>
+>  For a deeper understanding of the limits of the CRUD approach see [CRUD, Only When You Can Afford It](https://msdn.microsoft.com/library/ms978509.aspx). 
 
 ## Solution
 
@@ -44,17 +45,17 @@ The figure shows an overview of the pattern, including some of the options for u
 
 The Event Sourcing pattern provides the following advantages:
 
-Events are immutable and can be stored using an append-only operation. The user interface, workflow, or process that initiated the action that produced the events can continue, and the tasks that handle the events can run in the background. This, combined with the fact that there's no contention during the processing of transactions, can vastly improve performance and scalability for applications, especially for the presentation level or user interface.
+Events are immutable and can be stored using an append-only operation. The user interface, workflow, or process that initiated an event can continue, and tasks that handle the events can run in the background. This, combined with the fact that there's no contention during the processing of transactions, can vastly improve performance and scalability for applications, especially for the presentation level or user interface.
 
 Events are simple objects that describe some action that occurred, together with any associated data required to describe the action represented by the event. Events don't directly update a data store. They're simply recorded for handling at the appropriate time. This can simplify implementation and management.
 
-Events typically have meaning for a domain expert, while database tables are artificial constructs that represent the current state of the system, not the events that occurred. <<RBC: Again, potentially condescending language. Is this sufficient?>>
+Events typically have meaning for a domain expert, whereas [object-relational impedance mismatch](https://en.wikipedia.org/wiki/Object-relational_impedance_mismatch) can make complex database tables hard to understand. Tables are artificial constructs that represent the current state of the system, not the events that occurred. 
 
 Event sourcing can help prevent concurrent updates from causing conflicts because it avoids the requirement to directly update objects in the data store. However, the domain model must still be designed to protect itself from requests that might result in an inconsistent state.
 
 The append-only storage of events provides an audit trail that can be used to monitor actions taken against a data store, regenerate the current state as materialized views or projections by replaying the events at any time, and assist in testing and debugging the system. In addition, the requirement to use compensating events to cancel changes provides a history of changes that were reversed, which wouldn't be the case if the model simply stored the current state. The list of events can also be used to analyze application performance and detect user behavior trends, or to obtain other useful business information.
 
-The decoupling of events from tasks that perform operations in response to an event raised by the event store provides flexibility and extensibility. <<RBC: Technically accurate? It was either delete some works or it seemed like it needed a comma or two, but I wasn't sure where to put them.>> For example, the tasks that handle events raised by the event store only know the nature of the event and the data it contains. The way that the task is executed is decoupled from the operation that triggered the event. In addition, multiple tasks can handle each event. This enables easy integration with other services and systems that only listen for new events raised by the event store. However, the event sourcing events tend to be very low level, and it might be necessary to generate specific integration events instead.
+The event store raises events, and tasks perform operations in response to those events. This decoupling of the tasks from the events provides flexibility and extensibility. Tasks know about the type of event and the event data, but not about the operation that triggered the event. In addition, multiple tasks can handle each event. This enables easy integration with other services and systems that only listen for new events raised by the event store. However, the event sourcing events tend to be very low level, and it might be necessary to generate specific integration events instead.
 
 >  Event sourcing is commonly combined with the CQRS pattern by performing the data management tasks in response to the events, and by materializing views from the stored events.
 
@@ -74,7 +75,7 @@ There's no standard approach, or existing mechanisms such as SQL queries, for re
 
 The length of each event stream affects managing and updating the system. If the streams are large, consider creating snapshots at specific intervals such as a specified number of events. The current state of the entity can be obtained from the snapshot and by replaying any events that occurred after that point in time.
 
-    >  For more information about creating snapshots of data, see [Snapshot on Martin Fowler’s Enterprise Application Architecture website](http://martinfowler.com/eaaDev/Snapshot.html) and [Master-Subordinate Snapshot Replication](https://msdn.microsoft.com/library/ff650012.aspx). <<RBC: This is old (2003) data patterns guidance. It says it's retired, but patterns don't really expire if they're done well. Maybe some thought could be given to moving them to the current doc system?>>
+    >  For more information about creating snapshots of data, see [Snapshot on Martin Fowler’s Enterprise Application Architecture website](http://martinfowler.com/eaaDev/Snapshot.html) and [Master-Subordinate Snapshot Replication](https://msdn.microsoft.com/library/ff650012.aspx). 
 
 Even though event sourcing minimizes the chance of conflicting updates to the data, the application must still be able to deal with inconsistencies that result from eventual consistency and the lack of transactions. For example, an event that indicates a reduction in stock inventory might arrive in the data store while an order for that item is being placed, resulting in a requirement to reconcile the two operations either by advising the customer or creating a back order.
 
@@ -88,7 +89,7 @@ Use this pattern in the following scenarios:
  
 - When it's vital to minimize or completely avoid the occurrence of conflicting updates to data.
 
-- When you want to record events that occur, and be able to replay them to restore or roll back the state of a system, <<RBC: is roll back really all that different than restore that we need to list both?>> or simply as a history and audit log. For example, when a task involves multiple steps you might need to execute actions to revert updates and then replay some steps to bring the data back into a consistent state.
+- When you want to record events that occur, and be able to replay them to restore the state of a system, roll back changes, or keep a history and audit log. For example, when a task involves multiple steps you might need to execute actions to revert updates and then replay some steps to bring the data back into a consistent state.
 
 - When using events is a natural feature of the operation of the application, and requires little additional development or implementation effort.
 
@@ -96,7 +97,7 @@ Use this pattern in the following scenarios:
 
 - When you want flexibility to be able to change the format of materialized models and entity data if requirements change, or&mdash;when used in conjunction with CQRS&mdash;you need to adapt a read model or the views that expose the data.
 
-- When used in conjunction with CQRS, and eventual consistency is acceptable while a read model is updated. Ot, the performance impact incurred in rehydrating entities and data from an event stream is acceptable. <<RBC: Will the reader know what in the heck rehydrating is? Again, not a term in common usage.>>
+- When used in conjunction with CQRS, and eventual consistency is acceptable while a read model is updated, or the performance impact of rehydrating entities and data from an event stream is acceptable.
 
 This pattern might not be useful in the following situations:
 
@@ -114,9 +115,9 @@ A conference management system needs to track the number of completed bookings f
 
 - The system could store the information about the total number of bookings as a separate entity in a database that holds booking information. As bookings are made or cancelled, the system could increment or decrement this number as appropriate. This approach is simple in theory, but can cause scalability issues if a large number of attendees are attempting to book seats during a short period of time. For example, in the last day or so prior to the booking period closing.
 
-- The system could store information about bookings and cancellations as events held in an event store. It could then calculate the number of seats available by replaying these events. This approach can be more scalable due to the stability <<RBC: would "persistence" be better here?>> of events. The system only needs to be able to read data from the event store, or to append data to the event store. Event information about bookings and cancellations is never modified.
+- The system could store information about bookings and cancellations as events held in an event store. It could then calculate the number of seats available by replaying these events. This approach can be more scalable due to the immutability of events. The system only needs to be able to read data from the event store, or append data to the event store. Event information about bookings and cancellations is never modified.
 
-The figure illustrates how the seat reservation subsystem of the conference management system might be implemented using event sourcing.
+The following diagram illustrates how the seat reservation subsystem of the conference management system might be implemented using event sourcing.
 
 ![Using event sourcing to capture information about seat reservations in a conference management system](images/event-sourcing-bounded-context.png)
 
