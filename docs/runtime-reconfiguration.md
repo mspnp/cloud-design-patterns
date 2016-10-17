@@ -54,7 +54,7 @@ Plan for a staged rollout of updates and confirm they're successful, and that th
 
 Consider how you'll roll back configuration changes that cause issues, or that result in failure of the application. For example, it should be possible to roll back a change immediately instead of waiting for a polling interval to detect the change. 
 
-Consider how the location of the configuration settings might affect application performance. For example, you should handle the error that'll occur if the external store you use is unavailable when the application starts, or when configuration changes are applied. <<RBC: Is the future "to be" language needed here?>> You can do this using a default configuration or by caching the settings locally on the server and reusing these values while retrying access to the remote data store.
+Consider how the location of the configuration settings might affect application performance. For example, handle any errors that might occur if the external store is unavailable when the application starts, or when configuration changes are applied. You can do this using a default configuration or by caching the settings locally on the server and reusing these values while retrying access to the remote data store.
 
 Caching can help to reduce delays if a component needs to repeatedly access configuration settings. However, when the configuration changes, the application code has to invalidate the cached settings, and the component must use the updated settings. 
 
@@ -110,9 +110,9 @@ Be aware that, in the case of web roles, the `OnStart` event handler runs in a s
 
 >  You can store custom configuration settings in the service configuration file, in a custom configuration file, in a database such as Azure SQL Database or SQL Server in a Virtual Machine, or in Azure blob or table storage. You'll need to create code that can access the custom configuration settings and apply these to the application&mdash;typically by setting the properties of components in the application.  
 
-For example, the following custom function reads the value of a setting <<RBC: the deleted phrase seems awkward, is it necessary to understand what's going on? If so, can we change "whose" to something else?>> from the Azure service configuration file and then applies it to the current instance of a runtime component named `SomeRuntimeComponent`. This is from the Global.asax.cs file of the example.
+For example, the following custom function reads the value of a setting from the Azure service configuration file and then applies it to the current instance of a runtime component named `SomeRuntimeComponent`. This is from the Global.asax.cs file of the example.
 
->  Some configuration settings, such as those for Windows Identity Framework, can't be stored in the Azure service configuration file and must be in the `App.config` or `Web.config` file. <<RBC: These were bold in the original, should they be formatted as code here?>>
+>  Some configuration settings, such as those for Windows Identity Framework, can't be stored in the Azure service configuration file and must be in the App.config or Web.config file. 
 
 ```csharp
 private static void ConfigureFromSetting(string settingName)
@@ -128,7 +128,7 @@ In Azure, some configuration changes are detected and applied automatically. Thi
 
 - Cancel the change to tell Azure that the new value can't be applied at runtime, and that the application must be restarted in order for the change to be applied. 
 
-For example, the following code from the `WebRole.cs` class <<RBC: Would they not know it's part of the sample? If not, can we just say "from the sample" or something?>> shows how you can use the `RoleEnvironment.Changing` event to cancel the update for all settings except the ones that can be applied at runtime without requiring a restart. This example allows a change to the “CustomSetting” to be applied at runtime without restarting the application. The component that uses this setting will be able to read the new value and change its behavior accordingly at runtime. Any other change to the configuration will automatically cause the web or worker role to restart. 
+For example, the following code shows how you can use the `RoleEnvironment.Changing` event to cancel the update for all settings except the ones that can be applied at runtime without requiring a restart. This example allows a change to the "CustomSetting" to be applied at runtime without restarting the application. The component that uses this setting will be able to read the new value and change its behavior accordingly at runtime. Any other change to the configuration will automatically cause the web or worker role to restart. 
 
 ```csharp
 private void RoleEnvironment_Changing(object sender,
@@ -187,6 +187,4 @@ Note that if you fail to cancel a configuration change, but don't apply the new 
 ## Related patterns and guidance
 
 - A sample that demonstrates this pattern is available on [GitHub](https://github.com/mspnp/cloud-design-patterns/tree/master/samples/runtime-reconfiguration).
-- [External Configuration Store pattern](external-configuration-store.md). Moving configuration information out of the application deployment package to a centralized location can provide opportunities for easier management and control of configuration data, and sharing configuration data across applications and application instances. Explains how you can do this. <<RBC: Should we say something better here? Honestly is it worth the effort?>>
-- [RoleEnvironment.Changing Event](https://msdn.microsoft.com/library/azure/microsoft.windowsazure.serviceruntime.roleenvironment.changing.aspx)
-<<RBC: There were originally two articles here, one doesn't appear to be available any longer. Should we say something about why they might want to read this?>>
+- Moving configuration information out of the application deployment package to a centralized location can provide easier management and control of configuration data, and allows sharing of configuration data across applications and application instances. For more information, see [External Configuration Store pattern](external-configuration-store.md). 

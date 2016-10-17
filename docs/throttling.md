@@ -21,7 +21,7 @@ There're many strategies available for handling varying load in the cloud, depen
 
 ## Solution
 
-An alternative strategy to autoscaling is to allow applications to use resources only up to a limit,<<RBC: I don't think "soft" is necessary here, but if an adjective is I would suggest picking something else. When I searched this isn't a very common term and I'm not sure how well this would work for ESL readers.>>  and then throttle them when this limit is reached. The system should monitor how it's using resources so that, when usage exceeds the threshold, it can throttle requests from one or more users. This will enable the system to continue functioning and meet any service level agreements (SLAs) that are in place. For more information on monitoring resource usage, see the [Instrumentation and Telemetry Guidance](https://msdn.microsoft.com/library/dn589775.aspx).
+An alternative strategy to autoscaling is to allow applications to use resources only up to a limit, and then throttle them when this limit is reached. The system should monitor how it's using resources so that, when usage exceeds the threshold, it can throttle requests from one or more users. This will enable the system to continue functioning and meet any service level agreements (SLAs) that are in place. For more information on monitoring resource usage, see the [Instrumentation and Telemetry Guidance](https://msdn.microsoft.com/library/dn589775.aspx).
 
 The system could implement several throttling strategies, including:
 
@@ -76,8 +76,6 @@ Use this pattern:
 - To handle bursts in activity.
 
 - To help cost-optimize a system by limiting the maximum resource levels needed to keep it functioning.
-
-<<RBC: Nots?>>
 
 ## Example
 

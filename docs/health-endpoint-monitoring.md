@@ -23,10 +23,14 @@ There are many factors that affect cloud-hosted applications such as network lat
 
 Implement health monitoring by sending requests to an endpoint on the application. The application should perform the necessary checks, and return an indication of its status. 
 
-A health monitoring check typically combines two factors. The checks (if any) performed by the application or service in response to the request to the health verification endpoint. Analysis of the results by the tool or framework that's performing the health verification check. <RBC: Not sure if breaking this up helped or not.>>The response code indicates the status of the application and, optionally, any components or services it uses. The latency or response time check is performed by the monitoring tool or framework. The figure provides an overview of the pattern.
+A health monitoring check typically combines two factors:
+
+- The checks (if any) performed by the application or service in response to the request to the health verification endpoint. 
+- Analysis of the results by the tool or framework that performs the health verification check. 
+
+The response code indicates the status of the application and, optionally, any components or services it uses. The latency or response time check is performed by the monitoring tool or framework. The figure provides an overview of the pattern.
 
 ![Overview of the pattern](images/health-endpoint-monitoring-pattern.png)
-
 
 Other checks that might be carried out by the health monitoring code in the application include:
 - Checking cloud storage or a database for availability and response time.

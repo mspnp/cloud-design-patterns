@@ -30,7 +30,7 @@ The task instances are all peers, so there isn't a natural leader that can act a
 
 A single task instance should be elected to act as the leader, and this instance should coordinate the actions of the other subordinate task instances. If all of the task instances are running the same code, they are each capable of acting as the leader. Therefore, the election process must be managed carefully to prevent two or more instances taking over the leader role at the same time.
 
-The system must provide a method <RBC: To me, mechanism seems to imply a mechanical thing. I started with "process" but that's probably confusing. I decided on method, but means might be good too.>> for selecting the leader. This method has to cope with events such as network outages or process failures. In many solutions, the subordinate task instances monitor the leader through some type of heartbeat method, or by polling. If the designated leader terminates unexpectedly, or a network failure makes the leader unavailable to the subordinate task instances, it's necessary for them to elect a new leader.
+The system must provide a robust mechanism for selecting the leader. This method has to cope with events such as network outages or process failures. In many solutions, the subordinate task instances monitor the leader through some type of heartbeat method, or by polling. If the designated leader terminates unexpectedly, or a network failure makes the leader unavailable to the subordinate task instances, it's necessary for them to elect a new leader.
 
 There are several strategies for electing a leader among a set of tasks in a distributed environment, including: 
 - Selecting the task instance with the lowest-ranked instance or process ID.

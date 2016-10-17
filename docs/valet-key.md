@@ -11,7 +11,7 @@ ms.date: 06/20/2016
    
 # Valet Key
 
-Use a token or key that provides clients with restricted direct access to a specific resource or service to offload data transfer operations from the application code. <<RBC: I wanted to tighten this up a bit, but I couldn't decide if words like "direct" or "specific" were technically necessary. If they're not, consider removing them.>> This is particularly useful in applications that use cloud-hosted storage systems or queues, and can minimize cost and maximize scalability and performance.
+Use a token that provides clients with restricted direct access to a specific resource, in order to offload data transfer from the application. This is particularly useful in applications that use cloud-hosted storage systems or queues, and can minimize cost and maximize scalability and performance.
 
 ## Context and problem
 
@@ -31,7 +31,7 @@ The client uses this token to access a specific resource in the data store for o
 
 ![Figure 1 - Overview of the pattern](images/valet-key-pattern.png)  
 
-It's also possible to configure a key that has other dependencies, such as the scope of the location <<RBC: Scope "of" the location or scope "or" the location? If it's "scope of," is there a simpler way to say this? Maybe "data range" or something?>> of the data. For example, depending on the data store capabilities, the key can specify a complete table in a data store, or only specific rows in a table. In cloud storage systems the key can specify a container, or just a specific item within a container. 
+It's also possible to configure a key that has other dependencies, such as the scope of the data. For example, depending on the data store capabilities, the key can specify a complete table in a data store, or only specific rows in a table. In cloud storage systems the key can specify a container, or just a specific item within a container. 
 
 The key can also be invalidated by the application. This is a useful approach if the client notifies the server that the data transfer operation is complete. The server can then invalidate that key to prevent further.
 
@@ -41,7 +41,7 @@ Using this pattern can simplify managing access to resources because there's no 
 
 Consider the following points when deciding how to implement this pattern:
 
-**Manage the validity status and period of the key**. If leaked or compromised the key effectively unlocks the target item and makes it available for malicious use during the validity period. <<RBC: I took out the "bearer instrument" language because this doc is the only time it's used on MSDN. I don't think it's necessary for understanding what's going on here.>> A key can usually be revoked or disabled, depending on how it was issued. Server-side policies can be changed or, the server key it was signed with can be invalidated. Specify a short validity period to minimize the risk of allowing unauthorized operations to take place against the data store. However, if the validity period is too short, the client might not be able to complete the operation before the key expires. Allow authorized users to renew the key before the validity period expires if multiple accesses to the protected resource are required.
+**Manage the validity status and period of the key**. If leaked or compromised, the key effectively unlocks the target item and makes it available for malicious use during the validity period. A key can usually be revoked or disabled, depending on how it was issued. Server-side policies can be changed or, the server key it was signed with can be invalidated. Specify a short validity period to minimize the risk of allowing unauthorized operations to take place against the data store. However, if the validity period is too short, the client might not be able to complete the operation before the key expires. Allow authorized users to renew the key before the validity period expires if multiple accesses to the protected resource are required.
 
 **Control the level of access the key will provide**. Typically, the key should allow the user to only perform the actions necessary to complete the operation, such as read-only access if the client shouldn't be able to upload data to the data store. For file uploads, it's common to specify a key that provides write-only permission, as well as the location and the validity period. It's critical to accurately specify the resource or the set of resources to which the key applies. 
 
@@ -85,7 +85,7 @@ This pattern might not be useful in the following situations:
 
 - If the application must perform some task on the data before it's stored or before it's sent to the client. For example, if the application needs to perform validation, log access success, or execute a transformation on the data. However, some data stores and clients are able to negotiate and carry out simple transformations such as compression and decompression (for example, a web browser can usually handle GZip formats). 
 
-- If the design and implementation of an existing application makes it difficult and costly <<RBC: Not useful when both difficult and costly or, when when either difficult or costly?>> to implement. Using this pattern typically requires a different architectural approach for delivering and receiving data. 
+- If the design of an existing application makes it difficult to incorporate the pattern. Using this pattern typically requires a different architectural approach for delivering and receiving data. 
 
 - If it's necessary to maintain audit trails or control the number of times a data transfer operation is executed, and the valet key mechanism in use doesn't support notifications that the server can use to manage these operations. 
 
@@ -93,13 +93,13 @@ This pattern might not be useful in the following situations:
 
 ## Example
 
-Azure supports shared access signatures <<RBC: The Azure style guide says not to use the acronym, I know I removed it in another pattern because it wasn't actually used again, but I'll spell out here. Although frustratingly, we're pointing to articles that don't follow the rules. I guess that's what happens when there are few, if any, editors. So, I guess I'll leave it up to you whether this is a rule you choose to break, or not.>> on Azure Storage for granular access control to data in blobs, tables, and queues, and for Service Bus queues and topics. A shared access signatures token can be configured to provide specific access rights such as read, write, update, and delete to a specific table; a key range within a table; a queue; a blob; or a blob container. The validity can be a specified time period or with no time limit.
+Azure supports shared access signatures on Azure Storage for granular access control to data in blobs, tables, and queues, and for Service Bus queues and topics. A shared access signature token can be configured to provide specific access rights such as read, write, update, and delete to a specific table; a key range within a table; a queue; a blob; or a blob container. The validity can be a specified time period or with no time limit.
 
-Azure shared access signatures also support server-stored access policies that can be associated with a specific resource such as a table or blob. This feature provides additional control and flexibility compared to application-generated shared access signatures tokens, and should be used whenever possible. Settings defined in a server-stored policy can be changed and are reflected in the token without requiring a new token to be issued, but settings defined in the token can't be changed without issuing a new token. This approach also makes it possible to revoke a valid shared access signatures token before it's expired.
+Azure shared access signatures also support server-stored access policies that can be associated with a specific resource such as a table or blob. This feature provides additional control and flexibility compared to application-generated shared access signature tokens, and should be used whenever possible. Settings defined in a server-stored policy can be changed and are reflected in the token without requiring a new token to be issued, but settings defined in the token can't be changed without issuing a new token. This approach also makes it possible to revoke a valid shared access signature token before it's expired.
 
 >  For more information see [Introducing Table SAS (Shared Access Signature), Queue SAS and update to Blob SAS](https://blogs.msdn.microsoft.com/windowsazurestorage/2012/06/12/introducing-table-sas-shared-access-signature-queue-sas-and-update-to-blob-sas/) and [Using Shared Access Signatures](https://azure.microsoft.com/documentation/articles/storage-dotnet-shared-access-signature-part-1/) on MSDN. 
 
-The following code in C# demonstrates how to create a shared access signatures token <<RBC: I added token because it read awkwardly without something, is that okay technically? Or should it be key?>> that's valid for five minutes. The `GetSharedAccessReferenceForUpload` method returns a shared access signatures token that can be used to upload a file to Azure Blob Storage. 
+The following code shows how to create a shared access signature token that's valid for five minutes. The `GetSharedAccessReferenceForUpload` method returns a shared access signatures token that can be used to upload a file to Azure Blob Storage. 
 
 ```csharp
 public class ValuesController : ApiController

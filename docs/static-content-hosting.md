@@ -1,6 +1,6 @@
 ---
 title: Static Content Hosting
-description: Deploy static content to a cloud-based storage service that can deliver these <<RBC: I think "them" would read more naturally here.>> directly to the client.
+description: Deploy static content to a cloud-based storage service that can deliver them directly to the client.
 categories: [data-management, design-implementation, performance-scalability]
 keywords: design pattern
 layout: designpattern
@@ -11,13 +11,13 @@ ms.date: 06/20/2016
    
 # Static Content Hosting
 
-Deploy static content to a cloud-based storage service that can deliver these <<RBC: See comment above.>> directly to the client. This can reduce the need for potentially expensive compute instances.
+Deploy static content to a cloud-based storage service that can deliver them directly to the client. This can reduce the need for potentially expensive compute instances.
 
 ## Context and problem
 
 Web applications typically include some elements of static content. This static content might include HTML pages and other resources such as images and documents that are available to the client, either as part of an HTML page (such as inline images, style sheets, and client-side JavaScript files) or as separate downloads (such as PDF documents). 
 
-Although web servers are well tuned to optimize requests through efficient dynamic page code execution and output caching, they still have to handle requests to download static content. This consumes <<RBC: Absorbs seems like an odd word choice. At first I changed to "uses" but I didn't want "uses...use.">> processing cycles that could often be put to better use. 
+Although web servers are well tuned to optimize requests through efficient dynamic page code execution and output caching, they still have to handle requests to download static content. This consumes processing cycles that could often be put to better use. 
 
 ## Solution
 
@@ -31,7 +31,7 @@ Consider the following points when deciding how to implement this pattern:
 
 - The hosted storage service must expose an HTTP endpoint that users can access to download the static resources. Some storage services also support HTTPS, so it's possible to host resources in storage services that require SSL. 
 
-- For maximum performance and availability, consider using a content delivery network to cache the contents of the storage container in multiple datacenters around the world. However, you'll likely have to pay for using the content delivery network. <<RBC: Does this last sentence even need to be said? Would this ever be free? >>
+- For maximum performance and availability, consider using a content delivery network (CDN) to cache the contents of the storage container in multiple datacenters around the world. However, you'll likely have to pay for using the CDN.
 
 - Storage accounts are often georeplicated by default to provide resiliency against events that might affect a datacenter. This means that the IP address might change, but the URL will remain the same. 
 
@@ -61,8 +61,6 @@ This pattern might not be useful in the following situations:
 
 - The volume of static content is very small. The overhead of retrieving this content from separate storage can outweigh the cost benefit of separating it out from the compute resource.
 
-    >  It's sometimes possible to store a complete website that contains only static content such as HTML pages, images, style sheets, client-side JavaScript files, and downloadable documents such as PDF files in cloud-hosted storage. For more information see [An efficient way of deploying a static web site on Azure](http://www.infosysblogs.com/microsoft/2010/06/an_efficient_way_of_deploying.html) on the Infosys blog. <<RBC: I'm confused by this note, or at least it's placement in the when not to use this pattern section. Is the implication you don't need to use the pattern because the whole site is in storage? But that seems to contradict the second point in when to use the pattern. Or should this just be moved?>>
-
 ## Example
 
 Static content located in Azure Blob storage can be accessed directly by a web browser. Azure provides an HTTP-based interface over storage that can be publicly exposed to clients. For example, content in an Azure Blob storage container is exposed using a URL with the following form:
@@ -85,7 +83,7 @@ The links in the pages delivered to the client must specify the full URL of the 
 <img src="http://mystorageaccount.blob.core.windows.net/myresources/image1.png"
      alt="My image" />
 ```
->  If the resources are protected by using a valet key, such as an Azure shared access signature, <<RBC: Not in the style guide as a named feature, plus the acronmyn isn't used again.>> this signature must be included in the URLs in the links.
+>  If the resources are protected by using a valet key, such as an Azure shared access signature, this signature must be included in the URLs in the links.
 
 A solution named StaticContentHosting that demonstrates using external storage for static resources is available from [GitHub](https://github.com/mspnp/cloud-design-patterns/tree/master/samples/static-content-hosting). The StaticContentHosting.Cloud project contains configuration files that specify the storage account and container that holds the static content.
 
@@ -95,7 +93,7 @@ A solution named StaticContentHosting that demonstrates using external storage f
 <Setting name="StaticContent.Container" value="static-content" />
 ```
 
-The `Settings` class in the file Settings.cs of the StaticContentHosting.Web project contains methods to extract these values and build a string value containing the cloud storage account container URL. The following sample is in C#. <<RBC: I just realized this language isn't in the original text, DOH! was it added because the new system won't show language tags? I know this is in other docs and I just glossed over it. Sorry. Is this something you want to have or not? >>
+The `Settings` class in the file Settings.cs of the StaticContentHosting.Web project contains methods to extract these values and build a string value containing the cloud storage account container URL. 
 
 ```csharp
 public class Settings
