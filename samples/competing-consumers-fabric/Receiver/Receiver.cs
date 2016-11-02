@@ -10,6 +10,7 @@ using Microsoft.ServiceBus.Messaging;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.WindowsAzure.ServiceRuntime;
+using System.Net;
 
 namespace Receiver
 {
@@ -19,7 +20,7 @@ namespace Receiver
     internal sealed class Receiver : StatelessService
     {
         private QueueManager queueManager;
-
+        
         public Receiver(StatelessServiceContext context)
             : base(context)
         { }
@@ -39,6 +40,9 @@ namespace Receiver
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service instance.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
+            // Set the maximum number of concurrent connections 
+            ServicePointManager.DefaultConnectionLimit = 12;
+
             var configurationPackage = Context.CodePackageActivationContext.GetConfigurationPackageObject("Config");
 
             var queueName = configurationPackage.Settings.Sections["SettingsSection"].Parameters["QueueName"].Value;
@@ -46,13 +50,13 @@ namespace Receiver
 
             this.queueManager = new QueueManager(queueName, connectionString);
             await this.queueManager.Start();
+            
+            // Start listening for messages on the queue.
+            this.queueManager.ReceiveMessages(this.ProcessMessage);
 
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-
-                // Start listening for messages on the queue.
-                this.queueManager.ReceiveMessages(this.ProcessMessage);
 
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
             }
@@ -72,8 +76,9 @@ namespace Receiver
                 // Simulate message processing.
                 await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
 
-                Trace.WriteLine("Consumer " + RoleEnvironment.CurrentRoleInstance.Id + " : Message processed successfully: " + message.MessageId);
-
+                //Trace.WriteLine("Consumer " + RoleEnvironment.CurrentRoleInstance.Id + " : Message processed successfully: " + message.MessageId);
+                Trace.WriteLine($"Consumer {this.Context.NodeContext.NodeId.ToString()} : Message processed successfully: {message.MessageId}");
+                
                 // Complete the message.
                 await message.CompleteAsync();
             }

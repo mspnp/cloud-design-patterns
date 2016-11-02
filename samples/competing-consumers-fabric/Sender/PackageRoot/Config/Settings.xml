@@ -3,6 +3,6 @@
   <Section Name="SettingsSection">
     <Parameter Name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" Value="UseDevelopmentStorage=true" />
     <Parameter Name="QueueName" Value="workqueue" />
-    <Parameter Name="ServiceBusConnectionString" Value="YOUR SERVICE BUS CONNECTION INFORMATION" />
+    <Parameter Name="ServiceBusConnectionString" Value="Endpoint=sb://competing-consumers.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=S7T+flZeTGOtjAVTzo17CJ3dJ10sGWP/lz9IB9uyeKs=" />
   </Section>
 </Settings>
