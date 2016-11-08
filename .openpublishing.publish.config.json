@@ -5,7 +5,7 @@
   "docsets_to_publish": [
     {
       "docset_name": "cloud-design-patterns",
-      "build_source_folder": "cloud-design-patterns",
+      "build_source_folder": "docs",
       "build_output_subfolder": "docs",
       "locale": "en-us",
       "version": 0,
