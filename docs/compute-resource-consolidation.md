@@ -1,6 +1,6 @@
 ---
 title: Compute Resource Consolidation 
-description: Load data on demand into a cache from a data store
+description: Consolidate multiple tasks or operations into a single computational unit
 categories: [design-implementation]
 keywords: design pattern
 layout: designpattern
@@ -11,27 +11,26 @@ ms.date: 06/20/2016
 
 # Compute Resource Consolidation
 
-Consolidate multiple tasks or operations into a single computational unit. This pattern can increase compute resource utilization, and reduce the costs and management overhead associated with performing compute processing in cloud-hosted applications.
+Consolidate multiple tasks or operations into a single computational unit. This can increase compute resource utilization, and reduce the costs and management overhead associated with performing compute processing in cloud-hosted applications.
 
 ## Context and problem
 
-A cloud application often implements a variety of operations. In some solutions it makes sense initially to follow the design principle of separation of concerns, and divide these operations into discrete computational units that are hosted and deployed individually (for example, as separate roles in a Microsoft Azure Cloud Service, separate Azure Web Sites, or separate Virtual Machines). However, although this strategy can help to simplify the logical design of the solution, deploying a large number of computational units as part of the same application can increase runtime hosting costs and make management of the system more complex.
+A cloud application often implements a variety of operations. In some solutions it makes sense to follow the design principle of separation of concerns initially, and divide these operations into separate computational units that are hosted and deployed individually (for example, as separate App Service web apps, separate Virtual Machines, or separate Cloud Service roles). However, although this strategy can help simplify the logical design of the solution, deploying a large number of computational units as part of the same application can increase runtime hosting costs and make management of the system more complex.
 
-As an example, Figure 1 shows the simplified structure of a cloud-hosted solution that is implemented using more than one computational unit. Each computational unit runs in its own virtual environment. Each function has been implemented as a separate task (labeled Task A through Task E) running in its own computational unit.
+As an example, the figure shows the simplified structure of a cloud-hosted solution that is implemented using more than one computational unit. Each computational unit runs in its own virtual environment. Each function has been implemented as a separate task (labeled Task A through Task E) running in its own computational unit.
 
-![Running tasks in a cloud environment by using a set of dedicated computational units](images/compute-resource-consolidation-diagram.png)
+![Running tasks in a cloud environment using a set of dedicated computational units](images/compute-resource-consolidation-diagram.png)
 
-_Figure 1: Running tasks in a cloud environment by using a set of dedicated computational units_
 
 Each computational unit consumes chargeable resources, even when it's idle or lightly used. Therefore, this isn't always the most cost-effective solution.
 
-In Azure, this concern applies to roles in a Cloud Service, App Services, and Virtual Machines. These items execute in their own virtual environment. Running a collection of separate roles, web sites, or virtual machines that are designed to perform a set of well-defined operations, but that need to communicate and cooperate as part of a single solution, can be an inefficient use of resources.
+In Azure, this concern applies to roles in a Cloud Service, App Services, and Virtual Machines. These items run in their own virtual environment. Running a collection of separate roles, websites, or virtual machines that are designed to perform a set of well-defined operations, but that need to communicate and cooperate as part of a single solution, can be an inefficient use of resources.
 
 ## Solution
 
 To help reduce costs, increase utilization, improve communication speed, and reduce management it's possible to consolidate multiple tasks or operations into a single computational unit.
 
-Tasks can be grouped according to criteria based on the features provided by the environment, and the costs associated with these features. A common approach is to look for tasks that have a similar profile concerning their scalability, lifetime, and processing requirements. Grouping these together allows them to scale as a unit. The elasticity provided by many cloud environments enables additional instances of a computational unit to be started and stopped according to the workload. For example, Azure provides autoscaling that you can apply to roles in a Cloud Service, App Services, and Virtual Machines. For more information, see [Autoscaling Guidance](https://msdn.microsoft.com/library/dn589774.aspx).
+Tasks can be grouped according to criteria based on the features provided by the environment and the costs associated with these features. A common approach is to look for tasks that have a similar profile concerning their scalability, lifetime, and processing requirements. Grouping these together allows them to scale as a unit. The elasticity provided by many cloud environments enables additional instances of a computational unit to be started and stopped according to the workload. For example, Azure provides autoscaling that you can apply to roles in a Cloud Service, App Services, and Virtual Machines. For more information, see [Autoscaling Guidance](https://msdn.microsoft.com/library/dn589774.aspx).
 
 As a counter example to show how scalability can be used to determine which operations shouldn't be grouped together, consider the following two tasks:
 
@@ -42,31 +41,31 @@ The second task requires elasticity that can involve starting and stopping a lar
 
 In many cloud environments it's possible to specify the resources available to a computational unit in terms of the number of CPU cores, memory, disk space, and so on. Generally, the more resources specified, the greater the cost. To save money, it's important to maximize the work an expensive computational unit performs, and not let it become inactive for an extended period.
 
-If there are tasks that require a great deal of CPU power in short bursts, consider consolidating these into a single computational unit that provides the necessary power. However, it's important to balance this need to keep expensive resources busy against the contention that could occur if they are over-stressed. Long-running, compute-intensive tasks shouldn't share the same computational unit, for example.
+If there are tasks that require a great deal of CPU power in short bursts, consider consolidating these into a single computational unit that provides the necessary power. However, it's important to balance this need to keep expensive resources busy against the contention that could occur if they are over stressed. Long-running, compute-intensive tasks shouldn't share the same computational unit, for example.
 
 ## Issues and considerations
 
 Consider the following points when implementing this pattern:
 
-- **Scalability and elasticity**. Many cloud solutions implement scalability and elasticity at the level of the computational unit by starting and stopping instances of units. Avoid grouping tasks that have conflicting scalability requirements in the same computational unit.
+**Scalability and elasticity**. Many cloud solutions implement scalability and elasticity at the level of the computational unit by starting and stopping instances of units. Avoid grouping tasks that have conflicting scalability requirements in the same computational unit.
 
-- **Lifetime**. The cloud infrastructure periodically recycles the virtual environment that hosts a computational unit. When executing many long-running tasks inside a computational unit, it might be necessary to configure the unit to prevent it from being recycled until these tasks have finished. Alternatively, design the tasks by using a check-pointing approach that enables them to stop cleanly, and continue at the point at which they were interrupted when the computational unit is restarted.
+**Lifetime**. The cloud infrastructure periodically recycles the virtual environment that hosts a computational unit. When there are many long-running tasks inside a computational unit, it might be necessary to configure the unit to prevent it from being recycled until these tasks have finished. Alternatively, design the tasks by using a check-pointing approach that enables them to stop cleanly, and continue at the point they were interrupted when the computational unit is restarted.
 
-- **Release cadence**. If the implementation or configuration of a task changes frequently, it might be necessary to stop the computational unit hosting the updated code, reconfigure and redeploy the unit, and then restart it. This process will also require that all other tasks within the same computational unit are stopped, redeployed, and restarted.
+**Release cadence**. If the implementation or configuration of a task changes frequently, it might be necessary to stop the computational unit hosting the updated code, reconfigure and redeploy the unit, and then restart it. This process will also require that all other tasks within the same computational unit are stopped, redeployed, and restarted.
 
-- **Security**. Tasks in the same computational unit might share the same security context and be able to access the same resources. There must be a high degree of trust between the tasks, and confidence that one task isn't going to corrupt or adversely affect another. Additionally, increasing the number of tasks running in a computational unit increases the attack surface of the computational unit; each task is only as secure as the one with the most vulnerabilities.
+**Security**. Tasks in the same computational unit might share the same security context and be able to access the same resources. There must be a high degree of trust between the tasks, and confidence that one task isn't going to corrupt or adversely affect another. Additionally, increasing the number of tasks running in a computational unit increases the attack surface of the unit. Each task is only as secure as the one with the most vulnerabilities.
 
-- **Fault tolerance**. If one task in a computational unit fails or behaves abnormally, it can affect the other tasks running within the same unit. For example, if one task fails to start correctly it can cause the entire startup logic for the computational unit to fail, and prevent other tasks in the same unit from running.
+**Fault tolerance**. If one task in a computational unit fails or behaves abnormally, it can affect the other tasks running within the same unit. For example, if one task fails to start correctly it can cause the entire startup logic for the computational unit to fail, and prevent other tasks in the same unit from running.
 
-- **Contention**. Avoid introducing contention between tasks that compete for resources in the same computational unit. Ideally, tasks that share the same computational unit should exhibit different resource utilization characteristics. For example, two compute-intensive tasks should probably not reside in the same computational unit, and neither should two tasks that consume large amounts of memory. However, mixing a compute intensive task with a task that requires a large amount of memory is a viable combination.
+**Contention**. Avoid introducing contention between tasks that compete for resources in the same computational unit. Ideally, tasks that share the same computational unit should exhibit different resource utilization characteristics. For example, two compute-intensive tasks should probably not reside in the same computational unit, and neither should two tasks that consume large amounts of memory. However, mixing a compute intensive task with a task that requires a large amount of memory is a workable combination.
 
     >  Consider consolidating compute resources only for a system that's been in production for a period of time so that operators and developers can monitor the system and create a _heat map_ that identifies how each task utilizes differing resources. This map can be used to determine which tasks are good candidates for sharing compute resources.
 
-- **Complexity**. Combining multiple tasks into a single computational unit adds complexity to the code in the unit, possibly making it more difficult to test, debug, and maintain.
+**Complexity**. Combining multiple tasks into a single computational unit adds complexity to the code in the unit, possibly making it more difficult to test, debug, and maintain.
 
-- **Stable logical architecture**. Design and implement the code in each task so that it shouldn't need to change, even if the physical environment in which the task runs does change.
+**Stable logical architecture**. Design and implement the code in each task so that it shouldn't need to change, even if the physical environment the task runs in does change.
 
-- **Other strategies**. Consolidating compute resources is only one way to help reduce costs associated with running multiple tasks concurrently. It requires careful planning and monitoring to ensure that it remains an effective approach. Other strategies might be more appropriate, depending on the nature of the work and the location of the users on whose behalf these tasks are running. For example, functional decomposition of the workload (as described by the [Compute Partitioning Guidance](https://msdn.microsoft.com/library/dn589773.aspx)) might be a better option.
+**Other strategies**. Consolidating compute resources is only one way to help reduce costs associated with running multiple tasks concurrently. It requires careful planning and monitoring to ensure that it remains an effective approach. Other strategies might be more appropriate, depending on the nature of the work and where the users these tasks are running are located. For example, functional decomposition of the workload (as described by the [Compute Partitioning Guidance](https://msdn.microsoft.com/library/dn589773.aspx)) might be a better option.
 
 ## When to use this pattern
 
@@ -80,9 +79,9 @@ When building a cloud service on Azure, it’s possible to consolidate the proce
 
 >  In some cases it's possible to include background or asynchronous processing tasks in the web role. This technique helps to reduce costs and simplify deployment, although it can impact the scalability and responsiveness of the public-facing interface provided by the web role. The article [Combining Multiple Azure Worker Roles into an Azure Web Role](http://www.31a2ba2a-b718-11dc-8314-0800200c9a66.com/2012/02/combining-multiple-azure-worker-roles.html) contains a detailed description of implementing background or asynchronous processing tasks in a web role.
 
-The role is responsible for starting and stopping the tasks. When the Azure fabric controller loads a role, it raises the `Start` event for the role. You can override the `OnStart` method of the `WebRole` or `WorkerRole` class to handle this event, perhaps to initialize the data and other resources on which the tasks in this method depend.
+The role is responsible for starting and stopping the tasks. When the Azure fabric controller loads a role, it raises the `Start` event for the role. You can override the `OnStart` method of the `WebRole` or `WorkerRole` class to handle this event, perhaps to initialize the data and other resources the tasks in this method depend on.
 
-When the `OnStart `method completes, the role can start responding to requests. You can find more information and guidance about using the `OnStart` and `Run` methods in a role in the [Application Startup Processes](https://msdn.microsoft.com/library/ff803371.aspx#sec16) section in the patterns & practices guide [Moving Applications to the Cloud](https://msdn.microsoft.com/library/ff728592.aspx).
+When the `OnStart `method completes, the role can start responding to requests. You can find more information and guidance about using the `OnStart` and `Run` methods in a role in the [Application Startup Processes](https://msdn.microsoft.com/library/ff803371.aspx#sec16) section in the patterns & practices guide [Moving Applications to the Cloud](https://msdn.microsoft.com/library/ff728592.aspx). 
 
 >  Keep the code in the `OnStart` method as concise as possible. Azure doesn't impose any limit on the time taken for this method to complete, but the role won't be able to start responding to network requests sent to it until this method completes.
 
@@ -92,17 +91,16 @@ Place the code that actually creates the tasks in the `Run` method. Note that th
 
 When a role shuts down or is recycled, the fabric controller prevents any more incoming requests being received from the load balancer and raises the `Stop` event. You can capture this event by overriding the `OnStop` method of the role and perform any tidying up required before the role terminates.
 
->  Any actions performed in the OnStop method must be completed within five minutes (or 30 seconds if you are using the Azure emulator on a local computer); otherwise the Azure fabric controller assumes that the role has stalled and will force it to stop.
+>  Any actions performed in the `OnStop` method must be completed within five minutes (or 30 seconds if you are using the Azure emulator on a local computer). Otherwise the Azure fabric controller assumes that the role has stalled and will force it to stop.
 
-The tasks are started by the `Run` method, which then waits for the tasks to complete. The tasks themselves, which implement the business logic of the cloud service, can respond to messages posted to the role through the Azure load balancer.
+The tasks are started by the `Run` method that waits for the tasks to complete. The tasks implement the business logic of the cloud service, and can respond to messages posted to the role through the Azure load balancer. The figure shows the lifecycle of tasks and resources in a role in a Azure cloud service.
 
 ![The lifecycle of tasks and resources in a role in a Azure cloud service](images/compute-resource-consolidation-lifecycle.png)
 
-_Figure 2: The lifecycle of tasks and resources in a role in a Azure cloud service_
 
 The _WorkerRole.cs_ file in the _ComputeResourceConsolidation.Worker_ project shows an example of how you might implement this pattern in a Azure cloud service.
 
->  The _ComputeResourceConsolidation.Worker_ project is part of the _ComputeResourceConsolidation_ solution that is available for download with this guidance.
+>  The _ComputeResourceConsolidation.Worker_ project is part of the _ComputeResourceConsolidation_ solution available for download from [GitHub](https://github.com/mspnp/cloud-design-patterns/tree/master/compute-resource-consolidation).
 
 In the worker role, code that runs when the role is initialized creates the required cancellation token and a list of tasks to run.
 
@@ -127,7 +125,7 @@ public class WorkerRole: RoleEntryPoint
 }
 ```
 
-The `MyWorkerTask1` and the `MyWorkerTask2` methods illustrate how to perform different tasks within the same worker role. The following code shows `MyWorkerTask1`. This is a simple task that sleeps for 30 seconds and then outputs a trace message. It repeats this process indefinitely until the task is cancelled. The code in `MyWorkerTask2` is similar.
+The `MyWorkerTask1` and the `MyWorkerTask2` methods illustrate how to perform different tasks within the same worker role. The following code shows `MyWorkerTask1`. This is a simple task that sleeps for 30 seconds and then outputs a trace message. It repeats this process until the task is cancelled. The code in `MyWorkerTask2` is similar.
 
 ```csharp
 // A sample worker role task.
@@ -156,7 +154,7 @@ private static async Task MyWorkerTask1(CancellationToken ct)
     // cancellation request will be signaled.
     Trace.TraceInformation("Stopping service, cancellation requested");
 
-    // Re-throw the exception.
+    // Rethrow the exception.
     throw;
   }
 }
@@ -233,7 +231,7 @@ private void Stop(TimeSpan timeout)
     Trace.TraceError(ex.Message);
 
     // If any of the inner exceptions in the aggregate exception 
-    // are not cancellation exceptions then re-throw the exception.
+    // are not cancellation exceptions then rethrow the exception.
     ex.Handle(innerEx => (innerEx is OperationCanceledException));
   }
 }
@@ -245,6 +243,6 @@ The following patterns and guidance might also be relevant when implementing thi
 
 - [Autoscaling Guidance](https://msdn.microsoft.com/library/dn589774.aspx). Autoscaling can be used to start and stop instances of service hosting computational resources, depending on the anticipated demand for processing.
 
-- [Compute Partitioning Guidance](https://msdn.microsoft.com/library/dn589773.aspx). This guidance describes how to allocate the services and components in a cloud service in a way that helps to minimize running costs while maintaining the scalability, performance, availability, and security of the service.
+- [Compute Partitioning Guidance](https://msdn.microsoft.com/library/dn589773.aspx). Describes how to allocate the services and components in a cloud service in a way that helps to minimize running costs while maintaining the scalability, performance, availability, and security of the service.
 
-- This pattern has a [sample application](https://github.com/mspnp/cloud-design-patterns/tree/master/compute-resource-consolidation) associated with it.
+- This pattern includes a downloadable [sample application](https://github.com/mspnp/cloud-design-patterns/tree/master/compute-resource-consolidation).
