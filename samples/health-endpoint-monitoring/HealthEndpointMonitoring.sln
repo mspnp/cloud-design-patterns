@@ -3,16 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "HealthEndpointMonitoring.Cloud", "HealthEndpointMonitoring.Cloud\HealthEndpointMonitoring.Cloud.ccproj", "{4FDF1BB1-FB0E-45A1-8BDB-1AAF3E7831AD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealthEndpointMonitoring.Web", "HealthEndpointMonitoring.Web\HealthEndpointMonitoring.Web.csproj", "{DAE76E31-A077-4B22-AEAE-42D0D5D4DB2B}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B4F147E5-5002-4A01-BC33-A57FCB6638FB}"
 	ProjectSection(SolutionItems) = preProject
 		Readme.md = Readme.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealthEndpointMonitoring.App", "HealthEndpointMonitoring.App\HealthEndpointMonitoring.App.csproj", "{D9AA569F-0B17-4B79-A313-D14DEDC643AC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealthEndpointMonitoring.Web", "HealthEndpointMonitoring.Web\HealthEndpointMonitoring.Web.csproj", "{D9AA569F-0B17-4B79-A313-D14DEDC643AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
