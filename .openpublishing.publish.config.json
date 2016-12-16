@@ -5,7 +5,7 @@
     {
       "docset_name": "cloud-design-patterns",
       "build_source_folder": ".",
-      "build_output_subfolder": "patterns",
+      "build_output_subfolder": ".",
       "locale": "en-us",
       "version": 0,
       "open_to_public_contributors": false,
@@ -22,7 +22,7 @@
   "branches_to_filter": [],
   "skip_source_output_uploading": false,
   "need_preview_pull_request": false,
-  "enable_incremental_build": true,
+  "enable_incremental_build": false,
   "dependent_repositories": [
     {
       "path_to_root": "_themes",
