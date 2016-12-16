@@ -1,21 +1,28 @@
 ---
-title: External Configuration Store 
+title: External Configuration Store Pattern | Azure | Microsoft Docs
 description: Move configuration information out of the application deployment package to a centralized location.
 categories: [design-implementation, management-monitoring]
 keywords: design pattern
-layout: designpattern
 author: dragon119
 manager: bennage
-ms.date: 06/20/2016
+
+ms.service: guidance
+ms.topic: article
+ms.tgt_pltfrm: na
+ms.workload: na
+ms.author: mwasson
+ms.date: 12/14/2016
 ---
-   
+
 # External Configuration Store
+
+[!INCLUDE [pnp-branding](../includes/header.md)]
 
 Move configuration information out of the application deployment package to a centralized location. This can provide opportunities for easier management and control of configuration data, and for sharing configuration data across applications and application instances.
 
 ## Context and problem
 
-The majority of application runtime environments include configuration information that's held in files deployed with the application. In some cases it's possible to edit these files to change the application behavior after it's been deployed. However, changes to the configuration require the application be redeployed, often resulting in unacceptable downtime and other administrative overhead.
+The majority of application runtime environments include configuration information that's held in files deployed with the application. In some cases, it's possible to edit these files to change the application behavior after it's been deployed. However, changes to the configuration require the application be redeployed, often resulting in unacceptable downtime and other administrative overhead.
 
 Local configuration files also limit the configuration to a single application, but sometimes it would be useful to share configuration settings across multiple applications. Examples include database connection strings, UI theme information, or the URLs of queues and storage used by a related set of applications.
 
@@ -27,11 +34,11 @@ In addition, updates to applications and components might require changes to con
 
 Store the configuration information in external storage, and provide an interface that can be used to quickly and efficiently read and update configuration settings. The type of external store depends on the hosting and runtime environment of the application. In a cloud-hosted scenario it's typically a cloud-based storage service, but could be a hosted database or other system.
 
-The backing store you choose for configuration information should have an interface that provides consistent and easy-to-use access. It should expose the information in a correctly typed and structured format. The implementation might also need to authorize users’ access in order to protect configuration data, and be flexible enough to allow  storage of multiple versions of the configuration (such as development, staging, or production, including multiple release versions of each one).
+The backing store you choose for configuration information should have an interface that provides consistent and easy-to-use access. It should expose the information in a correctly typed and structured format. The implementation might also need to authorize users’ access in order to protect configuration data, and be flexible enough to allow storage of multiple versions of the configuration (such as development, staging, or production, including multiple release versions of each one).
 
->  Many built-in configuration systems read the data when the application starts up, and cache the data in memory to provide fast access and minimize the impact on application performance. Depending on the type of backing store used, and the latency of this store, it might be helpful to implement a caching mechanism within the external configuration store. For more information, see the [Caching Guidance](https://msdn.microsoft.com/library/dn589802.aspx). The figure illustrates an overview of the External Configuration Store pattern with optional local cache.
+> Many built-in configuration systems read the data when the application starts up, and cache the data in memory to provide fast access and minimize the impact on application performance. Depending on the type of backing store used, and the latency of this store, it might be helpful to implement a caching mechanism within the external configuration store. For more information, see the [Caching Guidance](https://msdn.microsoft.com/library/dn589802.aspx). The figure illustrates an overview of the External Configuration Store pattern with optional local cache.
 
-![An overview of the External Configuration Store pattern with optional local cache](images/external-configuration-store-overview.png)
+![An overview of the External Configuration Store pattern with optional local cache](media/external-configuration-store-overview.png)
 
 
 ## Issues and considerations
@@ -46,7 +53,7 @@ Consider the physical capabilities of the backing store, how it relates to the w
 
 Consider how the configuration interface will permit control of the scope and inheritance of configuration settings. For example, it might be a requirement to scope configuration settings at the organization, application, and the machine level. It might need to support delegation of control over access to different scopes, and to prevent or allow individual applications to override settings.
 
-Ensure that the configuration interface can expose the configuration data in the required formats such as typed values, collections, key/value pairs, or property bags. 
+Ensure that the configuration interface can expose the configuration data in the required formats such as typed values, collections, key/value pairs, or property bags.
 
 Consider how the configuration store interface will behave when settings contain errors, or don't exist in the backing store. It might be appropriate to return default settings and log errors. Also consider aspects such as the case sensitivity of configuration setting keys or names, the storage and handling of binary data, and the ways that null or empty values are handled.
 
@@ -66,7 +73,7 @@ This pattern is useful for:
 
 - As a complementary store for some of the settings for applications, perhaps allowing applications to override some or all of the centrally-stored settings.
 
-- As a way to simplify administration of multiple applications, and optionally for monitoring use of configuration settings by logging some or all types of access to the configuration store. 
+- As a way to simplify administration of multiple applications, and optionally for monitoring use of configuration settings by logging some or all types of access to the configuration store.
 
 ## Example
 
@@ -74,7 +81,7 @@ In a Microsoft Azure hosted application, a typical choice for storing configurat
 
 The following example shows how a configuration store can be implemented over Blob storage to store and expose configuration information. The `BlobSettingsStore` class abstracts Blob storage for holding configuration information, and implements the `ISettingsStore` interface shown in the following code.
 
->  This code is provided in the _ExternalConfigurationStore.Cloud_ project in the _ExternalConfigurationStore_ solution, available from [GitHub](https://github.com/mspnp/cloud-design-patterns/tree/master/external-configuration-store).
+> This code is provided in the _ExternalConfigurationStore.Cloud_ project in the _ExternalConfigurationStore_ solution, available from [GitHub](https://github.com/mspnp/cloud-design-patterns/tree/master/external-configuration-store).
 
 ```csharp
 public interface IsettingsStore
@@ -84,12 +91,12 @@ public interface IsettingsStore
   Dictionary<string, string> FindAll();
 
   void Update(string key, string value);
-} 
+}
 ```
 
 This interface defines methods for retrieving and updating configuration settings held in the configuration store, and includes a version number that can be used to detect whether any configuration settings have been modified recently. The `BlobSettingsStore` class uses the `ETag` property of the blob to implement versioning. The `ETag` property is updated automatically each time the blob is written.
 
->  By design, this simple solution exposes all configuration settings as string values rather than typed values.
+> By design, this simple solution exposes all configuration settings as string values rather than typed values.
 
 The `ExternalConfigurationManager` class provides a wrapper around a `BlobSettingsStore` object. An application can use this class to store and retrieve configuration information. This class uses the Microsoft [Reactive Extensions](https://msdn.microsoft.com/en-us/library/hh242985(v=vs.103).aspx) library to expose any changes made to the configuration through an implementation of the `IObservable` interface. If a setting is modified by calling the `SetAppSetting` method, the `Changed` event is raised and all subscribers to this event will be notified.
 
@@ -137,14 +144,14 @@ public class ExternalConfigurationManager : IDisposable
   public string GetAppSetting(string key)
   {
     ...
-    // Try to get the value from the settings cache.  
+    // Try to get the value from the settings cache.
     // If there's a miss, get the setting from the settings store.
     string value;
     if (this.settingsCache.TryGetValue(key, out value))
     {
       return value;
     }
-            
+
     // Check for changes and refresh the cache.
     this.CheckForConfigurationChanges();
 
@@ -186,7 +193,7 @@ public class ExternalConfigurationManager : IDisposable
 }
 ```
 
->  The `ExternalConfigurationManager` class also provides a property named `Environment`. This property supports varying configurations for an application running in different environments, such as staging and production.
+> The `ExternalConfigurationManager` class also provides a property named `Environment`. This property supports varying configurations for an application running in different environments, such as staging and production.
 
 An `ExternalConfigurationManager` object can also query the `BlobSettingsStore` object periodically for any changes (using a timer). The `StartMonitor` and `StopMonitor` methods illustrated in the code sample below start and stop the timer. The `OnTimerElapsed` method runs when the timer expires and invokes the `CheckForConfigurationChanges` method to detect any changes and raise the `Changed` event, as described earlier.
 
@@ -198,7 +205,7 @@ public class ExternalConfigurationManager : IDisposable
   private readonly Timer timer;
   private ISettingsStore settings;
   ...
-  public ExternalConfigurationManager(ISettingsStore settings, 
+  public ExternalConfigurationManager(ISettingsStore settings,
                                       TimeSpan interval, ...)
   {
     ...
@@ -211,11 +218,11 @@ public class ExternalConfigurationManager : IDisposable
     this.timer.Elapsed += this.OnTimerElapsed;
 
     this.changed = new Subject<KeyValuePair<string, string>>();
-    ...    
+    ...
   }
 
   ...
-        
+
   public void StartMonitor()
   {
     if (this.timer.Enabled)
@@ -262,8 +269,8 @@ public class ExternalConfigurationManager : IDisposable
       // Restart the timer after each interval.
       this.timer.Start();
       ...
-    }    
-  }  
+    }
+  }
   ...
 }
 ```
@@ -273,7 +280,7 @@ The `ExternalConfigurationManager` class is instantiated as a singleton instance
 ```csharp
 public static class ExternalConfiguration
 {
-  private static readonly Lazy<ExternalConfigurationManager> configuredInstance 
+  private static readonly Lazy<ExternalConfigurationManager> configuredInstance
                             = new Lazy<ExternalConfigurationManager>(
     () =>
     {
@@ -311,11 +318,11 @@ public override void Run()
 The following code, also from the `WorkerRole` class, shows how the application subscribes to configuration events.
 C#
 public override bool OnStart()
-{ 
+{
   ...
   // Subscribe to the event.
   ExternalConfiguration.Instance.Changed.Subscribe(
-     m => Trace.TraceInformation("Configuration has changed. Key:{0} Value:{1}", 
+     m => Trace.TraceInformation("Configuration has changed. Key:{0} Value:{1}",
           m.Key, m.Value),
      ex => Trace.TraceError("Error detected: " + ex.Message));
   ...

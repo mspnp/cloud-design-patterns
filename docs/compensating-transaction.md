@@ -1,12 +1,17 @@
 ---
-title: Compensating Transaction
+title: Compensating Transaction Pattern | Azure | Microsoft Docs
 description: Undo the work performed by a series of steps, which together define an eventually consistent operation.
 categories: [resiliency]
 keywords: design pattern
-layout: designpattern
 author: dragon119
 manager: bennage
-ms.date: 06/20/2016
+
+ms.service: guidance
+ms.topic: article
+ms.tgt_pltfrm: na
+ms.workload: na
+ms.author: mwasson
+ms.date: 12/14/2016
 ---
 
 # Compensating Transaction
@@ -61,7 +66,7 @@ Consider using retry logic that is more forgiving than usual to minimize failure
 
 ## When to use this pattern
 
-Use this pattern only for operations that must be undone if they fail. If possible, design solutions to avoid the complexity of requiring compensating transactions. 
+Use this pattern only for operations that must be undone if they fail. If possible, design solutions to avoid the complexity of requiring compensating transactions.
 
 ## Example
 
@@ -77,12 +82,12 @@ These steps constitute an eventually consistent operation, although each step is
 
 Notice that the steps in the compensating transaction might not be the exact opposite of the original steps, and the logic in each step in the compensating transaction must take into account any business-specific rules. For example, unbooking a seat on a flight might not entitle the customer to a complete refund of any money paid. The figure illustrates generating a compensating transaction to undo a long-running transaction to book a travel itinerary.
 
-![Generating a compensating transaction to undo a long-running transaction to book a travel itinerary](images/compensating-transaction-diagram.png)
+![Generating a compensating transaction to undo a long-running transaction to book a travel itinerary](media/compensating-transaction-diagram.png)
 
 
 > It might be possible for the steps in the compensating transaction to be performed in parallel, depending on how you've designed the compensating logic for each step.
 
-In many business solutions, failure of a single step doesn't always necessitate rolling the system back by using a compensating transaction. For example, if&mdash;after having booked flights F1, F2, and F3 in the travel website scenario&mdash;the customer is unable to reserve a room at hotel H1, it's preferable to offer the customer a room at a different hotel in the same city rather than cancelling the flights. The customer can still decide to cancel (in which case the compensating transaction runs and undoes the bookings made on flights F1, F2, and F3), but this decision should be made by the customer rather than by the system.
+In many business solutions, failure of a single step doesn't always necessitate rolling the system back by using a compensating transaction. For example, if&mdash;after having booked flights F1, F2, and F3 in the travel website scenario&mdash;the customer is unable to reserve a room at hotel H1, it's preferable to offer the customer a room at a different hotel in the same city rather than canceling the flights. The customer can still decide to cancel (in which case the compensating transaction runs and undoes the bookings made on flights F1, F2, and F3), but this decision should be made by the customer rather than by the system.
 
 ## Related patterns and guidance
 

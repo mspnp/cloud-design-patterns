@@ -1,0 +1,11 @@
+- name: Azure
+  tocHref: /azure/
+  topicHref: /azure/index
+  items:
+  - name: Guidance
+    tocHref: /azure/guidance/
+    topicHref: /azure/guidance/index
+    items:
+    - name: Cloud Design Patterns
+      tocHref: /azure/patterns
+      topicHref: /azure/patterns/index

@@ -1,12 +1,21 @@
 ---
-title: Command and Query Responsibility Segregation (CQRS)
+title: CQRS Pattern | Azure | Microsoft Docs
 description: Segregate operations that read data from operations that update data by using separate interfaces.
 categories: [data-management, design-implementation, performance-scalability]
 keywords: design pattern
-layout: designpattern
+services: ''
+documentationcenter: na
 author: dragon119
 manager: bennage
-ms.date: 06/20/2016
+tags: ''
+
+ms.service: guidance
+ms.devlang: na
+ms.topic: article
+ms.tgt_pltfrm: na
+ms.workload: na
+ms.date: 12/14/2016
+ms.author: mwasson
 ---
 
 # Command and Query Responsibility Segregation (CQRS)
@@ -19,7 +28,7 @@ In traditional data management systems, both commands (updates to the data) and 
 
 Typically in these systems, all create, read, update, and delete (CRUD) operations are applied to the same representation of the entity. For example, a data transfer object (DTO) representing a customer is retrieved from the data store by the data access layer (DAL) and displayed on the screen. A user updates some fields of the DTO (perhaps through data binding) and the DTO is then saved back in the data store by the DAL. The same DTO is used for both the read and write operations. The figure illustrates a traditional CRUD architecture.
 
-![A traditional CRUD architecture](images/command-and-query-responsibility-segregation-cqrs-tradition-crud.png)
+![A traditional CRUD architecture](media/command-and-query-responsibility-segregation-cqrs-tradition-crud.png)
 
 Traditional CRUD designs work well when only limited business logic is applied to the data operations. Scaffold mechanisms provided by development tools can create data access code very quickly, which can then be customized as required.
 
@@ -31,27 +40,25 @@ However, the traditional CRUD approach has some disadvantages:
 
 - It can make managing security and permissions more complex because each entity is subject to both read and write operations, which might expose data in the wrong context.
 
-> For a deeper understanding of the limits of the CRUD approach see [CRUD, Only When You Can Afford It](https://msdn.microsoft.com/library/ms978509.aspx). 
+> For a deeper understanding of the limits of the CRUD approach see [CRUD, Only When You Can Afford It](https://msdn.microsoft.com/library/ms978509.aspx).
 
 ## Solution
 
 Command and Query Responsibility Segregation (CQRS) is a pattern that segregates the operations that read data (queries) from the operations that update data (commands) by using separate interfaces. This means that the data models used for querying and updates are different. The models can then be isolated, as shown in the following figure, although that's not an absolute requirement.
 
-![A basic CQRS architecture](images/command-and-query-responsibility-segregation-cqrs-basic.png)
-
+![A basic CQRS architecture](media/command-and-query-responsibility-segregation-cqrs-basic.png)
 
 Compared to the single data model used in CRUD-based systems, the use of separate query and update models for the data in CQRS-based systems simplifies design and implementation. However, one disadvantage is that unlike CRUD designs, CQRS code can't automatically be generated using scaffold mechanisms.
 
 The query model for reading data and the update model for writing data can access the same physical store, perhaps by using SQL views or by generating projections on the fly. However, it's common to separate the data into different physical stores to maximize performance, scalability, and security, as shown in the next figure.
 
-![A CQRS architecture with separate read and write stores](images/command-and-query-responsibility-segregation-cqrs-separate-stores.png)
-
+![A CQRS architecture with separate read and write stores](media/command-and-query-responsibility-segregation-cqrs-separate-stores.png)
 
 The read store can be a read-only replica of the write store, or the read and write stores can have a different structure altogether. Using multiple read-only replicas of the read store can greatly increase query performance and application UI responsiveness, especially in distributed scenarios where read-only replicas are located close to the application instances. Some database systems (SQL Server) provide additional features such as failover replicas to maximize availability.
 
 Separation of the read and write stores also allows each to be scaled appropriately to match the load. For example, read stores typically encounter a much higher load than write stores.
 
-When the query/read model contains denormalized data (see [Materialized View pattern](materialized-view.md)), performance is maximized when reading data for each of the views in an application or when querying the data in the system. 
+When the query/read model contains denormalized data (see [Materialized View pattern](materialized-view.md)), performance is maximized when reading data for each of the views in an application or when querying the data in the system.
 
 ## Issues and considerations
 
@@ -61,21 +68,21 @@ Consider the following points when deciding how to implement this pattern:
 
     > For a description of eventual consistency see the [Data Consistency Primer](https://msdn.microsoft.com/library/dn589800.aspx).
 
-- Consider applying CQRS to limited sections of your system where it will be most valuable. 
+- Consider applying CQRS to limited sections of your system where it will be most valuable.
 
 - A typical approach to deploying eventual consistency is to use event sourcing in conjunction with CQRS so that the write model is an append-only stream of events driven by execution of commands. These events are used to update materialized views that act as the read model. For more information see [Event Sourcing and CQRS](https://msdn.microsoft.com/library/dn568103.aspx#EventSourcingandCQRS).
 
 ## When to use this pattern
 
-Use this pattern in the following situations: 
+Use this pattern in the following situations:
 
-- Collaborative domains where multiple operations are performed in parallel on the same data. CQRS allows you to define commands with a enough granularity to minimize merge conflicts at the domain level (any conflicts that do arise can be merged by the command), even when updating what appears to be the same type of data.
+- Collaborative domains where multiple operations are performed in parallel on the same data. CQRS allows you to define commands with enough granularity to minimize merge conflicts at the domain level (any conflicts that do arise can be merged by the command), even when updating what appears to be the same type of data.
 
-- Task-based user interfaces where users are guided through a complex process as a series of steps or with complex domain models. Also, useful for teams already familiar with domain-driven design (DDD) techniques. The write model has a full command-processing stack with business logic, input validation, and business validation to ensure that everything is always consistent for each of the aggregates (each cluster of associated objects treated as a unit for data changes) in the write model. The read model has no business logic or validation stack and just returns a DTO for use in a view model. The read model is eventually consistent with the write model. 
+- Task-based user interfaces where users are guided through a complex process as a series of steps or with complex domain models. Also, useful for teams already familiar with domain-driven design (DDD) techniques. The write model has a full command-processing stack with business logic, input validation, and business validation to ensure that everything is always consistent for each of the aggregates (each cluster of associated objects treated as a unit for data changes) in the write model. The read model has no business logic or validation stack and just returns a DTO for use in a view model. The read model is eventually consistent with the write model.
 
 - Scenarios where performance of data reads must be fine tuned separately from performance of data writes, especially when the read/write ratio is very high, and when horizontal scaling is required. For example, in many systems the number of read operations is many times greater that the number of write operations. To accommodate this, consider scaling out the read model, but running the write model on only one or a few instances. A small number of write model instances also helps to minimize the occurrence of merge conflicts.
 
-- Scenarios where one team of developers can focus on the complex domain model that is part of the write model, and another team can focus on the read model and the user interfaces. 
+- Scenarios where one team of developers can focus on the complex domain model that is part of the write model, and another team can focus on the read model and the user interfaces.
 
 - Scenarios where the system is expected to evolve over time and might contain multiple versions of the model, or where business rules change regularly.
 
@@ -162,15 +169,16 @@ public class RateProduct : Icommand
   public int UserId {get; set; }
 }
 ```
+
 The system uses the `ProductsCommandHandler` class to handle commands sent by the application. Clients typically send commands to the domain through a messaging system such as a queue. The command handler accepts these commands and invokes methods of the domain interface. The granularity of each command is designed to reduce the chance of conflicting requests. The following code shows an outline of the `ProductsCommandHandler` class.
 
 ```csharp
-public class ProductsCommandHandler : 
+public class ProductsCommandHandler :
     ICommandHandler<AddNewProduct>,
     ICommandHandler<RateProduct>,
     ICommandHandler<AddToInventory>,
     ICommandHandler<ConfirmItemShipped>,
-    ICommandHandler<UpdateStockFromInventoryRecount>    
+    ICommandHandler<UpdateStockFromInventoryRecount>
 {
   private readonly IRepository<Product> repository;
 

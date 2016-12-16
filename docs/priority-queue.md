@@ -1,15 +1,22 @@
 ---
-title: Priority Queue
+title: Priority Queue Pattern | Azure | Microsoft Docs
 description: Prioritize requests sent to services so that requests with a higher priority are received and processed more quickly than those with a lower priority.
 categories: [messaging, performance-scalability]
 keywords: design pattern
-layout: designpattern
 author: dragon119
 manager: bennage
-ms.date: 06/20/2016
+
+ms.service: guidance
+ms.topic: article
+ms.tgt_pltfrm: na
+ms.workload: na
+ms.author: mwasson
+ms.date: 12/14/2016
 ---
 
 # Priority Queue
+
+[!INCLUDE [pnp-branding](../includes/header.md)]
 
 Prioritize requests sent to services so that requests with a higher priority are received and processed more quickly than those with a lower priority. This pattern is useful in applications that offer different service level guarantees to individual clients.
 
@@ -18,15 +25,16 @@ Prioritize requests sent to services so that requests with a higher priority are
 Applications can delegate specific tasks to other services, for example, to perform background processing or to integrate with other applications or services. In the cloud, a message queue is typically used to delegate tasks to background processing. In many cases the order requests are received in by a service isn't important. In some cases, though, it's necessary to prioritize specific requests. These requests should be processed earlier than lower priority requests that were sent previously by the application.
 
 ## Solution
+
 A queue is usually a first-in, first-out (FIFO) structure, and consumers typically receive messages in the same order that they were posted to the queue. However, some message queues support priority messaging. The application posting a message can assign a priority and the messages in the queue are automatically reordered so that those with a higher priority will be received before those with a lower priority. The figure illustrates a queue with priority messaging.
 
-![Figure 1 - Using a queuing mechanism that supports message prioritization](images/priority-queue-pattern.png)
+![Figure 1 - Using a queuing mechanism that supports message prioritization](media/priority-queue-pattern.png)
 
->  Most message queue implementations support multiple consumers (following the [Competing Consumers pattern](https://msdn.microsoft.com/library/dn568101.aspx)), and the number of consumer processes can be scaled up or down depending on demand.
+> Most message queue implementations support multiple consumers (following the [Competing Consumers pattern](https://msdn.microsoft.com/library/dn568101.aspx)), and the number of consumer processes can be scaled up or down depending on demand.
 
 In systems that don't support priority-based message queues, an alternative solution is to maintain a separate queue for each priority. The application is responsible for posting messages to the appropriate queue. Each queue can have a separate pool of consumers. Higher priority queues can have a larger pool of consumers running on faster hardware than lower priority queues. The next figure illustrates using separate message queues for each priority.
 
-![Figure 2 - Using separate message queues for each priority](images/priority-queue-separate.png)
+![Figure 2 - Using separate message queues for each priority](media/priority-queue-separate.png)
 
 
 A variation on this strategy is to have a single pool of consumers that check for messages on high priority queues first, and only then start to fetch messages from lower priority queues. There are some semantic differences between a solution that uses a single pool of consumer processes (either with a single queue that supports messages with different priorities or with multiple queues that each handle messages of a single priority), and a solution that uses multiple queues with a separate pool for each queue.
@@ -41,7 +49,7 @@ Using a priority queuing mechanism can provide the following advantages:
 
 - The multiple message queue approach can help maximize application performance and scalability by partitioning messages based on processing requirements. For example, vital tasks can be prioritized to be handled by receivers that run immediately while less important background tasks can be handled by receivers that are scheduled to run at less busy periods.
 
-# Issues and Considerations
+## Issues and Considerations
 
 Consider the following points when deciding how to implement this pattern:
 
@@ -77,7 +85,7 @@ Microsoft Azure doesn't provide a queuing mechanism that natively supports autom
 
 An Azure solution can implement a Service Bus topic an application can post messages to, in the same way as a queue. Messages can contain metadata in the form of application-defined custom properties. Service Bus subscriptions can be associated with the topic, and these subscriptions can filter messages based on their properties. When an application sends a message to a topic, the message is directed to the appropriate subscription where it can be read by a consumer. Consumer processes can retrieve messages from a subscription using the same semantics as a message queue (a subscription is a logical queue). The following figure illustrates implementing a priority queue with Azure Service Bus topics and subscriptions.
 
-![Figure 3 - Implementing a priority queue with Azure Service Bus topics and subscriptions](images/priority-queue-service-bus.png)
+![Figure 3 - Implementing a priority queue with Azure Service Bus topics and subscriptions](media/priority-queue-service-bus.png)
 
 
 In the figure above, the application creates several messages and assigns a custom property called `Priority` in each message with a value, either `High` or `Low`. The application posts these messages to a topic. The topic has two associated subscriptions that both filter messages by examining the `Priority` property. One subscription accepts messages where the `Priority` property is set to `High`, and the other accepts messages where the `Priority` property is set to `Low`. A pool of consumers reads messages from each subscription. The high priority subscription has a larger pool, and these consumers might be running on more powerful computers with more resources available than the consumers in the low priority pool.
@@ -127,7 +135,7 @@ protected override async Task ProcessMessage(BrokeredMessage message)
 When an application posts messages to the topic associated with the subscriptions used by the `PriorityQueue.High` and `PriorityQueue.Low` worker roles, it specifies the priority by using the `Priority` custom property, as shown in the following code example. This code (implemented in the `WorkerRole` class in the PriorityQueue.Sender project), uses the `SendBatchAsync` helper method of the `QueueManager` class to post messages to a topic in batches.
 
 ```csharp
-// Send a low priority batch. 
+// Send a low priority batch.
 var lowMessages = new List<BrokeredMessage>();
 
 for (int i = 0; i < 10; i++)

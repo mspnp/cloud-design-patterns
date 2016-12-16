@@ -1,15 +1,22 @@
 ---
-title: Competing Consumers
+title: Competing Consumers Pattern | Azure | Microsoft Docs
 description: Enable multiple concurrent consumers to process messages received on the same messaging channel.
 categories: [messaging]
 keywords: design pattern
-layout: designpattern
 author: dragon119
 manager: bennage
-ms.date: 06/20/2016
+
+ms.service: guidance
+ms.topic: article
+ms.tgt_pltfrm: na
+ms.workload: na
+ms.author: mwasson
+ms.date: 12/14/2016
 ---
-   
+
 # Competing Consumers
+
+[!INCLUDE [pnp-branding](../includes/header.md)]
 
 Enable multiple concurrent consumers to process messages received on the same messaging channel. This enables a system to process multiple messages concurrently to optimize throughput, to improve scalability and availability, and to balance the workload.
 
@@ -23,7 +30,7 @@ The number of requests can vary significantly over time for many reasons. A sudd
 
 Use a message queue to implement the communication channel between the application and the instances of the consumer service. The application posts requests in the form of messages to the queue, and the consumer service instances receive messages from the queue and process them. This approach enables the same pool of consumer service instances to handle messages from any instance of the application. The figure illustrates using a message queue to distribute work to instances of a service.
 
-![Using a message queue to distribute work to instances of a service](images/compensating-transaction-diagram.png)
+![Using a message queue to distribute work to instances of a service](media/compensating-transaction-diagram.png)
 
 This solution has the following benefits:
 
@@ -52,7 +59,7 @@ Consider the following points when deciding how to implement this pattern:
 - **Handling results**. The service instance handling a message is fully decoupled from the application logic that generates the message, and they might not be able to communicate directly. If the service instance generates results that must be passed back to the application logic, this information must be stored in a location that's accessible to both. In order to prevent the application logic from retrieving incomplete data the system must indicate when processing is complete.
 
      > If you're using Azure, a worker process can pass results back to the application logic by using a dedicated message reply queue. The application logic must be able to correlate these results with the original message. This scenario is described in more detail in the [Asynchronous Messaging Primer](https://msdn.microsoft.com/library/dn589781.aspx).
-     
+
 - **Scaling the messaging system**. In a large-scale solution, a single message queue could be overwhelmed by the number of messages and become a bottleneck in the system. In this situation, consider partitioning the messaging system to send messages from specific producers to a particular queue, or use load balancing to distribute messages across multiple message queues.
 
 - **Ensuring reliability of the messaging system**. A reliable messaging system is needed to guarantee that after the application enqueues a message it won't be lost. This is essential for ensuring that all messages are delivered at least once.
@@ -78,7 +85,7 @@ This pattern might not be useful when:
 
 Azure provides storage queues and Service Bus queues that can act as a mechanism for implementing this pattern. The application logic can post messages to a queue, and consumers implemented as tasks in one or more roles can retrieve messages from this queue and process them. For resiliency, a Service Bus queue enables a consumer to use `PeekLock` mode when it retrieves a message from the queue. This mode doesn't actually remove the message, but simply hides it from other consumers. The original consumer can delete the message when it's finished processing it. If the consumer fails, the peek lock will time out and the message will become visible again, allowing another consumer to retrieve it.
 
-> For detailed information on using Azure Service Bus queues, see [Service Bus queues, topics, and subscriptions](https://msdn.microsoft.com/library/windowsazure/hh367516.aspx). 
+> For detailed information on using Azure Service Bus queues, see [Service Bus queues, topics, and subscriptions](https://msdn.microsoft.com/library/windowsazure/hh367516.aspx).
 For information on using Azure storage queues, see [Get started with Azure Queue storage using .NET](https://azure.microsoft.com/documentation/articles/storage-dotnet-how-to-use-queues/).
 
 The following code from the `QueueManager` class in CompetingConsumers solution available on [GitHub](https://github.com/mspnp/cloud-design-patterns/tree/master/samples/competing-consumers) shows how you can create a queue by using a `QueueClient` instance in the `Start` event handler in a web or worker role.
@@ -96,7 +103,7 @@ public async Task Start()
   {
     var queueDescription = new QueueDescription(this.queueName);
 
-    // Set the maximum delivery count for messages in the queue. A message 
+    // Set the maximum delivery count for messages in the queue. A message
     // is automatically dead-lettered after this number of deliveries. The
     // default value for dead letter count is 10.
     queueDescription.MaxDeliveryCount = 3;
@@ -145,7 +152,7 @@ public void ReceiveMessages(Func<BrokeredMessage, Task> processMessageTask)
   options.MaxConcurrentCalls = 10;
   options.ExceptionReceived += this.OptionsOnExceptionReceived;
 
-  // Use of the Service Bus OnMessage message pump. 
+  // Use of the Service Bus OnMessage message pump.
   // The OnMessage method must be called once, otherwise an exception will occur.
   this.client.OnMessageAsync(
     async (msg) =>
@@ -160,7 +167,7 @@ public void ReceiveMessages(Func<BrokeredMessage, Task> processMessageTask)
 }
 ...
 
-private void OptionsOnExceptionReceived(object sender, 
+private void OptionsOnExceptionReceived(object sender,
   ExceptionReceivedEventArgs exceptionReceivedEventArgs)
 {
   ...
@@ -174,7 +181,7 @@ Note that autoscaling features, such as those available in Azure, can be used to
 The following patterns and guidance might be relevant when implementing this pattern:
 
 - [Asynchronous Messaging Primer](https://msdn.microsoft.com/library/dn589781.aspx). Message queues are an asynchronous communications mechanism. If a consumer service needs to send a reply to an application, it might be necessary to implement some form of response messaging. The Asynchronous Messaging Primer provides information on how to implement request/reply messaging using message queues.
- 
+
 - [Autoscaling Guidance](https://msdn.microsoft.com/library/dn589774.aspx). It might be possible to start and stop instances of a consumer service since the length of the queue applications post messages on varies. Autoscaling can help to maintain throughput during times of peak processing.
 
 - [Compute Resource Consolidation Pattern](compute-resource-consolidation.md). It might be possible to consolidate multiple instances of a consumer service into a single process to reduce costs and management overhead. The Compute Resource Consolidation pattern describes the benefits and tradeoffs of following this approach.

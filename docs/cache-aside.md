@@ -1,12 +1,17 @@
 ---
-title: Cache-Aside
+title: Cache-Aside Pattern | Azure | Microsoft Docs 
 description: Load data on demand into a cache from a data store
 categories: [data-management, performance-scalability]
 keywords: design pattern
-layout: designpattern
 author: dragon119
 manager: bennage
-ms.date: 06/20/2016
+
+ms.service: guidance
+ms.topic: article
+ms.tgt_pltfrm: na
+ms.workload: na
+ms.author: mwasson
+ms.date: 12/14/2016
 ---
 
 # Cache-Aside
@@ -25,7 +30,7 @@ For caches that don't provide this functionality, it's the responsibility of the
 
 An application can emulate the functionality of read-through caching by implementing the cache-aside strategy. This strategy loads data into the cache on demand. The figure illustrates using the Cache-Aside pattern to store data in the cache.
 
-![Using the Cache-Aside pattern to store data in the cache](images/cache-aside-diagram.png)
+![Using the Cache-Aside pattern to store data in the cache](media/cache-aside-diagram.png)
 
 
 If an application updates information, it can follow the write-through strategy by making the modification to the data store, and by invalidating the corresponding item in the cache.

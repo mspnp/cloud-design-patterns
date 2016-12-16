@@ -1,15 +1,22 @@
 ---
-title: Compute Resource Consolidation 
+title: Compute Resource Consolidation Pattern | Azure | Microsoft Docs
 description: Consolidate multiple tasks or operations into a single computational unit
 categories: [design-implementation]
 keywords: design pattern
-layout: designpattern
 author: dragon119
 manager: bennage
-ms.date: 06/20/2016
+
+ms.service: guidance
+ms.topic: article
+ms.tgt_pltfrm: na
+ms.workload: na
+ms.author: mwasson
+ms.date: 12/14/2016
 ---
 
 # Compute Resource Consolidation
+
+[!INCLUDE [pnp-branding](../includes/header.md)]
 
 Consolidate multiple tasks or operations into a single computational unit. This can increase compute resource utilization, and reduce the costs and management overhead associated with performing compute processing in cloud-hosted applications.
 
@@ -19,7 +26,7 @@ A cloud application often implements a variety of operations. In some solutions 
 
 As an example, the figure shows the simplified structure of a cloud-hosted solution that is implemented using more than one computational unit. Each computational unit runs in its own virtual environment. Each function has been implemented as a separate task (labeled Task A through Task E) running in its own computational unit.
 
-![Running tasks in a cloud environment using a set of dedicated computational units](images/compute-resource-consolidation-diagram.png)
+![Running tasks in a cloud environment using a set of dedicated computational units](media/compute-resource-consolidation-diagram.png)
 
 
 Each computational unit consumes chargeable resources, even when it's idle or lightly used. Therefore, this isn't always the most cost-effective solution.
@@ -59,7 +66,8 @@ Consider the following points when implementing this pattern:
 
 **Contention**. Avoid introducing contention between tasks that compete for resources in the same computational unit. Ideally, tasks that share the same computational unit should exhibit different resource utilization characteristics. For example, two compute-intensive tasks should probably not reside in the same computational unit, and neither should two tasks that consume large amounts of memory. However, mixing a compute intensive task with a task that requires a large amount of memory is a workable combination.
 
-    >  Consider consolidating compute resources only for a system that's been in production for a period of time so that operators and developers can monitor the system and create a _heat map_ that identifies how each task utilizes differing resources. This map can be used to determine which tasks are good candidates for sharing compute resources.
+> [!NOTE]
+>  Consider consolidating compute resources only for a system that's been in production for a period of time so that operators and developers can monitor the system and create a _heat map_ that identifies how each task utilizes differing resources. This map can be used to determine which tasks are good candidates for sharing compute resources.
 
 **Complexity**. Combining multiple tasks into a single computational unit adds complexity to the code in the unit, possibly making it more difficult to test, debug, and maintain.
 
@@ -77,13 +85,13 @@ This pattern might not be suitable for tasks that perform critical fault-toleran
 
 When building a cloud service on Azure, it’s possible to consolidate the processing performed by multiple tasks into a single role. Typically this is a worker role that performs background or asynchronous processing tasks.
 
->  In some cases it's possible to include background or asynchronous processing tasks in the web role. This technique helps to reduce costs and simplify deployment, although it can impact the scalability and responsiveness of the public-facing interface provided by the web role. The article [Combining Multiple Azure Worker Roles into an Azure Web Role](http://www.31a2ba2a-b718-11dc-8314-0800200c9a66.com/2012/02/combining-multiple-azure-worker-roles.html) contains a detailed description of implementing background or asynchronous processing tasks in a web role.
+> In some cases it's possible to include background or asynchronous processing tasks in the web role. This technique helps to reduce costs and simplify deployment, although it can impact the scalability and responsiveness of the public-facing interface provided by the web role. The article [Combining Multiple Azure Worker Roles into an Azure Web Role](http://www.31a2ba2a-b718-11dc-8314-0800200c9a66.com/2012/02/combining-multiple-azure-worker-roles.html) contains a detailed description of implementing background or asynchronous processing tasks in a web role.
 
 The role is responsible for starting and stopping the tasks. When the Azure fabric controller loads a role, it raises the `Start` event for the role. You can override the `OnStart` method of the `WebRole` or `WorkerRole` class to handle this event, perhaps to initialize the data and other resources the tasks in this method depend on.
 
-When the `OnStart `method completes, the role can start responding to requests. You can find more information and guidance about using the `OnStart` and `Run` methods in a role in the [Application Startup Processes](https://msdn.microsoft.com/library/ff803371.aspx#sec16) section in the patterns & practices guide [Moving Applications to the Cloud](https://msdn.microsoft.com/library/ff728592.aspx). 
+When the `OnStart `method completes, the role can start responding to requests. You can find more information and guidance about using the `OnStart` and `Run` methods in a role in the [Application Startup Processes](https://msdn.microsoft.com/library/ff803371.aspx#sec16) section in the patterns & practices guide [Moving Applications to the Cloud](https://msdn.microsoft.com/library/ff728592.aspx).
 
->  Keep the code in the `OnStart` method as concise as possible. Azure doesn't impose any limit on the time taken for this method to complete, but the role won't be able to start responding to network requests sent to it until this method completes.
+> Keep the code in the `OnStart` method as concise as possible. Azure doesn't impose any limit on the time taken for this method to complete, but the role won't be able to start responding to network requests sent to it until this method completes.
 
 When the `OnStart` method has finished, the role executes the `Run` method. At this point, the fabric controller can start sending requests to the role.
 
@@ -91,16 +99,16 @@ Place the code that actually creates the tasks in the `Run` method. Note that th
 
 When a role shuts down or is recycled, the fabric controller prevents any more incoming requests being received from the load balancer and raises the `Stop` event. You can capture this event by overriding the `OnStop` method of the role and perform any tidying up required before the role terminates.
 
->  Any actions performed in the `OnStop` method must be completed within five minutes (or 30 seconds if you are using the Azure emulator on a local computer). Otherwise the Azure fabric controller assumes that the role has stalled and will force it to stop.
+> Any actions performed in the `OnStop` method must be completed within five minutes (or 30 seconds if you are using the Azure emulator on a local computer). Otherwise the Azure fabric controller assumes that the role has stalled and will force it to stop.
 
 The tasks are started by the `Run` method that waits for the tasks to complete. The tasks implement the business logic of the cloud service, and can respond to messages posted to the role through the Azure load balancer. The figure shows the lifecycle of tasks and resources in a role in a Azure cloud service.
 
-![The lifecycle of tasks and resources in a role in a Azure cloud service](images/compute-resource-consolidation-lifecycle.png)
+![The lifecycle of tasks and resources in a role in a Azure cloud service](media/compute-resource-consolidation-lifecycle.png)
 
 
 The _WorkerRole.cs_ file in the _ComputeResourceConsolidation.Worker_ project shows an example of how you might implement this pattern in a Azure cloud service.
 
->  The _ComputeResourceConsolidation.Worker_ project is part of the _ComputeResourceConsolidation_ solution available for download from [GitHub](https://github.com/mspnp/cloud-design-patterns/tree/master/compute-resource-consolidation).
+> The _ComputeResourceConsolidation.Worker_ project is part of the _ComputeResourceConsolidation_ solution available for download from [GitHub](https://github.com/mspnp/cloud-design-patterns/tree/master/compute-resource-consolidation).
 
 In the worker role, code that runs when the role is initialized creates the required cancellation token and a list of tasks to run.
 
@@ -114,18 +122,18 @@ public class WorkerRole: RoleEntryPoint
   private readonly List<Task> tasks = new List<Task>();
 
   // List of worker tasks to run on this role.
-  private readonly List<Func<CancellationToken, Task>> workerTasks  
+  private readonly List<Func<CancellationToken, Task>> workerTasks
                         = new List<Func<CancellationToken, Task>>
     {
       MyWorkerTask1,
       MyWorkerTask2
     };
-  
+
   ...
 }
 ```
 
-The `MyWorkerTask1` and the `MyWorkerTask2` methods illustrate how to perform different tasks within the same worker role. The following code shows `MyWorkerTask1`. This is a simple task that sleeps for 30 seconds and then outputs a trace message. It repeats this process until the task is cancelled. The code in `MyWorkerTask2` is similar.
+The `MyWorkerTask1` and the `MyWorkerTask2` methods illustrate how to perform different tasks within the same worker role. The following code shows `MyWorkerTask1`. This is a simple task that sleeps for 30 seconds and then outputs a trace message. It repeats this process until the task is canceled. The code in `MyWorkerTask2` is similar.
 
 ```csharp
 // A sample worker role task.
@@ -160,13 +168,12 @@ private static async Task MyWorkerTask1(CancellationToken ct)
 }
 ```
 
->  The sample code shows a common implementation of a background process. In a real world application you can follow this same structure, except that you should place your own processing logic in the body of the loop that waits for the cancellation request.
+> The sample code shows a common implementation of a background process. In a real world application you can follow this same structure, except that you should place your own processing logic in the body of the loop that waits for the cancellation request.
 
 After the worker role has initialized the resources it uses, the `Run` method starts the two tasks concurrently, as shown here.
 
 ```csharp
-...
-// RoleEntry Run() is called after OnStart().  
+// RoleEntry Run() is called after OnStart().
 // Returning from Run() will cause a role instance to recycle.
 public override void Run()
 {
@@ -175,7 +182,7 @@ public override void Run()
     tasks.Add(worker(cts.Token));
 
   Trace.TraceInformation("Worker host tasks started");
-  // The assumption is that all tasks should remain running and not return, 
+  // The assumption is that all tasks should remain running and not return,
   // similar to role entry Run() behavior.
   try
   {
@@ -185,13 +192,13 @@ public override void Run()
   {
     Trace.TraceError(ex.Message);
 
-    // If any of the inner exceptions in the aggregate exception 
+    // If any of the inner exceptions in the aggregate exception
     // are not cancellation exceptions then re-throw the exception.
     ex.Handle(innerEx => (innerEx is OperationCanceledException));
   }
 
   // If there wasn't a cancellation request, stop all tasks and return from Run()
-  // An alternative to cancelling and returning when a task exits would be to 
+  // An alternative to canceling and returning when a task exits would be to
   // restart the task.
   if (!cts.IsCancellationRequested)
   {
@@ -204,12 +211,12 @@ public override void Run()
 
 In this example, the `Run` method waits for tasks to be completed. If a task is canceled, the `Run` method assumes that the role is being shut down and waits for the remaining tasks to be canceled before finishing (it waits for a maximum of five minutes before terminating). If a task fails due to an expected exception, the `Run` method cancels the task.
 
->  You could implement more comprehensive monitoring and exception handling strategies in the `Run` method such as restarting tasks that have failed, or including code that enables the role to stop and start individual tasks.
+> You could implement more comprehensive monitoring and exception handling strategies in the `Run` method such as restarting tasks that have failed, or including code that enables the role to stop and start individual tasks.
 
-The `Stop` method shown in the following code is called when the fabric controller shuts down the role instance (it's invoked from the `OnStop` method). The code stops each task gracefully by cancelling it. If any task takes more than five minutes to complete, the cancellation processing in the `Stop` method ceases waiting and the role is terminated.
+The `Stop` method shown in the following code is called when the fabric controller shuts down the role instance (it's invoked from the `OnStop` method). The code stops each task gracefully by canceling it. If any task takes more than five minutes to complete, the cancellation processing in the `Stop` method ceases waiting and the role is terminated.
 
 ```csharp
-// Stop running tasks and wait for tasks to complete before returning 
+// Stop running tasks and wait for tasks to complete before returning
 // unless the timeout expires.
 private void Stop(TimeSpan timeout)
 {
@@ -219,7 +226,7 @@ private void Stop(TimeSpan timeout)
 
   Trace.TraceInformation("Waiting for canceled tasks to finish and return");
 
-  // Wait for all the tasks to complete before returning. Note that the 
+  // Wait for all the tasks to complete before returning. Note that the
   // emulator currently allows 30 seconds and Azure allows five
   // minutes for processing to complete.
   try
@@ -230,7 +237,7 @@ private void Stop(TimeSpan timeout)
   {
     Trace.TraceError(ex.Message);
 
-    // If any of the inner exceptions in the aggregate exception 
+    // If any of the inner exceptions in the aggregate exception
     // are not cancellation exceptions then rethrow the exception.
     ex.Handle(innerEx => (innerEx is OperationCanceledException));
   }
