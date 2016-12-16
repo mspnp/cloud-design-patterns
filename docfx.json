@@ -11,7 +11,7 @@
           "**/includes/**",
           "**/_themes/**"
         ],
-        "src": "patterns",
+        "src": "docs",
         "dest": "."
       },
       {

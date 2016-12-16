@@ -222,3 +222,12 @@ hs_err_pid*
 
 # Azure diagnostics
 *.wadcfgx
+
+# docs
+log/
+obj/
+_site/
+.optemp/
+_themes*/
+
+.openpublishing.buildcore.ps1

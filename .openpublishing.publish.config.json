@@ -3,9 +3,9 @@
   "need_generate_intellisense": false,
   "docsets_to_publish": [
     {
-      "docset_name": "guidance",
+      "docset_name": "cloud-design-patterns",
       "build_source_folder": ".",
-      "build_output_subfolder": "guidance",
+      "build_output_subfolder": "patterns",
       "locale": "en-us",
       "version": 0,
       "open_to_public_contributors": false,
