@@ -6,7 +6,7 @@
     {
       "docset_name": "cloud-design-patterns",
       "build_source_folder": "docs",
-      "build_output_subfolder": "docs",
+      "build_output_subfolder": "cloud-design-patterns",
       "locale": "en-us",
       "version": 0,
       "open_to_public_contributors": true,
@@ -29,5 +29,6 @@
       "branch": "master",
       "branch_mapping": {}
     }
-  ]
+  ],
+  "need_generate_pdf_url_template": false
 }
