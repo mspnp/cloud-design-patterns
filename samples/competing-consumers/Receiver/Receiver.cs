@@ -29,10 +29,7 @@ namespace Receiver
         /// Optional override to create listeners (e.g., TCP, HTTP) for this service replica to handle client or user requests.
         /// </summary>
         /// <returns>A collection of listeners.</returns>
-        protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
-        {
-            return new ServiceInstanceListener[0];
-        }
+        protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners() => new ServiceInstanceListener[0];
 
         /// <summary>
         /// This is the main entry point for your service instance.
@@ -49,51 +46,51 @@ namespace Receiver
             var connectionString = configurationPackage.Settings.Sections["SettingsSection"].Parameters["ServiceBusConnectionString"].Value;
 
             this.queueManager = new QueueManager(queueName, connectionString);
-            await this.queueManager.Start();
+            await this.queueManager.StartAsync()
+                .ConfigureAwait(false);
             
             // Start listening for messages on the queue.
-            this.queueManager.ReceiveMessages(this.ProcessMessage);
+            this.queueManager.ReceiveMessages(this.ProcessMessageAsync, cancellationToken);
 
-            while (true)
+            // Block until we are cancelled.
+            if (cancellationToken.WaitHandle.WaitOne())
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                await this.queueManager.StopAsync()
+                    .ConfigureAwait(false);
             }
         }
 
-        private async Task ProcessMessage(BrokeredMessage message)
+        private async Task ProcessMessageAsync(BrokeredMessage message)
         {
             try
             {
-                if (!this.IsValidMessage(message))
+                if (!IsValidMessage(message))
                 {
                     // Send the message to the Dead Letter queue for further analysis.
-                    await message.DeadLetterAsync("Invalid message", "The message Id is invalid");
+                    await message.DeadLetterAsync("Invalid message", "The message Id is invalid")
+                        .ConfigureAwait(false);
                     Trace.WriteLine("Invalid Message. Sending to Dead Letter queue");
                 }
 
                 // Simulate message processing.
-                await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(2))
+                    .ConfigureAwait(false);
 
-                //Trace.WriteLine("Consumer " + RoleEnvironment.CurrentRoleInstance.Id + " : Message processed successfully: " + message.MessageId);
                 Trace.WriteLine($"Consumer {this.Context.NodeContext.NodeId.ToString()} : Message processed successfully: {message.MessageId}");
                 
                 // Complete the message.
-                await message.CompleteAsync();
+                await message.CompleteAsync()
+                    .ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 // Abandon the message when appropriate.  If the message reaches the MaxDeliveryCount limit, it will be automatically deadlettered.
-                message.Abandon();
-                Trace.TraceError("An error has occurred while processing the message: " + ex.Message);
+                await message.AbandonAsync()
+                    .ConfigureAwait(false);
+                Trace.TraceError($"An error has occurred while processing the message: {ex.Message}");
             }
         }
 
-        private bool IsValidMessage(BrokeredMessage message)
-        {
-            // Simulate message validation.
-            return !string.IsNullOrWhiteSpace(message.MessageId);
-        }
+        private static bool IsValidMessage(BrokeredMessage message) => !string.IsNullOrWhiteSpace(message.MessageId);
     }
 }

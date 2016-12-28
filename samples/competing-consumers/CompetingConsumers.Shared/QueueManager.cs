@@ -5,6 +5,7 @@ namespace CompetingConsumers.Shared
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
@@ -16,30 +17,31 @@ namespace CompetingConsumers.Shared
         private readonly string queueName;
         private readonly string connectionString;
         private QueueClient client;
-        private ManualResetEvent pauseProcessingEvent;
 
         public QueueManager(string queueName, string connectionString)
         {
             this.queueName = queueName;
             this.connectionString = connectionString;
-            this.pauseProcessingEvent = new ManualResetEvent(true);
         }
+
+        private void OptionsOnExceptionReceived(object sender, ExceptionReceivedEventArgs exceptionReceivedEventArgs) =>
+            Trace.TraceError($"Exception in QueueClient.ExceptionReceived: {exceptionReceivedEventArgs?.Exception?.Message}");
 
         public async Task SendMessagesAsync()
         {
             // Simulate sending a batch of messages to the queue.
-            var messages = new List<BrokeredMessage>();
+            var messages = Enumerable.Range(0, 10)
+                .Select(i => new BrokeredMessage()
+                {
+                    MessageId = Guid.NewGuid().ToString()
+                })
+                .ToList();
 
-            for (int i = 0; i < 10; i++)
-            {
-                var message = new BrokeredMessage() { MessageId = Guid.NewGuid().ToString() };
-                messages.Add(message);
-            }
-
-            await this.client.SendBatchAsync(messages);
+            await this.client.SendBatchAsync(messages)
+                .ConfigureAwait(false);
         }
 
-        public void ReceiveMessages(Func<BrokeredMessage, Task> processMessageTask)
+        public void ReceiveMessages(Func<BrokeredMessage, Task> processMessageTask, CancellationToken cancellationToken)
         {
             // Setup the options for the message pump.
             var options = new OnMessageOptions();
@@ -53,51 +55,40 @@ namespace CompetingConsumers.Shared
             this.client.OnMessageAsync(
                 async (msg) =>
                 {
-                    // Will block the current thread if Stop is called.
-                    this.pauseProcessingEvent.WaitOne();
-
-                    // Execute processing task here
-                    await processMessageTask(msg);
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        // Execute processing task here
+                        await processMessageTask(msg)
+                            .ConfigureAwait(false);
+                    }
                 },
                 options);
         }
 
-        public async Task Start()
+        public async Task StartAsync()
         {
             // Check queue existence.
             var manager = NamespaceManager.CreateFromConnectionString(this.connectionString);
-            if (!manager.QueueExists(this.queueName))
+            if (!await manager.QueueExistsAsync(this.queueName)
+                .ConfigureAwait(false))
             {
                 try
                 {
-                    var queueDescription = new QueueDescription(this.queueName);
-
-                    // Set the maximum delivery count for messages. A message is automatically deadlettered after this number of deliveries.  Default value is 10.
-                    queueDescription.MaxDeliveryCount = 3;
-
-                    await manager.CreateQueueAsync(queueDescription);
+                    await manager.CreateQueueAsync(new QueueDescription(this.queueName)
+                    {
+                        // Set the maximum delivery count for messages. A message is automatically deadlettered after
+                        // this number of deliveries.  Default value is 10.
+                        MaxDeliveryCount = 3
+                    }).ConfigureAwait(false);
                 }
                 catch (MessagingEntityAlreadyExistsException)
                 {
                     Trace.TraceWarning(
-                        "MessagingEntityAlreadyExistsException Creating Queue - Queue likely already exists for path: {0}", this.queueName);
+                        $"MessagingEntityAlreadyExistsException Creating Queue - Queue likely already exists for path: {this.queueName}");
                 }
-                catch (MessagingException ex)
+                catch (MessagingException ex) when (((ex.InnerException as WebException)?.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.Conflict)
                 {
-                    var webException = ex.InnerException as WebException;
-                    if (webException != null)
-                    {
-                        var response = webException.Response as HttpWebResponse;
-
-                        // It's likely the conflicting operation being performed by the service bus is another queue create operation
-                        // If we don't have a web response with status code 'Conflict' it's another exception
-                        if (response == null || response.StatusCode != HttpStatusCode.Conflict)
-                        {
-                            throw;
-                        }
-
-                        Trace.TraceWarning("MessagingException HttpStatusCode.Conflict - Queue likely already exists or is being created or deleted for path: {0}", this.queueName);
-                    }
+                    Trace.TraceWarning($"MessagingException HttpStatusCode.Conflict - Queue likely already exists or is being created or deleted for path: {this.queueName}");
                 }
             }
 
@@ -105,40 +96,26 @@ namespace CompetingConsumers.Shared
             this.client = QueueClient.CreateFromConnectionString(this.connectionString, this.queueName);
         }
         
-        public async Task Stop(TimeSpan waitTime)
+        public async Task StopAsync()
         {
-            // Pause the processing threads
-            this.pauseProcessingEvent.Reset();
-
-            // There is no clean approach to wait for the threads to complete processing.
-            // We simply stop any new processing, wait for existing thread to complete, then close the message pump and then return
-            Thread.Sleep(waitTime);
-
-            await this.client.CloseAsync();
+            await this.client.CloseAsync()
+                .ConfigureAwait(false);
 
             var manager = NamespaceManager.CreateFromConnectionString(this.connectionString);
 
-            if (await manager.QueueExistsAsync(this.queueName))
+            if (await manager.QueueExistsAsync(this.queueName)
+                .ConfigureAwait(false))
             {
                 try
                 {
-                    await manager.DeleteQueueAsync(this.queueName);
+                    await manager.DeleteQueueAsync(this.queueName)
+                        .ConfigureAwait(false);
                 }
                 catch (MessagingEntityNotFoundException)
                 {
                     Trace.TraceWarning(
-                        "MessagingEntityNotFoundException Deleting Queue - Queue does not exist at path: {0}", this.queueName);
+                        $"MessagingEntityNotFoundException Deleting Queue - Queue does not exist at path: {this.queueName}");
                 }
-            }
-        }
-
-        private void OptionsOnExceptionReceived(object sender, ExceptionReceivedEventArgs exceptionReceivedEventArgs)
-        {
-            var exceptionMessage = "null";
-            if (exceptionReceivedEventArgs != null && exceptionReceivedEventArgs.Exception != null)
-            {
-                exceptionMessage = exceptionReceivedEventArgs.Exception.Message;
-                Trace.TraceError("Exception in QueueClient.ExceptionReceived: {0}", exceptionMessage);
             }
         }
     }
