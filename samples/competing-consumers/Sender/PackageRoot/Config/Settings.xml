@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Settings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/2011/01/fabric">
+  <Section Name="SettingsSection">
+    <Parameter Name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" Value="UseDevelopmentStorage=true" />
+    <Parameter Name="QueueName" Value="workqueue" />
+    <Parameter Name="ServiceBusConnectionString" Value="YOUR SERVICE BUS CONNECTION INFORMATION" />
+  </Section>
+</Settings>

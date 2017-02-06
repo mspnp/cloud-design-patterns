@@ -50,14 +50,22 @@ namespace ValetKey.Client
 
         private static async Task<StorageEntitySas> GetBlobSas(Uri blobUri)
         {
-            var request = HttpWebRequest.Create(blobUri);
-            var response = await request.GetResponseAsync();
-            var responseString = string.Empty;
+            try
+            {
+                var request = HttpWebRequest.Create(blobUri);
+                var response = await request.GetResponseAsync();
+                var responseString = string.Empty;
 
-            var serializer = new DataContractJsonSerializer(typeof(StorageEntitySas));
-            var blobSas = (StorageEntitySas)serializer.ReadObject(response.GetResponseStream());
+                var serializer = new DataContractJsonSerializer(typeof(StorageEntitySas));
+                var blobSas = (StorageEntitySas)serializer.ReadObject(response.GetResponseStream());
 
-            return blobSas;
+                return blobSas;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
         }
 
         /// <summary>

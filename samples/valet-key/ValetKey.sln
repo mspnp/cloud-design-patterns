@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A89995F7-9A43-4705-849D-CD8674442085}"
 	ProjectSection(SolutionItems) = preProject
@@ -13,6 +13,8 @@ EndProject
 Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "ValetKey.Cloud", "ValetKey.Cloud\ValetKey.Cloud.ccproj", "{37102750-31F8-4EBE-A274-127EDFDB80A0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValetKey.Web", "ValetKey.Web\ValetKey.Web.csproj", "{58825C1F-77C5-40A8-BB43-71D2BD6B4547}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValetKey.WebApp", "ValetKey.WebApp\ValetKey.WebApp.csproj", "{C94B2ADF-A831-4311-9A00-89701B46F934}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +34,10 @@ Global
 		{58825C1F-77C5-40A8-BB43-71D2BD6B4547}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58825C1F-77C5-40A8-BB43-71D2BD6B4547}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58825C1F-77C5-40A8-BB43-71D2BD6B4547}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C94B2ADF-A831-4311-9A00-89701B46F934}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C94B2ADF-A831-4311-9A00-89701B46F934}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C94B2ADF-A831-4311-9A00-89701B46F934}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C94B2ADF-A831-4311-9A00-89701B46F934}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

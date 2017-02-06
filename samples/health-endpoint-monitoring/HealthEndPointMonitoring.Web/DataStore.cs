@@ -1,9 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-namespace HealthEndPointMonitoring.Web
+namespace HealthEndpointMonitoring.App
 {
-    using HealthEndpointMonitoring.Web;
-
     public class DataStore
     {
         public static readonly DataStore Instance = new DataStore();
