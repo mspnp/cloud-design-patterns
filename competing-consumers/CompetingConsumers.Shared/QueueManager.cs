@@ -16,7 +16,7 @@ namespace CompetingConsumers.Shared
         private readonly string queueName;
         private readonly string connectionString;
         private QueueClient client;
-        private ManualResetEvent pauseProcessingEvent;
+        private readonly ManualResetEvent pauseProcessingEvent;
 
         public QueueManager(string queueName, string connectionString)
         {
@@ -51,7 +51,7 @@ namespace CompetingConsumers.Shared
 
             // Use of Service Bus OnMessage message pump. The OnMessage method must be called once, otherwise an exception will occur.
             this.client.OnMessageAsync(
-                async (msg) =>
+                async msg =>
                 {
                     // Will block the current thread if Stop is called.
                     this.pauseProcessingEvent.WaitOne();
@@ -134,12 +134,11 @@ namespace CompetingConsumers.Shared
 
         private void OptionsOnExceptionReceived(object sender, ExceptionReceivedEventArgs exceptionReceivedEventArgs)
         {
-            var exceptionMessage = "null";
-            if (exceptionReceivedEventArgs != null && exceptionReceivedEventArgs.Exception != null)
-            {
-                exceptionMessage = exceptionReceivedEventArgs.Exception.Message;
-                Trace.TraceError("Exception in QueueClient.ExceptionReceived: {0}", exceptionMessage);
-            }
+            if (exceptionReceivedEventArgs?.Exception == null)
+                return;
+
+            var exceptionMessage = exceptionReceivedEventArgs.Exception.Message;
+            Trace.TraceError("Exception in QueueClient.ExceptionReceived: {0}", exceptionMessage);
         }
     }
 }
