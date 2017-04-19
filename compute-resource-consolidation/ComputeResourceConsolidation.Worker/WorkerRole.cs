@@ -25,11 +25,7 @@ namespace ComputeResourceConsolidation.Worker
         /// <summary>
         /// List of worker tasks to run on this role
         /// </summary>
-        private readonly List<Func<CancellationToken, Task>> workerTasks = new List<Func<CancellationToken, Task>>
-        {
-            MyWorkerTask1,
-            MyWorkerTask2
-        };
+        private readonly List<Task> workerTasks = new List<Task>();
 
         /// <summary>
         /// RoleEntry Run() is called after OnStart().  Returning from run will cause a Role instance to recycle.
@@ -37,9 +33,12 @@ namespace ComputeResourceConsolidation.Worker
         public override void Run()
         {
             // Start worker tasks and add to the task list
+            workerTasks.Add(MyWorkerTask1(cts.Token));
+            workerTasks.Add(MyWorkerTask2(cts.Token));
+
             foreach (var worker in this.workerTasks)
             {
-                this.tasks.Add(worker(this.cts.Token));
+                this.tasks.Add(worker);
             }
 
             Trace.TraceInformation("Worker host tasks started");
@@ -47,7 +46,7 @@ namespace ComputeResourceConsolidation.Worker
             // The assumption is that all tasks should remain running and not return, similar to role entry Run() behavior.
             try
             {
-                Task.WaitAny(this.tasks.ToArray());
+                Task.WaitAll(this.tasks.ToArray());
             }
             catch (AggregateException ex)
             {
