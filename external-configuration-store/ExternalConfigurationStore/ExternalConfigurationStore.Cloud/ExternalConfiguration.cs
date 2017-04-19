@@ -14,9 +14,6 @@ namespace ExternalConfigurationStore.Cloud
                 return new ExternalConfigurationManager(environment);
             });
 
-        public static ExternalConfigurationManager Instance
-        {
-            get { return configuredInstance.Value; }
-        }
+        public static ExternalConfigurationManager Instance => configuredInstance.Value;
     }
 }

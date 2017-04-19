@@ -13,11 +13,11 @@ namespace ExternalConfigurationStore.Cloud
     public class WorkerRole : RoleEntryPoint
     {
         // Storing blob data here for sample purposes only.
-        private readonly string configContainer = "configuration";
-        private readonly string configBlobNameProduction = "configurationdata-production.config";
-        private readonly string configBlobNameStaging = "configurationdata-staging.config";
+        private const string configContainer = "configuration";
+        private const string configBlobNameProduction = "configurationdata-production.config";
+        private const string configBlobNameStaging = "configurationdata-staging.config";
 
-        private ManualResetEvent completeEvent = new ManualResetEvent(false);
+        private readonly ManualResetEvent completeEvent = new ManualResetEvent(false);
 
         public override void Run()
         {
@@ -69,14 +69,14 @@ namespace ExternalConfigurationStore.Cloud
             // Setup blobs for sample.
             var account = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("storageAccount"));
             var client = account.CreateCloudBlobClient();
-            var container = client.GetContainerReference(this.configContainer);
+            var container = client.GetContainerReference(configContainer);
             container.CreateIfNotExists();
 
-            var productionBlob = container.GetBlockBlobReference(this.configBlobNameProduction);
-            productionBlob.UploadFromFile(this.configBlobNameProduction);
+            var productionBlob = container.GetBlockBlobReference(configBlobNameProduction);
+            productionBlob.UploadFromFile(configBlobNameProduction);
 
-            var stagingBlob = container.GetBlockBlobReference(this.configBlobNameStaging);
-            stagingBlob.UploadFromFile(this.configBlobNameStaging);
+            var stagingBlob = container.GetBlockBlobReference(configBlobNameStaging);
+            stagingBlob.UploadFromFile(configBlobNameStaging);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace ExternalConfigurationStore.Cloud
             // Cleanup sample resources.
             var account = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("storageAccount"));
             var client = account.CreateCloudBlobClient();
-            var container = client.GetContainerReference(this.configContainer);
+            var container = client.GetContainerReference(configContainer);
 
             container.DeleteIfExists();
         }
