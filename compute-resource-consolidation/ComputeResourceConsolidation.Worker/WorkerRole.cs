@@ -10,7 +10,7 @@ namespace ComputeResourceConsolidation.Worker
     using System.Threading.Tasks;
     using Microsoft.WindowsAzure.ServiceRuntime;
 
-    public class WorkerRole : RoleEntryPoint
+    public sealed class WorkerRole : RoleEntryPoint, IDisposable
     {
         /// <summary>
         /// The cancellation token source use to cooperatively cancel running tasks
@@ -23,31 +23,20 @@ namespace ComputeResourceConsolidation.Worker
         private readonly List<Task> tasks = new List<Task>();
 
         /// <summary>
-        /// List of worker tasks to run on this role
-        /// </summary>
-        private readonly List<Func<CancellationToken, Task>> workerTasks = new List<Func<CancellationToken, Task>>
-        {
-            MyWorkerTask1,
-            MyWorkerTask2
-        };
-
-        /// <summary>
         /// RoleEntry Run() is called after OnStart().  Returning from run will cause a Role instance to recycle.
         /// </summary>
         public override void Run()
         {
             // Start worker tasks and add to the task list
-            foreach (var worker in this.workerTasks)
-            {
-                this.tasks.Add(worker(this.cts.Token));
-            }
+            tasks.Add(MyWorkerTask1(cts.Token));
+            tasks.Add(MyWorkerTask2(cts.Token));
 
             Trace.TraceInformation("Worker host tasks started");
 
             // The assumption is that all tasks should remain running and not return, similar to role entry Run() behavior.
             try
             {
-                Task.WaitAny(this.tasks.ToArray());
+                Task.WaitAll(this.tasks.ToArray());
             }
             catch (AggregateException ex)
             {
@@ -187,6 +176,11 @@ namespace ComputeResourceConsolidation.Worker
                 // If any of the inner exceptions in the aggregate exception are not cancellation exceptions then rethrow the exception
                 ex.Handle(innerEx => (innerEx is OperationCanceledException));
             }
+        }
+
+        public void Dispose()
+        {
+            cts.Dispose();
         }
     }
 }
