@@ -13,7 +13,7 @@ namespace ExternalConfigurationStore.Cloud.SettingsStore
 
     public class BlobSettingsStore : ISettingsStore
     {
-        private CloudBlockBlob configBlob;
+        private readonly CloudBlockBlob configBlob;
 
         public BlobSettingsStore(string environment) : this(CloudConfigurationManager.GetSetting("storageAccount"), "configuration", "configurationdata", environment)
         {

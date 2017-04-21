@@ -27,7 +27,6 @@ namespace ExternalConfigurationStore.Cloud
 
         private Dictionary<string, string> settingsCache;
         private string currentVersion;
-        private bool keepMonitoring;
 
         public ExternalConfigurationManager(string environment) : this(new BlobSettingsStore(environment), TimeSpan.FromSeconds(15), environment)
         {
@@ -47,18 +46,12 @@ namespace ExternalConfigurationStore.Cloud
             get; private set;
         }
 
-        public IObservable<KeyValuePair<string, string>> Changed
-        {
-            get { return this.changed.AsObservable(); }
-        }
+        public IObservable<KeyValuePair<string, string>> Changed => this.changed.AsObservable();
 
         /// <summary>
         /// Check to see if the current instance is monitoring for changes
         /// </summary>
-        public bool IsMonitoring
-        {
-            get { return this.monitoringTask != null && !this.monitoringTask.IsCompleted; }
-        }
+        public bool IsMonitoring => this.monitoringTask != null && !this.monitoringTask.IsCompleted;
 
         /// <summary>
         /// Start the background monitoring for configuration changes in the central store
@@ -140,7 +133,7 @@ namespace ExternalConfigurationStore.Cloud
         {
             if (string.IsNullOrEmpty(key))
             {
-                throw new ArgumentNullException("key", "Value cannot be null or empty.");
+                throw new ArgumentNullException(nameof(key), "Value cannot be null or empty.");
             }
 
             // Try and get the value from the settings cache.  If there's a miss, get the setting from the settings store and refresh the settings cache.
