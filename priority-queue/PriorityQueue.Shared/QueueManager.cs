@@ -70,21 +70,12 @@ namespace PriorityQueue.Shared
                 {
                     Trace.TraceInformation("Messaging entity already created: " + this.topicName);
                 }
-                catch (MessagingException ex) when (ex.InnerException is WebException)
+                // It's likely the conflicting operation being performed by the service bus is another queue create operation
+                // If we don't have a web response with status code 'Conflict' it's another exception
+                catch (MessagingException ex) when ((ex.InnerException as WebException)?.Response is HttpWebResponse 
+                                                    && ((HttpWebResponse)((WebException)ex.InnerException).Response).StatusCode == HttpStatusCode.Conflict)
                 {
-                    var webException = (WebException) ex.InnerException;
-
-                    var response = webException.Response as HttpWebResponse;
-
-                    // It's likely the conflicting operation being performed by the service bus is another queue create operation
-                    // If we don't have a web response with status code 'Conflict' it's another exception
-                    if (response == null || response.StatusCode != HttpStatusCode.Conflict)
-                    {
-                        throw;
-                    }
-
                     Trace.TraceWarning("MessagingException HttpStatusCode.Conflict - Queue likely already exists or is being created or deleted for path: {0}", this.topicName);
-
                 }
             }
 
@@ -113,18 +104,11 @@ namespace PriorityQueue.Shared
                 {
                     Trace.TraceInformation("Messaging entity already created: " + subscription);
                 }
-                catch (MessagingException ex) when (ex.InnerException is WebException)
+                // It's likely the conflicting operation being performed by the service bus is another queue create operation
+                // If we don't have a web response with status code 'Conflict' it's another exception
+                catch (MessagingException ex) when ((ex.InnerException as WebException)?.Response is HttpWebResponse
+                                                    && ((HttpWebResponse)((WebException)ex.InnerException).Response).StatusCode == HttpStatusCode.Conflict)
                 {
-                    var webException = (WebException) ex.InnerException;
-                    var response = webException.Response as HttpWebResponse;
-
-                    // It's likely the conflicting operation being performed by the service bus is another queue create operation
-                    // If we don't have a web response with status code 'Conflict' it's another exception
-                    if (response == null || response.StatusCode != HttpStatusCode.Conflict)
-                    {
-                        throw;
-                    }
-
                     Trace.TraceWarning("MessagingException HttpStatusCode.Conflict - subscription likely already exists or is being created or deleted for path: {0}", subscription);
                 }
             }
