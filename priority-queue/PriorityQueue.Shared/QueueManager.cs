@@ -17,7 +17,7 @@ namespace PriorityQueue.Shared
         private readonly string topicName;
         private SubscriptionClient subscriptionClient;
         private TopicClient topicClient;
-        private ManualResetEvent pauseProcessingEvent;
+        private readonly ManualResetEvent pauseProcessingEvent;
 
         public QueueManager(string serviceBusConnectionString, string topicName)
         {
@@ -44,7 +44,7 @@ namespace PriorityQueue.Shared
             options.ExceptionReceived += this.OptionsOnExceptionReceived;
 
             this.subscriptionClient.OnMessageAsync(
-                 async (msg) =>
+                 async msg =>
                  {
                      // Will block the current thread if Stop is called.
                      this.pauseProcessingEvent.WaitOne();
@@ -70,22 +70,11 @@ namespace PriorityQueue.Shared
                 {
                     Trace.TraceInformation("Messaging entity already created: " + this.topicName);
                 }
-                catch (MessagingException ex)
+                // It's likely the conflicting operation being performed by the service bus is another queue create operation
+                // If we don't have a web response with status code 'Conflict' it's another exception
+                catch (MessagingException ex) when (((ex.InnerException as WebException)?.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.Conflict)
                 {
-                    var webException = ex.InnerException as WebException;
-                    if (webException != null)
-                    {
-                        var response = webException.Response as HttpWebResponse;
-
-                        // It's likely the conflicting operation being performed by the service bus is another queue create operation
-                        // If we don't have a web response with status code 'Conflict' it's another exception
-                        if (response == null || response.StatusCode != HttpStatusCode.Conflict)
-                        {
-                            throw;
-                        }
-
-                        Trace.TraceWarning("MessagingException HttpStatusCode.Conflict - Queue likely already exists or is being created or deleted for path: {0}", this.topicName);
-                    }
+                    Trace.TraceWarning("MessagingException HttpStatusCode.Conflict - Queue likely already exists or is being created or deleted for path: {0}", this.topicName);
                 }
             }
 
@@ -93,48 +82,37 @@ namespace PriorityQueue.Shared
             this.topicClient.RetryPolicy = RetryPolicy.Default;
 
             // Setup the subscription.
-            if (!string.IsNullOrEmpty(subscription))
+            if (string.IsNullOrEmpty(subscription))
+                return;
+
+            if (!namespaceManager.SubscriptionExists(this.topicName, subscription))
             {
-                if (!namespaceManager.SubscriptionExists(this.topicName, subscription))
+                // Setup the filter for the subscription based on the priority.
+                var filter = new SqlFilter("Priority = '" + priority + "'");
+                var ruleDescription = new RuleDescription
                 {
-                    // Setup the filter for the subscription based on the priority.
-                    var filter = new SqlFilter("Priority = '" + priority + "'");
-                    var ruleDescription = new RuleDescription
-                    {
-                        Name = "PriorityFilter",
-                        Filter = filter
-                    };
+                    Name = "PriorityFilter",
+                    Filter = filter
+                };
 
-                    try
-                    {
-                        namespaceManager.CreateSubscription(this.topicName, subscription, ruleDescription);
-                    }
-                    catch (MessagingEntityAlreadyExistsException)
-                    {
-                        Trace.TraceInformation("Messaging entity already created: " + subscription);
-                    }
-                    catch (MessagingException ex)
-                    {
-                        var webException = ex.InnerException as WebException;
-                        if (webException != null)
-                        {
-                            var response = webException.Response as HttpWebResponse;
-
-                            // It's likely the conflicting operation being performed by the service bus is another queue create operation
-                            // If we don't have a web response with status code 'Conflict' it's another exception
-                            if (response == null || response.StatusCode != HttpStatusCode.Conflict)
-                            {
-                                throw;
-                            }
-
-                            Trace.TraceWarning("MessagingException HttpStatusCode.Conflict - subscription likely already exists or is being created or deleted for path: {0}", subscription);
-                        }
-                    }
+                try
+                {
+                    namespaceManager.CreateSubscription(this.topicName, subscription, ruleDescription);
                 }
-
-                this.subscriptionClient = SubscriptionClient.CreateFromConnectionString(this.serviceBusConnectionString, this.topicName, subscription);
-                this.subscriptionClient.RetryPolicy = RetryPolicy.Default;
+                catch (MessagingEntityAlreadyExistsException)
+                {
+                    Trace.TraceInformation("Messaging entity already created: " + subscription);
+                }
+                // It's likely the conflicting operation being performed by the service bus is another queue create operation
+                // If we don't have a web response with status code 'Conflict' it's another exception
+                catch (MessagingException ex) when (((ex.InnerException as WebException)?.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.Conflict)
+                {
+                    Trace.TraceWarning("MessagingException HttpStatusCode.Conflict - subscription likely already exists or is being created or deleted for path: {0}", subscription);
+                }
             }
+
+            this.subscriptionClient = SubscriptionClient.CreateFromConnectionString(this.serviceBusConnectionString, this.topicName, subscription);
+            this.subscriptionClient.RetryPolicy = RetryPolicy.Default;
         }
 
         public void SetupTopic()
@@ -176,12 +154,11 @@ namespace PriorityQueue.Shared
 
         private void OptionsOnExceptionReceived(object sender, ExceptionReceivedEventArgs exceptionReceivedEventArgs)
         {
-            var exceptionMessage = "null";
-            if (exceptionReceivedEventArgs != null && exceptionReceivedEventArgs.Exception != null)
-            {
-                exceptionMessage = exceptionReceivedEventArgs.Exception.Message;
-                Trace.TraceError("Exception in QueueClient.ExceptionReceived: {0}", exceptionMessage);
-            }
+            if (exceptionReceivedEventArgs?.Exception == null)
+                return;
+
+            var exceptionMessage = exceptionReceivedEventArgs.Exception.Message;
+            Trace.TraceError("Exception in QueueClient.ExceptionReceived: {0}", exceptionMessage);
         }
     }
 }
