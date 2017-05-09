@@ -13,7 +13,7 @@ namespace PriorityQueue.Shared
     public class PriorityWorkerRole : RoleEntryPoint
     {
         private QueueManager queueManager;
-        private ManualResetEvent completedEvent = new ManualResetEvent(false);
+        private readonly ManualResetEvent completedEvent = new ManualResetEvent(false);
 
         public override void Run()
         {

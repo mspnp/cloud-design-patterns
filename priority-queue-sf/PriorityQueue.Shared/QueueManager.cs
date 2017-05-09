@@ -45,7 +45,7 @@ namespace PriorityQueue.Shared
             options.ExceptionReceived += this.OptionsOnExceptionReceived;
 
             this.subscriptionClient.OnMessageAsync(
-                 async (msg) =>
+                 async msg =>
                  {
                      if (!cancellationToken.IsCancellationRequested)
                      {

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.Tracing;
-using System.Fabric;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.ServiceFabric.Services.Runtime;
 
@@ -22,7 +18,7 @@ namespace PriorityQueue.Low
         }
 
         // Instance constructor is private to enforce singleton semantics
-        private ServiceEventSource() : base() { }
+        private ServiceEventSource() { }
 
         #region Keywords
         // Event keywords can be used to categorize events. 
