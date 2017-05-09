@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Fabric;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,11 +15,11 @@ namespace PriorityQueue.Sender
     /// <summary>
     /// An instance of this class is created for each service instance by the Service Fabric runtime.
     /// </summary>
-    internal sealed class Fabric : StatelessService
+    internal sealed class MessagesSender : StatelessService
     {
         private QueueManager queueManager;
 
-        public Fabric(StatelessServiceContext context)
+        public MessagesSender(StatelessServiceContext context)
             : base(context)
         { }
 
@@ -63,7 +62,7 @@ namespace PriorityQueue.Sender
                         }).ToList();
                     await this.queueManager.SendBatchAsync(lowMessages)
                         .ConfigureAwait(false);
-                    Trace.TraceInformation($"Sent low priority message batch: {this.Context.NodeContext.NodeId.ToString()}");
+                    Trace.TraceInformation($"Sent low priority message batch: {this.Context.NodeContext.NodeId}");
 
                     // Send a high priority batch
                     var highMessages = Enumerable.Range(0, 10)
@@ -79,7 +78,7 @@ namespace PriorityQueue.Sender
 
                     await this.queueManager.SendBatchAsync(highMessages)
                         .ConfigureAwait(false);
-                    Trace.TraceInformation($"Sent high priority message batch: {this.Context.NodeContext.NodeId.ToString()}");
+                    Trace.TraceInformation($"Sent high priority message batch: {this.Context.NodeContext.NodeId}");
                 }
                 catch (Exception ex)
                 {
