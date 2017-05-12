@@ -1,0 +1,35 @@
+﻿@model ResiliencyDemos.Models.Book
+@{
+    ViewBag.Title = "Graceful Degredation Demo";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <h2>@ViewBag.Title</h2>
+    </div>
+    <div class="col-md-6">
+        @{ Html.RenderPartial("_Mode", "Broken"); }
+    </div>
+</div>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+
+        <!--
+        This demonstrates the user experience when an image is broken.
+        The source uri of the below <img> tag is invalid to simulate the failure.
+        The same experience occurs if retrieving the image returns an HTTP error, such as 401, 403, 404 or 500.
+        Because there is no graceful degredation strategy in place, the user experience is impacted.
+        -->
+
+        <img class="img-responsive" id="coverImage" src="#" alt="@Model.ShortTitle"/>
+
+    </div>
+    <div class="col-md-8">
+        <h1 class="media-heading">@Model.Title</h1>
+        <h3>@Model.Author</h3>
+        @Html.FormatParagraphs(Model.Summary)
+    </div>
+</div>

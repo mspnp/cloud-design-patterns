@@ -1,0 +1,52 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+/* Highlight active buttons better */
+.btn.active {
+    -webkit-box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .5);
+    box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .5);
+}
+
+/* Book cover fall-back classes */
+.book-container {
+    position: relative;
+    max-width: 360px;
+    height: 450px;
+}
+.book-bg {
+    /* Embedded SVG. Source: https://pixabay.com/p-161117  (CC0 Public Domain) */
+    background: url('data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%20165.912%20205.448%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cdefs%3E%3ClinearGradient%20gradientUnits%3D%22userSpaceOnUse%22%20id%3D%22a%22%20x2%3D%220%22%20y1%3D%2247.223%22%20y2%3D%22154.077%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23b5dbff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238fbfeb%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20gradientUnits%3D%22userSpaceOnUse%22%20id%3D%22b%22%20x1%3D%2273.411%22%20x2%3D%22110.343%22%20y1%3D%2271.898%22%20y2%3D%22160.551%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23b5deff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237ac4ff%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M22.4%20196.167s-4.25-.082-6-.832-3.75-2.5-3.75-2.5v-182.5s1.5%201%203.25%201.75%206.5%201.5%206.5%201.5v182.582z%22%20fill%3D%22url(%23a)%22%2F%3E%3Cpath%20d%3D%22M22.4%2013.585h129.498v182.582H22.4z%22%20fill%3D%22url(%23b)%22%2F%3E%3Cpath%20d%3D%22M152.828%2013.423a.477.477%200%200%200-.264-.424c-.01-.006-.016-.016-.027-.021l-8.783-4.392a.488.488%200%200%200-.217-.051H14.087c-.315%200-1.118.002-1.572.367a.476.476%200%200%200-.272.398c-.008.022-.022.039-.028.063a.832.832%200%200%200%20.021.425v182.818a.851.851%200%200%200%20.012.433c.064.208.259.838%202.236%201.825%202.199%201.101%205.411%202.015%207.613%202.207a.47.47%200%200%200%20.208.052l130.079.011a.489.489%200%200%200%20.485-.485l-.041-183.226zm-4.504-1.468H18.09c-.041%200-.071.025-.105.043a25.162%2025.162%200%200%201-1.541-.545h130.875l1.005.502zm-1.975-.987H15.306c-.133-.063-.274-.122-.401-.186a11.37%2011.37%200%200%201-.59-.316h131.031l1.003.502zM13.203%209.613c.113-.044.365-.108.884-.108h129.336l.953.478H13.578a1.932%201.932%200%200%201-.375-.363v-.007zM14.915%20194c-1.178-.588-1.604-1.008-1.712-1.184v-.146a.427.427%200%200%200%200-.113V10.904c.339.241.754.488%201.268.745%202.103%201.051%205.125%201.929%207.311%202.173l.039%20182.249c-2.063-.238-4.91-1.072-6.906-2.071zm4.667-181.561h129.71l.979.488H22.863c-.879-.001-2.049-.188-3.281-.488zm3.355%20183.718l-.054-.011c-.029%200-.065-.005-.095-.005l-.039-182.245%20129.11.012.039%20182.26-128.961-.011z%22%20fill%3D%22%233e3a39%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    height: 100%;
+    width: 100%;
+}
+.book-txt {
+    padding: 5% 15%;
+    height: 100%;
+    width: 100%;
+}
+.book-txt-bottom {
+    margin-top: -20px;
+}
