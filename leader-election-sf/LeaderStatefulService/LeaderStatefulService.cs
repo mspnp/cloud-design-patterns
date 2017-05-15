@@ -31,6 +31,8 @@ namespace LeaderStatefulService
 
         public async Task<List<ApplicationLog>> GetWorkloadChunk()
         {
+            await InitWorkloads();
+
             await DoInTransaction(instance =>
             {
                 instance.Page = instance.Page + 1;
@@ -90,7 +92,7 @@ namespace LeaderStatefulService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            workloads = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, WorkloadManager>>("workloads");
+            await InitWorkloads();
             
             using (var tx = this.StateManager.CreateTransaction())
             {
@@ -118,10 +120,8 @@ namespace LeaderStatefulService
                 }
             }
 
-            while (true)
+            while (!cancellationToken.IsCancellationRequested)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
                 await Task.Delay(20000, cancellationToken);
 
                 // Simulate an exception raised in the leader
@@ -131,6 +131,14 @@ namespace LeaderStatefulService
                     throw new ApplicationException("Force failure");
                 }
             }
+        }
+
+        private async Task InitWorkloads()
+        {
+            if (workloads != null)
+                return;
+
+            workloads = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, WorkloadManager>>("workloads");
         }
 
         private async Task DoInTransaction(Func<WorkloadManager, WorkloadManager> func)

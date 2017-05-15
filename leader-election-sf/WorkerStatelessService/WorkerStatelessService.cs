@@ -2,12 +2,13 @@
 using System.Fabric;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.ServiceFabric.Services.Runtime;
 using Shared.Service;
 using Microsoft.ServiceFabric.Services.Remoting.Client;
 using Microsoft.ServiceFabric.Services.Client;
 using System.Configuration;
+using System.Fabric.Query;
 using System.Linq;
+using StatelessService = Microsoft.ServiceFabric.Services.Runtime.StatelessService;
 
 namespace WorkerStatelessService
 {
@@ -17,8 +18,9 @@ namespace WorkerStatelessService
     internal sealed class WorkerStatelessService : StatelessService
     {
         private static readonly string LeaderServiceName = ConfigurationManager.AppSettings["LeaderServiceName"];
-        private static readonly int secondsBetweenRetries = 10;
-        private static readonly int numberOfRetries = 12;
+        private static readonly int secondsBetweenRetries = 5;
+        private static readonly int numberOfRetries = 30;
+        private static readonly int timeout = 60;
 
         public WorkerStatelessService(StatelessServiceContext context)
             : base(context)
@@ -36,10 +38,8 @@ namespace WorkerStatelessService
             // TODO: Replace the following sample code with your own logic 
             //       or remove this RunAsync override if it's not needed in your service.
 
-            while (true)
+            while (!cancellationToken.IsCancellationRequested)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
                 var service = ServiceProxy.Create<ILeaderService>(serviceUri, new ServicePartitionKey(1));
 
                 var load = await service.GetWorkloadChunk();
@@ -55,32 +55,27 @@ namespace WorkerStatelessService
 
         private static async Task WaitForLeader(string leaderServiceName, CancellationToken cancellationToken, int count = 1)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            if(count == numberOfRetries)
-                throw new TimeoutException("Leader not initialized after " + count * secondsBetweenRetries + " seconds" );
-
-            var fabricClient = new FabricClient();
-            var apps = fabricClient.QueryManager.GetApplicationListAsync().Result;
-            
-            if (apps.Any())
+            while (count < numberOfRetries && !cancellationToken.IsCancellationRequested)
             {
-                var services = await fabricClient.QueryManager.GetServiceListAsync(apps.First().ApplicationName);
-                if (services.All(s => s.ServiceName.LocalPath != leaderServiceName))
+                var fabricClient = new FabricClient();
+                var apps = fabricClient.QueryManager.GetApplicationListAsync(null, TimeSpan.FromSeconds(timeout), cancellationToken).Result;
+
+                if (apps.Any())
                 {
-                    await Wait(cancellationToken, count);
+                    var services = await fabricClient.QueryManager.GetServiceListAsync(apps.First().ApplicationName, null, null,
+                                TimeSpan.FromSeconds(timeout), cancellationToken);
+                    var leaderService = services.FirstOrDefault(s => s.ServiceName.LocalPath == leaderServiceName);
+                    if (leaderService != null && leaderService.ServiceStatus == ServiceStatus.Active)
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(secondsBetweenRetries), cancellationToken);
+                        return;
+                    }
                 }
+                await Task.Delay(TimeSpan.FromSeconds(secondsBetweenRetries), cancellationToken);
+                count++;
             }
-            else
-            {
-                await Wait(cancellationToken, count);
-            }
+            throw new TimeoutException("Leader not initialized after " + count * secondsBetweenRetries + " seconds" );
         }
 
-        private static async Task Wait(CancellationToken cancellationToken, int count)
-        {
-            await Task.Delay(TimeSpan.FromSeconds(secondsBetweenRetries*count), cancellationToken);
-            count++;
-            await WaitForLeader(LeaderServiceName, cancellationToken, count);
-        }
     }
 }
