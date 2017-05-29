@@ -22,20 +22,20 @@ namespace LeaderStatefulService
         public const string ApplicationLogWorkloadName = "applicationlog-workload";
         private readonly bool simulateInternalFailure = bool.Parse(ConfigurationManager.AppSettings["simulateInternalFailure"]);
 
-        WorkloadManager manager;
-        IReliableDictionary<string, WorkloadManager> workloads;
+        private WorkloadManager manager;
+        private IReliableDictionary<string, WorkloadManager> workloads;
 
         public LeaderStatefulService(StatefulServiceContext context)
             : base(context)
         { }
 
-        public async Task<List<ApplicationLog>> GetWorkloadChunk()
+        public async Task<List<ApplicationLog>> GetWorkloadChunkAsync()
         {
-            await InitWorkloads();
+            await InitWorkloadsAsync();
 
-            await DoInTransaction(instance =>
+            await CreateOrUpdateWorkloadsAsync(instance =>
             {
-                instance.Page = instance.Page + 1;
+                instance.Page++;
                 return instance;
             });
 
@@ -43,7 +43,7 @@ namespace LeaderStatefulService
 
             if (result == null || result.Count == 0)
             {
-                await DoInTransaction(instance =>
+                await CreateOrUpdateWorkloadsAsync(instance =>
                 {
                     instance.AggregatedTotal = 0;
                     instance.Page = 0;
@@ -56,11 +56,11 @@ namespace LeaderStatefulService
             return result;
         }
 
-        public async Task ReportResult(int total)
+        public async Task ReportResultAsync(int total)
         {
-            await DoInTransaction(instance =>
+            await CreateOrUpdateWorkloadsAsync(instance =>
             {
-                instance.AggregatedTotal = instance.AggregatedTotal + total;
+                instance.AggregatedTotal += total;
                 return instance;
             });
 
@@ -81,8 +81,7 @@ namespace LeaderStatefulService
         /// <returns>A collection of listeners.</returns>
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return new[] { new ServiceReplicaListener(context =>
-                this.CreateServiceRemotingListener(context)) };
+            return new[] { new ServiceReplicaListener(this.CreateServiceRemotingListener) };
         }
 
         /// <summary>
@@ -92,7 +91,7 @@ namespace LeaderStatefulService
         /// <param name="cancellationToken">Canceled when Service Fabric needs to shut down this service replica.</param>
         protected override async Task RunAsync(CancellationToken cancellationToken)
         {
-            await InitWorkloads();
+            await InitWorkloadsAsync();
             
             using (var tx = this.StateManager.CreateTransaction())
             {
@@ -113,7 +112,7 @@ namespace LeaderStatefulService
                 {
                     ServiceEventSource.Current.ServiceMessage(
                         this.Context,
-                        "Failure at RunAsync on Leader {0}. {1}",
+                        "Failure at RunAsync on Leader {0}: {1}",
                         Context.NodeContext.NodeName,
                         ex.Message);
                     throw;
@@ -122,8 +121,6 @@ namespace LeaderStatefulService
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Delay(20000, cancellationToken);
-
                 // Simulate an exception raised in the leader
                 if (simulateInternalFailure && manager.Page > 0 && (manager.Page % 3) == 0)
                 {
@@ -133,7 +130,7 @@ namespace LeaderStatefulService
             }
         }
 
-        private async Task InitWorkloads()
+        private async Task InitWorkloadsAsync()
         {
             if (workloads != null)
                 return;
@@ -141,7 +138,7 @@ namespace LeaderStatefulService
             workloads = await this.StateManager.GetOrAddAsync<IReliableDictionary<string, WorkloadManager>>("workloads");
         }
 
-        private async Task DoInTransaction(Func<WorkloadManager, WorkloadManager> func)
+        private async Task CreateOrUpdateWorkloadsAsync(Func<WorkloadManager, WorkloadManager> func)
         {
             using (var tx = this.StateManager.CreateTransaction())
             {

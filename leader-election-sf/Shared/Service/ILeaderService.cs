@@ -6,8 +6,8 @@ namespace Shared.Service
 {
     public interface ILeaderService : IService
     {
-        Task<List<ApplicationLog>> GetWorkloadChunk();
+        Task<List<ApplicationLog>> GetWorkloadChunkAsync();
 
-        Task ReportResult(int total);
+        Task ReportResultAsync(int total);
     }
 }

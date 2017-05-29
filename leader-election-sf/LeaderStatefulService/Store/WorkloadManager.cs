@@ -1,5 +1,4 @@
-﻿using Microsoft.ServiceFabric.Services.Runtime;
-using Shared;
+﻿using Shared;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -10,7 +9,7 @@ namespace LeaderStatefulService.Store
     [DataContract]
     public class WorkloadManager
     {
-        const int _defaultElements = 10;
+        const int DefaultElementsCount = 10;
         
         [DataMember]
         public int AggregatedTotal { get; set; }
@@ -19,17 +18,9 @@ namespace LeaderStatefulService.Store
         [DataMember]
         public int ItemsPerPage { get; set; }
 
-        private WorkloadStore Store
-        {
-            get
-            {
-                // NOTE: ideally, there would be no need to recreate test
-                //       data over and over... :)
-                return new WorkloadStore();
-            }
-        }
+        private static WorkloadStore Store => new WorkloadStore();
 
-        public WorkloadManager(int itemsPerPage = _defaultElements)
+        public WorkloadManager(int itemsPerPage = DefaultElementsCount)
         {
             ItemsPerPage = itemsPerPage;
             Page = -1;

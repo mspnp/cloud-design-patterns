@@ -21,3 +21,5 @@ This is a console project that should be run in parallel with the cluster. The p
 ### Leader's unhealthy scenario
 
 *LeaderStatefulService* project includes the possibility to simulate an unhandled exception in the leader's service. Change the setting **simulateInternalFailure** to true in *app.config* to recreate this scenario. In this case Service Fabric also fails over to another node but also reports the application as unhealthy facilitating the detection of this condition.
+
+> Note for VSTS users: correlation Ids was disabled to avoid [this issue](https://github.com/Azure/service-fabric-issues/issues/209)
