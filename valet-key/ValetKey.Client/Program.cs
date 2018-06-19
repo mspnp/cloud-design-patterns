@@ -36,7 +36,7 @@ namespace ValetKey.Client
                     blob.UploadFromStream(stream);
                 }
 
-                Console.WriteLine("Blob uplodad successful: {0}", blobSas.Name);
+                Console.WriteLine("Blob uploaded successful: {0}", blobSas.Name);
             }
             catch (Exception ex)
             {
