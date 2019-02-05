@@ -4,7 +4,7 @@ This document describes the Compute Resource Consolidation Pattern example from 
 
 ## System Requirements
 * Microsoft .NET Framework version 4.5
-* Microsoft Visual Studio 2015 Comunity, Enterprise, or Professional
+* Microsoft Visual Studio 2015 Community, Enterprise, or Professional
 * Windows Azure SDK for .NET version 2.9
 
 ## Before you start
