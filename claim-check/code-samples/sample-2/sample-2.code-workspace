@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "client-consumer"
+		},
+		{
+			"path": "azure-function"
+		}
+	],
+	"settings": {}
+}

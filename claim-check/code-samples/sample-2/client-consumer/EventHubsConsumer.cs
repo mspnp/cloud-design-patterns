@@ -92,8 +92,6 @@ namespace ClientConsumer
         public async Task ProcessMessages(CancellationToken cancellationToken)
         {
             Console.WriteLine("The application will now start to listen for incoming message.");
-            Console.WriteLine("Hit a key when ready to start. Hit 'q' to terminate the app.");
-            Console.ReadKey();
 
             var runtimeInfo = await client.GetRuntimeInformationAsync();
             Console.WriteLine("Creating receiver handlers...");

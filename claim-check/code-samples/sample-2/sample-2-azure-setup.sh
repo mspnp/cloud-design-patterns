@@ -25,7 +25,11 @@ trap on_error ERR
 
 rm azcli-execution.log -f
 
-export RG="pnp2"
+if [[ -z $1 ]]; then
+    export RG="pnp2"
+else
+    export RG="${1}"
+fi
 export PREFIX="${RG}cc"
 export LOCATION="eastus"
 
@@ -97,6 +101,11 @@ az eventgrid event-subscription create --name "eventhub" --endpoint "${EEID}" --
 
 echo "done\n"
 
-echo "Copy below values for later use"
+echo "The following values will be copied into App.config (using App.config.template as source):"
 echo "EventHubConnectionString = ${EVENTHUB_CONNECTION_STRING}"
 echo "StorageConnectionString = ${STORAGE_CONNECTION_STRING}"
+
+sed "s|{EventHubConnectionString}|${EVENTHUB_CONNECTION_STRING}|g" client-consumer/App.config.template > client-consumer/App.config
+sed -i "s|{StorageConnectionString}|${STORAGE_CONNECTION_STRING}|g" client-consumer/App.config
+
+echo "done\n"
