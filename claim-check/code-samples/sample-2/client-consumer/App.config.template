@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <appSettings>
+    <add key="EventHubConnectionString" value="{EventHubConnectionString}"/>
+    <add key="StorageConnectionString" value="{StorageConnectionString}"/>
+    <add key="DownloadDestination" value="temp"/>
+  </appSettings>
+</configuration>
+
