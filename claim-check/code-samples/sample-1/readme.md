@@ -86,23 +86,7 @@ Azure Event grid is already configured to send data to Event Hubs by the `sample
     --source-resource-id "<storage-account-resoure-id>"
 ```
 
-Before running the console application, you need to point it to the used Azure Storage Account and Azure Storage Queue. To do that, simply access the console application by opening the below solution in VS2017 or just open the folder using Visual Studio Code:
-
-```bash
-./client-consumer/client-consumer.sln
-```
-
-Open the App.config file in the solution and update the connection strings and queue name information obtained earlier on running the `sample-1-azure-setup.sh` script in this file. Set a download destination that works for your environment. By default it is set to be `C:\Temp`.
-
-```xml
-<appSettings>
-  <add key="StorageConnectionString" value=""/>
-  <add key="StorageQueueName" value=""/>
-  <add key="DownloadDestination" value="temp"/>
-</appSettings>
-```
-
-After making above update, run the console application locally.
+The script will also automatically configure `App.config` so that the consumer application will point to the created resources. Run the consumer application locally:
 
 ```bash
 cd client-consumer
