@@ -81,6 +81,11 @@ az eventgrid event-subscription create --name "queue" --included-event-types "Mi
 
 echo "done\n"
 
-echo "Copy below values for later use"
+echo "The following values will be copied into App.config (using App.config.template as source):"
 echo "StorageConnectionString = ${STORAGE_CONNECTION_STRING}"
 echo "StorageQueueName = ${PREFIX}queue"
+
+sed "s/{StorageConnectionString}/${STORAGE_CONNECTION_STRING}/g" client-consumer/App.config.template > client-consumer/App.config
+sed -i "s/{StorageQueueName}/${PREFIX}queue/g" client-consumer/App.config
+
+echo "done\n"
