@@ -39,8 +39,8 @@ az account set --subscription "<YOUR SUBSCRIPTION NAME>"
 Clone the repository and open the code-samples directory from your command line tool.
 
 ```bash
-git clone https://github.com/mspnp/cloud-design-patterns.git claimncheck
-cd cloud-design-patterns/claimncheck/code-samples/sample-1
+git clone https://github.com/mspnp/cloud-design-patterns.git
+cd cloud-design-patterns/claim-check/code-samples/sample-1
 ```
 
 ## Run Azure Setup Script
@@ -51,7 +51,7 @@ Run the azure setup script to get the resources deployed and everything set up
 ./sample-1-azure-setup.sh <unique-name>
 ```
 
-"unique-name" should be something that is unlikely to be used by someone else. This is needed to make sure that no conflict with other people running the same sample at the same time will arise. The name should only contains numbers and letters should not be longer than 12 characters (as additonal text will be added by the script itself to identify each created resource) If you're not sure about what to use here, you can just generate a random string using the following bash command:
+"unique-name" should be something that is unlikely to be used by someone else. This is needed to make sure that no conflict with other people running the same sample at the same time will arise. The name should only contains numbers and letters should not be longer than 12 characters (as additional text will be added by the script itself to identify each created resource) If you're not sure about what to use here, you can just generate a random string using the following bash command:
 
 ```bash
 echo `openssl rand 5 -base64 | cut -c1-7 | tr '[:upper:]' '[:lower:]' | tr -cd '[[:alnum:]]._-'`
