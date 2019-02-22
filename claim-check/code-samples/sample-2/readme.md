@@ -109,7 +109,15 @@ The "azure-function" sample shows how easy it is to set up a complete serverless
     --source-resource-id "<storage-account-resoure-id>"
 ```
 
-The sample Azure Function will only get the Claim Check message, extract the payload address and log it. You can see the logged messages using the Application Insight resource, searching for TRACE messages created in the last 24h. You will see log messages like the following:
+The sample Azure Function will only get the Claim Check message, extract the payload address and log it. You can see the logged messages using the Application Insight resource, searching for TRACE messages created in the last 24h. Here's a sample query you can use:
+
+```
+traces
+| where operation_Name == "ClaimCheck" and timestamp  > ago(12h) and customDimensions.Category == 'Function.ClaimCheck.User'
+| order by timestamp desc
+```
+
+You will see log messages like the following:
 
 ```text
 Got BlobCreated event data, blob URI https://pnp1ccstorage.blob.core.windows.net/sample/my-sampl-big-file.jpg
