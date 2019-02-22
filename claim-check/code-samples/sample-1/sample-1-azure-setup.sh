@@ -85,7 +85,7 @@ echo "The following values will be copied into App.config (using App.config.temp
 echo "StorageConnectionString = ${STORAGE_CONNECTION_STRING}"
 echo "StorageQueueName = ${PREFIX}queue"
 
-sed "s/{StorageConnectionString}/${STORAGE_CONNECTION_STRING}/g" client-consumer/App.config.template > client-consumer/App.config
-sed -i "s/{StorageQueueName}/${PREFIX}queue/g" client-consumer/App.config
+sed "s|{StorageConnectionString}|${STORAGE_CONNECTION_STRING}|g" client-consumer/App.config.template > client-consumer/App.config
+sed -i "s|{StorageQueueName}|${PREFIX}queue|g" client-consumer/App.config
 
 echo "done\n"
