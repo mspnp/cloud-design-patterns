@@ -3,12 +3,13 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RootNamespace>client_consumer</RootNamespace>
+    <RootNamespace>ClientConsumer</RootNamespace>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="ServiceBus.AttachmentPlugin" Version="3.0.1" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.6.0-preview.18571.3" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
   </ItemGroup>
 
 </Project>
