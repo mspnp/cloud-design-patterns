@@ -16,7 +16,11 @@ trap on_error ERR
 
 rm azcli-execution.log -f
 
-export RG="pnp3"
+if [[ -z $1 ]]; then
+    export RG="pnp3"
+else
+    export RG="${1}"
+fi
 export PREFIX="${RG}cc"
 export LOCATION="eastus"
 
@@ -76,7 +80,14 @@ az functionapp config appsettings set --name "${PREFIX}functionapp" --resource-g
 
 echo "done\n"
 
-echo "Copy below values for later use"
+echo "The following values will be copied into App.config (using App.config.template as source):"
 echo "STORAGE_CONNECTION_STRING = ${STORAGE_CONNECTION_STRING}"
 echo "SERVICE_BUS_CONNECTION_STRING = ${SERVICE_BUS_CONNECTION_STRING}"
 echo "QUEUE_NAME = ${PREFIX}sbq"
+
+sed "s|{STORAGE_CONNECTION_STRING}|${STORAGE_CONNECTION_STRING}|g" client-consumer/App.config.template > client-consumer/App.config
+sed -i "s|{SERVICE_BUS_CONNECTION_STRING}|${SERVICE_BUS_CONNECTION_STRING}|g" client-consumer/App.config
+sed -i "s|{QUEUE_NAME}|${PREFIX}sbq|g" client-consumer/App.config
+
+echo "done\n"
+
