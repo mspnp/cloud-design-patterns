@@ -14,7 +14,7 @@ on_error() {
 
 trap on_error ERR
 
-rm azcli-execution.log -f
+rm -f azcli-execution.log 
 
 if [[ -z $1 ]]; then
     export RG="pnp3"

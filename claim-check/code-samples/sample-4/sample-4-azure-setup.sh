@@ -23,7 +23,7 @@ on_error() {
 
 trap on_error ERR
 
-rm azcli-execution.log -f
+rm -f azcli-execution.log
 
 export RG="pnp4"
 export PREFIX="${RG}cc"
