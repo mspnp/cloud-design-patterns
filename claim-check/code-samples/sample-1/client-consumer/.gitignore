@@ -339,3 +339,4 @@ ASALocalRun/
 
 # Additional files/folders
 temp/
+*.bak

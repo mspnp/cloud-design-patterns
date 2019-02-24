@@ -79,13 +79,16 @@ az eventgrid event-subscription create --name "function" --included-event-types 
 echo "create: eventgrid event-subscription queue"
 az eventgrid event-subscription create --name "queue" --included-event-types "Microsoft.Storage.BlobCreated" --endpoint "${SID}/queueservices/default/queues/${PREFIX}queue" --endpoint-type "storagequeue" --source-resource-id "${SID}" -o json >> azcli-execution.log
 
-echo "done\n"
+echo "done"
 
 echo "The following values will be copied into App.config (using App.config.template as source):"
+
 echo "StorageConnectionString = ${STORAGE_CONNECTION_STRING}"
-echo "StorageQueueName = ${PREFIX}queue"
-
 sed "s|{StorageConnectionString}|${STORAGE_CONNECTION_STRING}|g" client-consumer/App.config.template > client-consumer/App.config
-sed -i "s|{StorageQueueName}|${PREFIX}queue|g" client-consumer/App.config
 
-echo "done\n"
+echo "StorageQueueName = ${PREFIX}queue"
+sed -i.bak "s|{StorageQueueName}|${PREFIX}queue|g" client-consumer/App.config
+
+rm -f client-consumer/App.config.bak
+
+echo "done"

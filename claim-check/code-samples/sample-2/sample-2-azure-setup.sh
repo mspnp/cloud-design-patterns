@@ -99,13 +99,16 @@ az eventgrid event-subscription create --name "function" --endpoint "https://${P
 echo "create: eventgrid event-subscription eventhub"
 az eventgrid event-subscription create --name "eventhub" --endpoint "${EEID}" --endpoint-type "eventhub" --included-event-types "Microsoft.Storage.BlobCreated" --source-resource-id "${SID}" -o json >> azcli-execution.log
 
-echo "done\n"
+echo "done"
 
 echo "The following values will be copied into App.config (using App.config.template as source):"
+
 echo "EventHubConnectionString = ${EVENTHUB_CONNECTION_STRING}"
-echo "StorageConnectionString = ${STORAGE_CONNECTION_STRING}"
-
 sed "s|{EventHubConnectionString}|${EVENTHUB_CONNECTION_STRING}|g" client-consumer/App.config.template > client-consumer/App.config
-sed -i "s|{StorageConnectionString}|${STORAGE_CONNECTION_STRING}|g" client-consumer/App.config
 
-echo "done\n"
+echo "StorageConnectionString = ${STORAGE_CONNECTION_STRING}"
+sed -i.bak "s|{StorageConnectionString}|${STORAGE_CONNECTION_STRING}|g" client-consumer/App.config
+
+rm -f client-consumer/App.config.bak
+
+echo "done"

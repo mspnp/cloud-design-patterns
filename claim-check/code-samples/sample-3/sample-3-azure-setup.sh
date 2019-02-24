@@ -78,16 +78,20 @@ az functionapp config appsettings set --name "${PREFIX}functionapp" --resource-g
 echo "set: functionapp config appsettings for service bus queue name"
 az functionapp config appsettings set --name "${PREFIX}functionapp" --resource-group "${RG}" --settings "APPINSIGHTS_INSTRUMENTATIONKEY=${APPINSIGHTS_KEY}" -o json >> azcli-execution.log
 
-echo "done\n"
+echo "done"
 
 echo "The following values will be copied into App.config (using App.config.template as source):"
+
 echo "STORAGE_CONNECTION_STRING = ${STORAGE_CONNECTION_STRING}"
-echo "SERVICE_BUS_CONNECTION_STRING = ${SERVICE_BUS_CONNECTION_STRING}"
-echo "QUEUE_NAME = ${PREFIX}sbq"
-
 sed "s|{STORAGE_CONNECTION_STRING}|${STORAGE_CONNECTION_STRING}|g" client-consumer/App.config.template > client-consumer/App.config
-sed -i "s|{SERVICE_BUS_CONNECTION_STRING}|${SERVICE_BUS_CONNECTION_STRING}|g" client-consumer/App.config
-sed -i "s|{QUEUE_NAME}|${PREFIX}sbq|g" client-consumer/App.config
 
-echo "done\n"
+echo "SERVICE_BUS_CONNECTION_STRING = ${SERVICE_BUS_CONNECTION_STRING}"
+sed -i.bak "s|{SERVICE_BUS_CONNECTION_STRING}|${SERVICE_BUS_CONNECTION_STRING}|g" client-consumer/App.config
+
+echo "QUEUE_NAME = ${PREFIX}sbq"
+sed -i.bak "s|{QUEUE_NAME}|${PREFIX}sbq|g" client-consumer/App.config
+
+rm -f client-consumer/App.config.bak
+
+echo "done"
 

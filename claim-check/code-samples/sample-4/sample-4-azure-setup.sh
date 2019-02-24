@@ -95,7 +95,7 @@ az functionapp config appsettings set --name "${PREFIX}functionapp" --resource-g
 echo "set: functionapp config appsettings for event hub consumer group"
 az functionapp config appsettings set --name "${PREFIX}functionapp" --resource-group "${RG}" --settings "EVENTHUB_NAME_CONSUMER_GROUP=${PREFIX}ehubcg" -o json >> azcli-execution.log
 
-echo "done\n"
+echo "done"
 
 echo "Copy below values for later use"
 echo "STORAGE_CONNECTION_STRING = ${STORAGE_CONNECTION_STRING}"

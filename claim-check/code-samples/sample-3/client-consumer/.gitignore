@@ -336,3 +336,7 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+
+# Additional files/folders
+temp/
+*.bak
