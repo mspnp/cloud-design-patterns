@@ -88,7 +88,7 @@ curl -H "Content-Type: application/json" -X POST https://<yourapp>.azurewebsites
 
 The Azure Function code uses the Service Bus plugin which drops the payload as a blob in the Storage Account created earlier and also sends a notification to consumer client using Service Bus Queue.
 
-The script `sample-3-azure-setup.sh` automatically configured `App.config` so that the consumer application points to the created resources. Run the consumer application locally:
+The script `sample-3-azure-setup.sh` had automatically configured `App.config` so that the consumer application points to the created resources. Run the consumer application locally:
 
 ```bash
 cd client-consumer
