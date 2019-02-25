@@ -49,6 +49,7 @@ namespace ClientConsumer
                 Console.WriteLine("Downloading to {0}...", destinationFile);
                 cloudBlob.DownloadToFile(destinationFile, FileMode.Create);
                 Console.WriteLine("Done.");
+                Console.WriteLine();
             }
 
             return Task.CompletedTask;
