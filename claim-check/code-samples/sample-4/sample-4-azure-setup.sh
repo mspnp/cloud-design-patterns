@@ -104,17 +104,17 @@ echo "done"
 echo "The following values will be copied into App.config (using App.config.template as source):"
 
 echo "STORAGE_CONNECTION_STRING = ${STORAGE_CONNECTION_STRING}"
-sed "s|{STORAGE_CONNECTION_STRING}|${STORAGE_CONNECTION_STRING}|g" client-consumer/App.config.template > client-consumer/App.config
+sed "s|{STORAGE_CONNECTION_STRING}|${STORAGE_CONNECTION_STRING}|g" client-producer/App.config.template > client-consumer/App.config
 
 echo "EH_FQDN = ${PREFIX}ehubns.servicebus.windows.net:9093"
-sed -i.bak "s|{EH_FQDN}|${PREFIX}ehubns.servicebus.windows.net:9093|g" client-consumer/App.config
+sed -i.bak "s|{EH_FQDN}|${PREFIX}ehubns.servicebus.windows.net:9093|g" client-producer/App.config
 
 echo "EH_CONNECTION_STRING = ${EVENTHUB_CS}"
-sed -i.bak "s|{EH_CONNECTION_STRING}|${EVENTHUB_CS}|g" client-consumer/App.config
+sed -i.bak "s|{EH_CONNECTION_STRING}|${EVENTHUB_CS}|g" client-producer/App.config
 
 echo "EH_NAME = ${EVENTHUB_NAME}"
-sed -i.bak "s|{EH_NAME}|${EVENTHUB_NAME}|g" client-consumer/App.config
+sed -i.bak "s|{EH_NAME}|${EVENTHUB_NAME}|g" client-producer/App.config
 
-rm -f client-consumer/App.config.bak
+rm -f client-producer/App.config.bak
 
 echo "done"
