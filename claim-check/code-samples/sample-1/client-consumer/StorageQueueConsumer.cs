@@ -12,14 +12,15 @@ namespace ClientConsumer
 {
     class StorageQueueConsumer : IConsumer
     {
-        private CloudStorageAccount storageAccount;
-        private CloudQueueClient queueClient;
-        private CloudQueue queue;
-        private CloudBlobClient cloudBlobClient;
-        private string downloadDestination;
+        private CloudQueueClient _queueClient;
+        private CloudQueue _queue;
+        private CloudBlobClient _cloudBlobClient;
+        private string _downloadDestination;
 
         public void Configure()
         {
+            CloudStorageAccount storageAccount;           
+
             foreach (string option in new string[] { "StorageConnectionString", "StorageQueueName", "DownloadDestination" })
             {
                 if (string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings?[option]))
@@ -30,38 +31,41 @@ namespace ClientConsumer
 
             string storageConnectionString = ConfigurationManager.AppSettings["StorageConnectionString"];
             string storageQueueName = ConfigurationManager.AppSettings["StorageQueueName"];
-            downloadDestination = ConfigurationManager.AppSettings["DownloadDestination"];
+            _downloadDestination = ConfigurationManager.AppSettings["DownloadDestination"];
 
             Console.WriteLine("Connecting to Azure Storage Account...");
             storageAccount = CloudStorageAccount.Parse(storageConnectionString);
-            cloudBlobClient = storageAccount.CreateCloudBlobClient();
-            queueClient = storageAccount.CreateCloudQueueClient();
-            queue = queueClient.GetQueueReference(storageQueueName);
+            _cloudBlobClient = storageAccount.CreateCloudBlobClient();
+            _queueClient = storageAccount.CreateCloudQueueClient();
+            _queue = _queueClient.GetQueueReference(storageQueueName);
             Console.WriteLine("Connected to {0}.", storageAccount.QueueEndpoint);
             Console.WriteLine();
         }
 
         public async Task ProcessMessages(CancellationToken token)
         {
-            foreach (CloudQueueMessage message in await queue.GetMessagesAsync(1, TimeSpan.FromMinutes(1), null, null))
+            foreach (CloudQueueMessage message in await _queue.GetMessagesAsync(1, TimeSpan.FromMinutes(1), null, null))
             {
                 var jsonMessage = JObject.Parse(message.AsString);
                 Uri uploadedUri = new Uri(jsonMessage["data"]["url"].ToString());
                 string uploadedFile = Path.GetFileName(jsonMessage["data"]["url"].ToString());
                 Console.WriteLine("Blob available at: {0}", jsonMessage["data"]["url"]);
 
-                var cloudBlob = await cloudBlobClient.GetBlobReferenceFromServerAsync(uploadedUri);
+                var cloudBlob = await _cloudBlobClient.GetBlobReferenceFromServerAsync(uploadedUri);
 
-                string destinationFile = Path.Combine(downloadDestination, Path.GetFileName(uploadedFile));
+                string destinationFile = Path.Combine(_downloadDestination, Path.GetFileName(uploadedFile));
                 Console.WriteLine("Downloading to {0}...", destinationFile);
-                await cloudBlob.DownloadToFileAsync(destinationFile, FileMode.Create);
+                await cloudBlob.DownloadToFileAsync(destinationFile, FileMode.Create);                
 
                 Console.WriteLine("Done.");
-                await queue.DeleteMessageAsync(message);
+                await _queue.DeleteMessageAsync(message);
                 Console.WriteLine();
             }
 
-            await Task.Delay(1000);
+            if (!token.IsCancellationRequested)
+            {
+                await Task.Delay(1000);
+            }
         }
     }
 }
