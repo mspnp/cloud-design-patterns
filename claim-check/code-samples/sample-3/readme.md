@@ -38,8 +38,8 @@ az account set --subscription "<YOUR SUBSCRIPTION NAME>"
 Clone the repository and open the code-samples directory from your command line tool.
 
 ```bash
-git clone https://github.com/mspnp/cloud-design-patterns.git claimncheck
-cd claimncheck/code-samples
+git clone https://github.com/mspnp/cloud-design-patterns.git
+cd claim-check/code-samples/sample-2
 ```
 
 ## Run Azure Setup Script
@@ -47,7 +47,13 @@ cd claimncheck/code-samples
 Run the azure setup script to get the resources deployed and everything set up
 
 ```bash
-./sample-3-azure-setup.sh
+./sample-3-azure-setup.sh <unique-name>
+```
+
+"unique-name" should be something that is unlikely to be used by someone else. This is needed to make sure that no conflict with other people running the same sample at the same time will arise. The name should only contains numbers and letters should not be longer than 12 characters (as additional text will be added by the script itself to identify each created resource) If you're not sure about what to use here, you can just generate a random string using the following bash command:
+
+```bash
+echo `openssl rand 5 -base64 | cut -c1-7 | tr '[:upper:]' '[:lower:]' | tr -cd '[[:alnum:]]._-'`
 ```
 
 This script will create
@@ -59,8 +65,6 @@ This script will create
 * a function app in an app service plan
 * an application insights service
 
-Copy the Connection string values displayed at the end of this script on execution. These will be used later.
-
 ## Running the sample
 
 The Azure Function is used to demonstrate a client application that acts as the initial processor for the large payload.
@@ -68,7 +72,7 @@ This could be replaced with any other console application with similar code
 
 Use the Azure Function URL obtained from the portal as shown below
 
-![Imported Sript](images/Function_GetURL.jpg)
+![Imported Script](images/Function_GetURL.jpg)
 
 Send a post request on the URL obtained using a message which acts as your large payload
 
@@ -79,28 +83,19 @@ curl -H "Content-Type: application/json" -X POST https://<yourapp>.azurewebsites
 or, if you want to try sending something bigger:
 
 ```bash
-curl -H "Content-Type: application/json" -X POST https://<yourapp>.azurewebsites.net/api/ClaimCheck -d @sample-3/readme.md
+curl -H "Content-Type: application/json" -X POST https://<yourapp>.azurewebsites.net/api/ClaimCheck -d @readme.md
 ```
 
 The Azure Function code uses the Service Bus plugin which drops the payload as a blob in the Storage Account created earlier and also sends a notification to consumer client using Service Bus Queue.
 
-Access the console application by opening the below solution in VS2017:
+The script `sample-3-azure-setup.sh` also automatically configure `App.config` so that the consumer application will point to the created resources. Run the consumer application locally:
 
 ```bash
-./claimncheck/code-samples/sample-3/client-consumer/client-consumer.sln
+cd client-consumer
+dotnet run
 ```
 
-Open the App.config file in the solution and update the connection strings and queue name information obtained earlier on running the ```sample-3-azure-setup.sh``` script in this file.
-
-```xml
-<appSettings>
-    <add key="STORAGE_CONNECTION_STRING" value=""/>
-    <add key="SERVICE_BUS_CONNECTION_STRING" value=""/>
-    <add key="QUEUE_NAME" value="pnp3sbq"/>
-  </appSettings>
-```
-
-After making above update, run the console application locally. This console application acts as the consumer client and on running will process the Service Bus message and retrieve the payload message from blob storage.
+This console application acts as the consumer client and on running will process the Service Bus message and retrieve the payload message from blob storage.
 
 Please note: For demo purposes, the console application prints payload content on the screen. So keep that in mind if you want to try sending really large payloads.
 
@@ -109,5 +104,5 @@ Please note: For demo purposes, the console application prints payload content o
 To complete cleanup of your solution, since this will create a dedicated resource group for the sample, you can just delete the entire resource group:
 
 ```bash
-az group delete -n pnp3
+az group delete -n <unique-name>
 ```

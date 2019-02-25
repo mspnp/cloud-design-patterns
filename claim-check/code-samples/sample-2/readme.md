@@ -66,8 +66,6 @@ This script will create
 * an application insights service
 * an event hubs namespace and an event hub instance
 
-Copy the Connection string values displayed at the end of this script on execution. These will be used later.
-
 ## Running the sample
 
 There are two applications provided as sample: one to be executed on premises, the other one to be executed on Azure. In order to generate a Claim Check message you just have to drop a file in the created Azure Storage account. You can use Azure Storage Explorer to do that. 
@@ -128,5 +126,5 @@ Got BlobCreated event data, blob URI https://pnp1ccstorage.blob.core.windows.net
 To complete cleanup of your solution, since this will create a dedicated resource group for the sample, you can just delete the entire resource group:
 
 ```bash
-az group delete -n pnp2
+az group delete -n <unique-name>
 ```

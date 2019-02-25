@@ -127,5 +127,5 @@ Got BlobCreated event data, blob URI https://pnp1ccstorage.blob.core.windows.net
 To complete cleanup of your solution, since this will create a dedicated resource group for the sample, you can just delete the entire resource group:
 
 ```bash
-az group delete -n pnp1
+az group delete -n <unique-name>
 ```
