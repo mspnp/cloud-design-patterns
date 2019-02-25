@@ -3,8 +3,7 @@
   <appSettings>
     <add key="STORAGE_CONNECTION_STRING" value="{STORAGE_CONNECTION_STRING}"/>
     <add key="SERVICE_BUS_CONNECTION_STRING" value="{SERVICE_BUS_CONNECTION_STRING}"/>
-    <add key="QUEUE_NAME" value="{QUEUE_NAME}"/>
-    <add key="DownloadDestination" value="temp"/>
+    <add key="QUEUE_NAME" value="{QUEUE_NAME}"/> 
   </appSettings>
 </configuration>
 
