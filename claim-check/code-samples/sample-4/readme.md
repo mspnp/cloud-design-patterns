@@ -90,7 +90,13 @@ The Kafka message will contain something like this:
 
 The Azure Function is used to demonstrate a client application that acts as the consumer  for the large payload. We have used the Azure Function Event Hub binding here to be notified of an incoming message in the Event Hub.
 
-You can use the Azure portal to see the output of the Azure Function.
+You can use the Azure portal to see the output of the Azure Function. You can see the logged messages using the Application Insight resource, searching for TRACE messages created in the last 24h. Here's a sample query you can use:
+
+```
+traces
+| where timestamp  > ago(12h) and operation_Name == "AzFuncConsumer" and customDimensions.Category == 'Function.AzFuncConsumer.User'
+| order by timestamp desc
+```
 
 ## Cleanup
 
