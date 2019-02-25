@@ -25,7 +25,11 @@ trap on_error ERR
 
 rm -f azcli-execution.log
 
-export RG="pnp4"
+if [[ -z $1 ]]; then
+    export RG="pnp4"
+else
+    export RG="${1}"
+fi
 export PREFIX="${RG}cc"
 export LOCATION="eastus"
 
@@ -97,8 +101,20 @@ az functionapp config appsettings set --name "${PREFIX}functionapp" --resource-g
 
 echo "done"
 
-echo "Copy below values for later use"
+echo "The following values will be copied into App.config (using App.config.template as source):"
+
 echo "STORAGE_CONNECTION_STRING = ${STORAGE_CONNECTION_STRING}"
-echo "EH_FQDN = ${PREFIX}ehubns.servicebus.windows.net"
+sed "s|{STORAGE_CONNECTION_STRING}|${STORAGE_CONNECTION_STRING}|g" client-consumer/App.config.template > client-consumer/App.config
+
+echo "EH_FQDN = ${PREFIX}ehubns.servicebus.windows.net:9093"
+sed -i.bak "s|{EH_FQDN}|${PREFIX}ehubns.servicebus.windows.net:9093|g" client-consumer/App.config
+
 echo "EH_CONNECTION_STRING = ${EVENTHUB_CS}"
+sed -i.bak "s|{EH_CONNECTION_STRING}|${EVENTHUB_CS}|g" client-consumer/App.config
+
 echo "EH_NAME = ${EVENTHUB_NAME}"
+sed -i.bak "s|{EH_NAME}|${EVENTHUB_NAME}|g" client-consumer/App.config
+
+rm -f client-consumer/App.config.bak
+
+echo "done"
