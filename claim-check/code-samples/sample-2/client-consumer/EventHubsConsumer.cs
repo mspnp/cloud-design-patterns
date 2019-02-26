@@ -32,7 +32,7 @@ namespace ClientConsumer
             return Task.FromException(error);
         }
 
-        public Task ProcessEventsAsync(IEnumerable<EventData> events)
+        public async Task ProcessEventsAsync(IEnumerable<EventData> events)
         {
             foreach(var e in events)
             {
@@ -47,12 +47,12 @@ namespace ClientConsumer
                 string uploadedFile = Path.GetFileName(jsonMessage["data"]["url"].ToString());
                 string destinationFile = Path.Combine(_downloadDestination, Path.GetFileName(uploadedFile));
                 Console.WriteLine("Downloading to {0}...", destinationFile);
-                cloudBlob.DownloadToFile(destinationFile, FileMode.Create);
+                await cloudBlob.DownloadToFileAsync(destinationFile, FileMode.Create);
                 Console.WriteLine("Done.");
                 Console.WriteLine();
             }
 
-            return Task.CompletedTask;
+            return;
         }
     }
 

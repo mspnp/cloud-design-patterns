@@ -19,8 +19,6 @@ namespace Microsoft.PnP.Messaging
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
             string requestContent = await new StreamReader(req.Body).ReadToEndAsync();
             log.LogInformation($"Received events: {requestContent}");
 

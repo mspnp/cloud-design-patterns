@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace client_producer
+namespace ClientProducer
 {
     public class PayloadDetails
     {

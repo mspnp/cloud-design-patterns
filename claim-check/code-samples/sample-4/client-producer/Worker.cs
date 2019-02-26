@@ -13,7 +13,7 @@ using Confluent.Kafka;
 using Confluent.Kafka.Serialization;
 using Newtonsoft.Json;
 
-namespace client_producer
+namespace ClientProducer
 {
     class Worker
     {
