@@ -51,8 +51,6 @@ namespace ClientConsumer
                 Console.WriteLine("Done.");
                 Console.WriteLine();
             }
-
-            return;
         }
     }
 
