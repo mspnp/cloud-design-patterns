@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientProducer", "client-producer\client-producer.csproj", "{3A65E840-1942-49C1-A05D-9F52FFC14DEE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sample-4", "azure-function\sample-4.csproj", "{1C52F404-ED59-4155-98EC-B49286AA2B11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sample-4", "azure-function\azure-function.csproj", "{1C52F404-ED59-4155-98EC-B49286AA2B11}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

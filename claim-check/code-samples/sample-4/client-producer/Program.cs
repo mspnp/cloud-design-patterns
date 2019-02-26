@@ -73,7 +73,7 @@ namespace ClientProducer
                 string localFileName = "HeavyPayload_" + Guid.NewGuid().ToString() + ".txt";
                 sourceFile = Path.Combine(localPath, localFileName);
                 // Write contents to file
-                File.WriteAllText(sourceFile, "Hello, World! This is a huge file");
+                await File.WriteAllTextAsync(sourceFile, "Hello, World! This is a huge file");
 
                 Console.WriteLine("- Created temp file = {0}", sourceFile);
                 Console.WriteLine("- Uploading to Blob storage as blob '{0}'", localFileName);
