@@ -1,0 +1,7 @@
+.DS_Store
+azcli-execution.log
+.vscode/
+.vs/
+local.settings.json
+App.config
+obj/

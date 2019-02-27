@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <appSettings>
+    <add key="STORAGE_CONNECTION_STRING" value="{STORAGE_CONNECTION_STRING}"/>
+    <add key="EH_FQDN" value="{EH_FQDN}"/>
+    <add key="EH_CONNECTION_STRING" value="{EH_CONNECTION_STRING}"/>
+    <add key="EH_NAME" value="{EH_NAME}"/>
+    <add key="CA_CERT_LOCATION" value=".\cacert.pem"/>
+  </appSettings>
+</configuration>
+
