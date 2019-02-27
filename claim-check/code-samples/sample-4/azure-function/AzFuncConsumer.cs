@@ -17,13 +17,10 @@ namespace azure_function
         [FunctionName("AzFuncConsumer")]
         public static async Task RunAsync([EventHubTrigger("%EVENTHUB_NAME%", Connection = "EventHubConnectionAppSetting")]string myEventHubMessage, ILogger log)
         {
-            log.LogInformation($"C# Event Hub trigger function processed a message: {myEventHubMessage}");
-
             // Processing  and extracting the notification on Event Hub 
             PayloadDetails payloadDetails = JsonConvert.DeserializeObject<PayloadDetails>(myEventHubMessage);
             string containerName = payloadDetails.ContainerName;
             string blobName = payloadDetails.BlobName;
-
 
             // Downloading the message from blob storage for processing
             string storageConnectionString = Environment.GetEnvironmentVariable("STORAGE_CONNECTION_STRING");

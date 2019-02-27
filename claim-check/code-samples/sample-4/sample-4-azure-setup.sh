@@ -45,7 +45,7 @@ export SID=$(az storage account show --name "${PREFIX}storage" --query "id" --re
 echo "show: storage account ${PREFIX}storage connection string"
 export STORAGE_CONNECTION_STRING=$(az storage account show-connection-string --resource-group "${RG}" --name "${PREFIX}storage" -o tsv)
 
-echo "create: storage account container attachments"
+echo "create: storage account container heavypayload"
 az storage container create --name "heavypayload" --connection-string "${STORAGE_CONNECTION_STRING}" -o json >> azcli-execution.log
 
 echo "create: eventhubs namespace ${PREFIX}ehubns"
