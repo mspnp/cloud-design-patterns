@@ -1,6 +1,6 @@
 ---
 title: Claim-Check
-description: Enable efficient processing of large messages [ TODO extend description? ]
+description: Enable efficient processing of large messages
 keywords: design pattern, large message
 ms.date: mm/dd/yyyy
 pnp.series.title: Cloud Design Patterns
@@ -8,8 +8,6 @@ pnp.pattern.categories: [messaging]
 ---
 
 # Claim-Check Pattern
-
-[!INCLUDE [header](../_includes/header.md)]
 
 Split a large message into a claim check and a payload, send the claim check into the messaging platform and store the payload into an external service. This allows large messages to be processed while it protects the message bus and the client from being jammed or slowed down by their presence. It also helps to reduce costs as storage is usually cheaper than resource units used by the messaging platform.
 
