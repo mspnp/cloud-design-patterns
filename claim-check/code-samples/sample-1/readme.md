@@ -1,6 +1,6 @@
 # Sample 1: Automatic Tag Generation, Queues as Message Bus
 
-## Technologies used: Azure Blob Storage, Azure Event Grid, Azure Functions, Azure Blob Queue, .NET Core 2.1
+## Technologies used: Azure Blob Storage, Azure Event Grid, Azure Functions, Azure Storage Queue, .NET Core 2.1
 
 In this example we're using Blob Store to store data, but any service that supportes Event Grid integration can be used too. A client just needs to drop the payload to be shared into the designated Azure Blob Store and Event Grid will automatically generate a Claim Check message and send it to one of the supported message bus. In this sample the message bus is created using Azure Storage Queues. This allows a client application to poll the queue, get the message and then use the stored reference data to download the payload directly from Azure Blob Storage.
 The same message, without the need to go through a message bus, can also be directly consumed via Azure Function, leveraging in this case the serverless nature of both Azure Event Grid and Azure Functions.
