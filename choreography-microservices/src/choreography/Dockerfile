@@ -30,8 +30,6 @@ RUN dotnet publish /app/Fabrikam.Choreography.ChoreographyService/ -c Release -o
 
 FROM base AS runtime
 
-MAINTAINER Carlos Farre
-
 LABEL Tags="Azure,AKS,Choreography"
 
 ARG user=choreographtuser

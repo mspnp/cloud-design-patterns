@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fabrikam.Choreograph.ChoreographyService\Fabrikam.Choreography.ChoreographyService.csproj" />
+    <ProjectReference Include="..\Fabrikam.Choreography.ChoreographyService\Fabrikam.Choreography.ChoreographyService.csproj" />
   </ItemGroup>
 
 </Project>
