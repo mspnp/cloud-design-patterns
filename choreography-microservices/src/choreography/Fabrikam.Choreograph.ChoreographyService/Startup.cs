@@ -37,6 +37,12 @@ namespace Fabrikam.Choreography.ChoreographyService
 
             Configuration = builder.Build();
 
+
+            if (buildConfig["AzureKeyVault:KeyVaultUri"] is var keyVaultUri && !string.IsNullOrEmpty(keyVaultUri))
+            {
+                builder.AddAzureKeyVault(keyVaultUri);
+            }
+
         }
 
         public IConfiguration Configuration { get; }
