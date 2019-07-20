@@ -1,0 +1,44 @@
+# Default values for workflow.
+nameOverride: workflow
+replicaCount: 1
+dockerregistrynamespace:
+dockerregistry:
+identity:
+  clientid:
+  resourceid:
+image:
+  repository:
+  tag:
+  pullPolicy: IfNotPresent
+reason: unknown
+serviceuri:
+  delivery: http://delivery/api/Deliveries/
+  drone: http://dronescheduler/api/DroneDeliveries/
+  package: http://package/api/packages/
+servicerequest:
+  maxretries: 3
+  circuitbreakerthreshold: 0.5
+  circuitbreakersamplingperiodseconds: 5
+  circuitbreakerminimumthroughput: 20
+  circuitbreakerbreakduration: 30
+  maxbulkheadsize: 100
+  maxbulkheadqueuesize: 25
+keyvault:
+  name:
+  resourcegroup:
+  subscriptionid:
+  tenantid:
+telemetry:
+  level: "Error"
+resources:
+  requests:
+    cpu: 1700m
+    memory: 100Mi
+  limits:
+    cpu: 2300m
+    memory: 140Mi
+tags:
+  dev: false
+  prod: false
+  qa: false
+  staging: false

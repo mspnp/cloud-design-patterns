@@ -33,21 +33,18 @@ namespace PackageService
 
             var buildConfig = builder.Build();
 
-        
-
-
-            if (buildConfig["AzureKeyVault:KeyVaultUri"] is var keyVaultUri && !string.IsNullOrEmpty(keyVaultUri))
+            if (buildConfig["KEY_VAULT_URI"] is var keyVaultUri && !string.IsNullOrEmpty(keyVaultUri))
             {
                 builder.AddAzureKeyVault(keyVaultUri);
             }
 
             // Get CosmosDB database and collection and store it in DocumentConfig. Those values
             // are accessd by the PackageRepository class.
-            if (buildConfig["CosmosDB:Database"] is var database && !string.IsNullOrEmpty(database))
+            if (buildConfig["DOCDB_DATABASEID"] is var database && !string.IsNullOrEmpty(database))
             {
                 DocumentConfig.DatabaseId = database;
             }
-            if (buildConfig["CosmosDB:Collection"] is var collection && !string.IsNullOrEmpty(collection))
+            if (buildConfig["DOCDB_COLLECTIONID"] is var collection && !string.IsNullOrEmpty(collection))
             {
                 DocumentConfig.CollectionId = collection;
             }
