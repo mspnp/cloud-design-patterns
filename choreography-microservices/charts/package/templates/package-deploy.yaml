@@ -6,6 +6,7 @@
 ###################################################################################################
 # Package
 ###################################################################################################
+{{- $fullname := include "package.fullname" . | replace "." "" }}
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -36,9 +37,10 @@ spec:
         app.kubernetes.io/component: backend
         app.kubernetes.io/part-of: dronedelivery
         helm.sh/chart: {{ include "package.chart" . }}
+        aadpodidbinding: {{ $fullname }}
     spec:
       containers:
-      - name: &package-container_name fabrikam-package
+      - name: fabrikam-package
         image: {{ .Values.dockerregistry }}{{ .Values.dockerregistrynamespace }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
@@ -50,14 +52,15 @@ spec:
           value: {{ .Values.keyvault.uri }}
         - name: LOGGING__ApplicationInsights__LOGLEVEL__DEFAULT
           value: {{ default "Error" .Values.telemetry.level | quote }}
-        - name: CONTAINER_NAME
-          value: *package-container_name
         ports:
         - name: service
           containerPort: 80
-      - name: &package-container_name fabrikam-package
-        image: {{ .Values.dockerregistry }}{{ .Values.dockerregistrynamespace }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
+      - name: choreography-fabrikam-package
+        image: {{ .Values.dockerregistry }}{{ .Values.dockerregistrynamespace }}/{{ .Values.imageambassador.repository }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: ENV_TOPICS
+          value: {{ .Values.eventgrid.topics }}
         ports:
         - name: service
           containerPort: 80         
