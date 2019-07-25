@@ -60,7 +60,7 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
             {
                 try
                 {
-                    var data = (SubscriptionValidationEventData)e.Data;
+                    var data = Operations.ConvertDataEventToType<SubscriptionValidationEventData>(e.Data);
                     var response = new SubscriptionValidationResponse(data.ValidationCode);
                     return Ok(response);
                 }

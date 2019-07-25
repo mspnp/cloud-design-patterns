@@ -7,20 +7,20 @@ FROM microsoft/dotnet:2.2-sdk AS build
 WORKDIR /app
 COPY Fabrikam.Choreography.ChoreographyService/*.csproj ./Fabrikam.Choreograph.ChoreographyService/
 WORKDIR /app
-RUN dotnet restore /app/Fabrikam.Choreograph.ChoreographyService/
+RUN dotnet restore /app/Fabrikam.Choreography.ChoreographyService/
 
 WORKDIR /app
-COPY Fabrikam.Choreography.ChoreographyService/. ./Fabrikam.Choreograph.ChoreographyService/
+COPY Fabrikam.Choreography.ChoreographyService/. ./Fabrikam.Choreography.ChoreographyService/
 
 FROM build AS testrunner
 
 WORKDIR /app/tests
-COPY Fabrikam.Choreography.ChoreographyService.Tests/*.csproj .
+COPY Frabrikam.Choreography.ChoreographyService.Tests/*.csproj .
 WORKDIR /app/tests
 RUN dotnet restore /app/tests/
 
 WORKDIR /app/tests
-COPY Fabrikam.Choreography.ChoreographyService.Tests/. .
+COPY Frabrikam.Choreography.ChoreographyService.Tests/. .
 ENTRYPOINT ["dotnet", "test", "--logger:trx"]
 
 FROM build AS publish
@@ -32,7 +32,7 @@ FROM base AS runtime
 
 LABEL Tags="Azure,AKS,Choreography"
 
-ARG user=choreographtuser
+ARG user=choreographyuser
 
 RUN useradd -m -s /bin/bash -U $user
 
