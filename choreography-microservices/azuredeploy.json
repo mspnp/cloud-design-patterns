@@ -404,66 +404,207 @@
     },
 
     {
-      "type": "secrets",
-      "name": "CosmosDB-Endpoint",
-      "apiVersion": "2015-06-01",
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "[variables('droneSchedulerKeyVaultName')]",
+      "apiVersion": "2016-10-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "DroneScheduler Key Vault",
+        "app": "fabrikam-dronescheduler",
+        "environment": "choreography"
+      },
       "properties": {
-        "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('deliveryCosmosDbName')).documentEndpoint)]"
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantId]",
+        "accessPolicies": [
+          {
+            "tenantId": "[subscription().tenantId]",
+            "objectId": "[parameters('droneSchedulerPrincipalId')]",
+            "permissions": {
+              "secrets": [
+                "get",
+                "list"
+              ]
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "[variables('packageKeyVaultName')]",
+      "apiVersion": "2016-10-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "Workflow Key Vault",
+        "app": "fabrikam-package",
+        "environment": "choreography"
+      },
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantId]",
+        "accessPolicies": [
+          {
+            "tenantId": "[subscription().tenantId]",
+            "objectId": "[parameters('packagePrincipalId')]",
+            "permissions": {
+              "secrets": [
+                "get",
+                "list"
+              ]
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "type": "Microsoft.KeyVault/vaults/providers/roleAssignments",
+      "name": "[concat(variables('deliveryKeyVaultName'),'/Microsoft.Authorization/',guid(concat('kv-delivery', resourceGroup().id)))]",
+      "apiVersion": "2017-05-01",
+      "tags": {
+        "displayName": "Delivery app RBAC Reader for Key Vault",
+        "what": "rbac",
+        "to": "pod",
+        "identity-type": "msi",
+        "access": "keyvault",
+        "reason": "aad-pod-identity",
+        "flex-vol": "no",
+        "app": "fabrikam-delivery",
+        "environment": "choreography"
+      },
+      "properties": {
+        "roleDefinitionId": "[variables('readerRoleId')]",
+        "principalId": "[parameters('deliveryPrincipalId')]",
+        "scope": "[resourceId('Microsoft.KeyVault/vaults', variables('deliveryKeyVaultName'))]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('deliveryKeyVaultName'))]",
-        "[resourceId('Microsoft.Cache/Redis', 'deliveryRedisName')]"
+        "[resourceId('Microsoft.KeyVault/vaults', variables('deliveryKeyVaultName'))]"
       ]
     },
+
     {
-      "type": "secrets",
-      "name": "CosmosDB-Key",
-      "apiVersion": "2015-06-01",
+      "type": "Microsoft.KeyVault/vaults/providers/roleAssignments",
+      "name": "[concat(variables('droneSchedulerKeyVaultName'),'/Microsoft.Authorization/',guid(concat('kv-dronescheduler',resourceGroup().id)))]",
+      "apiVersion": "2017-05-01",
+      "tags": {
+        "displayName": "DroneScheduler app RBAC Reader for Key Vault",
+        "what": "rbac",
+        "to": "pod",
+        "identity-type": "msi",
+        "access": "keyvault",
+        "reason": "aad-pod-identity",
+        "flex-vol": "no",
+        "app": "fabrikam-dronescheduler",
+        "environment": "choreography"
+      },
       "properties": {
-        "value": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('deliveryCosmosDbName')), '2016-03-31').primaryMasterKey]"
+        "roleDefinitionId": "[variables('readerRoleId')]",
+        "principalId": "[parameters('droneSchedulerPrincipalId')]",
+        "scope": "[resourceId('Microsoft.KeyVault/vaults', variables('droneSchedulerKeyVaultName'))]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', 'deliveryKeyVaultName')]",
-        "[resourceId('Microsoft.Cache/Redis', 'deliveryRedisName')]"
+        "[resourceId('Microsoft.KeyVault/vaults', variables('droneSchedulerKeyVaultName'))]"
       ]
     },
+
     {
-      "type": "secrets",
-      "name": "Redis-Endpoint",
-      "apiVersion": "2015-06-01",
+      "type": "Microsoft.KeyVault/vaults/providers/roleAssignments",
+      "name": "[concat(variables('packageKeyVaultName'),'/Microsoft.Authorization/',guid(concat('kv-package',resourceGroup().id)))]",
+      "apiVersion": "2017-05-01",
+      "tags": {
+        "displayName": "Workflow app RBAC Reader for Key Vault",
+        "what": "rbac",
+        "to": "pod",
+        "identity-type": "msi",
+        "access": "keyvault",
+        "reason": "aad-pod-identity",
+        "flex-vol": "yes",
+        "app": "fabrikam-workflow",
+        "environment": "choreography"
+      },
       "properties": {
-        "value": "[reference(resourceId('Microsoft.Cache/Redis', variables('deliveryRedisName')).hostName)]"
+        "roleDefinitionId": "[variables('readerRoleId')]",
+        "principalId": "[parameters('packagePrincipalId')]",
+        "scope": "[resourceId('Microsoft.KeyVault/vaults', variables('packageKeyVaultName'))]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('deliveryKeyVaultName'))]",
-        "[resourceId('Microsoft.Cache/Redis', variables('deliveryRedisName'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', variables('packageKeyVaultName'))]"
       ]
     },
+
     {
-      "type": "secrets",
-      "name": "Redis-AccessKey",
-      "apiVersion": "2015-06-01",
-      "properties": {
-        "value": "[listKeys(resourceId('Microsoft.Cache/Redis', variables('deliveryRedisName')), '2016-04-01').primaryKey]"
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities/providers/roleAssignments",
+      "name": "[concat(parameters('deliveryIdName'), '/Microsoft.Authorization/', guid(concat('msi-delivery',resourceGroup().id)))]",
+      "apiVersion": "2017-05-01",
+      "comments": "Grant the AKS cluster access to the delivery managed id",
+      "tags": {
+        "displayName": "AKS SP RBAC Access for delivery managed identity",
+        "what": "rbac",
+        "to": "cluster",
+        "identity-type": "sp",
+        "access": "msi",
+        "reason": "aad-pod-identity",
+        "app": "fabrikam-delivery",
+        "environment": "choreography"
       },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('deliveryKeyVaultName'))]",
-        "[resourceId('Microsoft.Cache/Redis', variables('deliveryRedisName'))]"
-      ]
+      "properties": {
+        "roleDefinitionId": "[variables('managedIdentityOperatorRoleId')]",
+        "principalId": "[parameters('servicePrincipalId')]"
+      }
     },
     {
-      "type": "secrets",
-      "name": "ApplicationInsights--InstrumentationKey",
-      "apiVersion": "2015-06-01",
-      "properties": {
-        "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName'),'2015-05-01').InstrumentationKey]"
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities/providers/roleAssignments",
+      "name": "[concat(parameters('packageIdName'), '/Microsoft.Authorization/', guid(concat('msi-package',resourceGroup().id)))]",
+      "apiVersion": "2017-05-01",
+      "comments": "Grant the AKS cluster access to the workflow managed id",
+      "tags": {
+        "displayName": "AKS SP RBAC Access for workflow managed identity",
+        "what": "rbac",
+        "to": "cluster",
+        "identity-type": "sp",
+        "access": "msi",
+        "reason": "aad-pod-identity",
+        "app": "fabrikam-package",
+        "environment": "choreography"
       },
-      "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', variables('deliveryKeyVaultName'))]",
-        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]"
-      ]
+      "properties": {
+        "roleDefinitionId": "[variables('managedIdentityOperatorRoleId')]",
+        "principalId": "[parameters('servicePrincipalId')]"
+      }
+    },
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities/providers/roleAssignments",
+      "name": "[concat(parameters('droneSchedulerIdName'), '/Microsoft.Authorization/', guid(concat('msi-dronescheduler',resourceGroup().id)))]",
+      "apiVersion": "2017-05-01",
+      "comments": "Grant the AKS cluster access to the drone scheduler managed id",
+      "tags": {
+        "displayName": "AKS SP RBAC Access for dronescheduler managed identity",
+        "what": "rbac",
+        "to": "cluster",
+        "identity-type": "sp",
+        "access": "msi",
+        "reason": "aad-pod-identity",
+        "app": "fabrikam-dronescheduler",
+        "environment": "choreography"
+      },
+      "properties": {
+        "roleDefinitionId": "[variables('managedIdentityOperatorRoleId')]",
+        "principalId": "[parameters('servicePrincipalId')]"
+      }
     }
 
 
+
+
+
+
   ]
-}
+    }
