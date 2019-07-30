@@ -50,7 +50,7 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
         public async Task<IActionResult> Post([FromBody] EventGridEvent e)
         {
 
-            if (e is null)
+            if (e == null)
             {
                 logger.LogError("event is  Null");
                 return BadRequest("No Event for Choreography");

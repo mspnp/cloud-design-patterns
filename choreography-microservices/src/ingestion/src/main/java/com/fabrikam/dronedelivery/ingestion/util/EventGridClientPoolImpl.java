@@ -1,13 +1,8 @@
 package com.fabrikam.dronedelivery.ingestion.util;
 
-import com.microsoft.azure.eventgrid.EventGridClient;
+import com.fabrikam.dronedelivery.ingestion.configuration.ApplicationProperties;
 import com.microsoft.azure.eventgrid.TopicCredentials;
 import com.microsoft.azure.eventgrid.implementation.EventGridClientImpl;
-import com.microsoft.azure.eventgrid.models.EventGridEvent;
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import com.fabrikam.dronedelivery.ingestion.configuration.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -52,7 +47,6 @@ public class EventGridClientPoolImpl implements EventClientPool {
 
     @Override
     public String getTopic() {
-     //   int topidId =
         return topics[(int) (Math.random() * topics.length)];
     }
 

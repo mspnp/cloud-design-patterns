@@ -1,38 +1,18 @@
 package com.fabrikam.dronedelivery.ingestion.service;
 
-import com.fabrikam.dronedelivery.ingestion.models.*;
-
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.ArrayList;
-import java.time.LocalDateTime;
+import com.fabrikam.dronedelivery.ingestion.models.DeliveryBase;
+import com.fabrikam.dronedelivery.ingestion.util.EventClientPool;
+import com.microsoft.azure.eventgrid.models.EventGridEvent;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import com.fabrikam.dronedelivery.ingestion.util.EventClientPool;
-//import com.google.gson.Gson;
-//import com.google.gson.GsonBuilder;
-import java.net.URI;
 import rx.Observable;
-import java.util.Random;
 
-
-
-import java.util.UUID;
-
-import com.microsoft.azure.eventgrid.EventGridClient;
-import com.microsoft.azure.eventgrid.TopicCredentials;
-import com.microsoft.azure.eventgrid.implementation.EventGridClientImpl;
-import com.microsoft.azure.eventgrid.implementation.EventGridClientImpl;
-import com.microsoft.azure.eventgrid.models.EventGridEvent;
-
-
-
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class IngestionImpl implements Ingestion {
@@ -64,8 +44,6 @@ public class IngestionImpl implements Ingestion {
 		ArrayList<EventGridEvent> Event = getEvent(rescheduledDelivery, "RescheduleDelivery");
 		this.sendEventAsync(Event);
 	}
-
-
 
 	private ArrayList<EventGridEvent> getEvent(Object deliveryObj,String Operation) {
 		ArrayList<EventGridEvent> eventsList = new ArrayList<>();

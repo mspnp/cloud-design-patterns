@@ -1,9 +1,7 @@
 package com.fabrikam.dronedelivery.ingestion.util;
 
-import org.springframework.scheduling.annotation.Async;
 import com.microsoft.azure.eventgrid.implementation.EventGridClientImpl;
-
-import java.net.URISyntaxException;
+import org.springframework.scheduling.annotation.Async;
 
 public interface EventClientPool {
 

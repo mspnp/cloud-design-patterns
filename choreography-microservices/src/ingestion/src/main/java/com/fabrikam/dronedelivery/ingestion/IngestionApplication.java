@@ -1,11 +1,9 @@
 package com.fabrikam.dronedelivery.ingestion;
 
+import com.fabrikam.dronedelivery.ingestion.configuration.ApplicationProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-
-import com.fabrikam.dronedelivery.ingestion.configuration.*;
-
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication

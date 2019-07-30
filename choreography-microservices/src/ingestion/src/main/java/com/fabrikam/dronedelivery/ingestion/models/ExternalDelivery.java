@@ -1,7 +1,8 @@
 package com.fabrikam.dronedelivery.ingestion.models;
 
-import java.util.Date;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
 
 @Component
 public class ExternalDelivery {

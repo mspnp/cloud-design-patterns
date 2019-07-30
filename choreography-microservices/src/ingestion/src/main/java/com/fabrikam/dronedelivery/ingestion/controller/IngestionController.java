@@ -1,35 +1,23 @@
 package com.fabrikam.dronedelivery.ingestion.controller;
 
-import org.springframework.web.bind.annotation.RestController;
-
 import com.fabrikam.dronedelivery.ingestion.models.*;
-import com.fabrikam.dronedelivery.ingestion.service.*;
-
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
-import javax.servlet.http.HttpServletResponse;
-
+import com.fabrikam.dronedelivery.ingestion.service.Ingestion;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 public class IngestionController {
@@ -56,11 +44,6 @@ public class IngestionController {
 		log.error("Method argument exception - ", e);
 	}
 
-//	@ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR, reason = "Internal Server Error") // 500
-/*	@ExceptionHandler(ServiceBusException.class)
-	public void exHandlerServiceBusError(ServiceBusException e) {
-		log.error("ServiceBus exception - ", e);
-	}*/
 
 	@ResponseStatus(value = HttpStatus.GATEWAY_TIMEOUT, reason = "Bad Format data sent to service") // 504
 	@ExceptionHandler(IOException.class)
