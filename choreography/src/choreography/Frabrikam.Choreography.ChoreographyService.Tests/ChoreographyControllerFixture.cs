@@ -37,8 +37,11 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                                                 new Mock<IDeliveryServiceCaller>().Object,
                                                 new Mock<IEventRepository>().Object,
                                                 new Mock<ILogger<ChoreographyController>>().Object);
+            EventGridEvent[] events = new EventGridEvent[1];
 
-            var result = await target.Post(eventOp) as OkObjectResult;
+            events[0] = eventOp;
+
+            var result = await target.Post(events) as OkObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(200, result.StatusCode);
         }
@@ -56,7 +59,10 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                                                 new Mock<IEventRepository>().Object,
                                                 loggerMock.Object);
 
-            var result = await target.Post(eventOp) as BadRequestObjectResult;
+            EventGridEvent[] events = new EventGridEvent[1];
+
+            events[0] = eventOp;
+            var result = await target.Post(events) as BadRequestObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(400, result.StatusCode);
             loggerMock.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<FormattedLogValues>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()), Times.Once);
@@ -78,8 +84,10 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                                                 deliveryCallerMock.Object,
                                                 new Mock<IEventRepository>().Object,
                                                 new Mock<ILogger<ChoreographyController>>().Object);
+            EventGridEvent[] events = new EventGridEvent[1];
 
-            var result = await target.Post(eventOp) as OkObjectResult;
+            events[0] = eventOp;
+            var result = await target.Post(events) as OkObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(200, result.StatusCode);
             deliveryCallerMock.Verify();
@@ -105,7 +113,10 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                                                 eventRepositoryMock.Object,
                                                 new Mock<ILogger<ChoreographyController>>().Object);
 
-            var result = await target.Post(eventOp) as OkObjectResult;
+            EventGridEvent[] events = new EventGridEvent[1];
+
+            events[0] = eventOp;
+            var result = await target.Post(events) as OkObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(200, result.StatusCode);
             packageServiceCallerMock.Verify();
@@ -132,7 +143,9 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                                                 eventRepositoryMock.Object,
                                                 new Mock<ILogger<ChoreographyController>>().Object);
 
-            var result = await target.Post(eventOp) as OkObjectResult;
+            EventGridEvent[] events = new EventGridEvent[1];
+            events[0] = eventOp;
+            var result = await target.Post(events) as OkObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(200, result.StatusCode);
             droneServiceCallerMock.Verify();
@@ -172,8 +185,9 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                                                 new Mock<IDeliveryServiceCaller>().Object,
                                                 new Mock<IEventRepository>().Object,
                                                 loggerMock.Object);
-
-            var result = await target.Post(eventOp) as BadRequestObjectResult;
+            EventGridEvent[] events = new EventGridEvent[1];
+            events[0] = eventOp;
+            var result = await target.Post(events) as BadRequestObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(400, result.StatusCode);
             loggerMock.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<FormattedLogValues>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()), Times.Once);
@@ -195,7 +209,9 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                                                 new Mock<IEventRepository>().Object,
                                                 loggerMock.Object);
 
-            var result = await target.Post(eventOp) as BadRequestObjectResult;
+            EventGridEvent[] events = new EventGridEvent[1];
+            events[0] = eventOp;
+            var result = await target.Post(events) as BadRequestObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(400, result.StatusCode);
             loggerMock.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<FormattedLogValues>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()), Times.Once);
@@ -224,7 +240,10 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                                                 eventRepositoryMock.Object,
                                                 loggerMock.Object);
 
-            var result = await target.Post(eventOp) as BadRequestObjectResult;
+            EventGridEvent[] events = new EventGridEvent[1];
+
+            events[0] = eventOp;
+            var result = await target.Post(events) as BadRequestObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(400, result.StatusCode);
             packageServiceCallerMock.Verify();
@@ -253,7 +272,9 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                                                 eventRepositoryMock.Object,
                                                 loggerMock.Object);
 
-            var result = await target.Post(eventOp) as BadRequestObjectResult;
+            EventGridEvent[] events = new EventGridEvent[1];
+            events[0] = eventOp;
+            var result = await target.Post(events) as BadRequestObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(400, result.StatusCode);
             droneServiceCallerMock.Verify();
