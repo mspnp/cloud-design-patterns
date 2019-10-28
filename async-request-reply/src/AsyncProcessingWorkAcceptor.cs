@@ -1,14 +1,14 @@
 using System;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
-using System.Text;
 
 namespace Contoso
 {

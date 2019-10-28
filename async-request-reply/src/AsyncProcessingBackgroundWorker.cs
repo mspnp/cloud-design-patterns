@@ -1,8 +1,8 @@
+using System.IO;
+using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Blob;
-using System.IO;
-using Microsoft.Azure.ServiceBus;
 
 namespace Contoso
 {
