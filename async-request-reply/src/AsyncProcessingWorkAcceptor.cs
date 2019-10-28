@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +6,6 @@ using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 
 namespace Contoso
@@ -17,7 +15,6 @@ namespace Contoso
         [FunctionName("AsyncProcessingWorkAcceptor")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] CustomerPOCO customer,
-            [Blob("data", FileAccess.Read, Connection = "StorageConnectionAppSetting")] CloudBlobContainer inputBlob,
             [ServiceBus("outqueue", Connection = "ServiceBusConnectionAppSetting")] IAsyncCollector<Message> OutMessage,
             ILogger log)
         {
@@ -38,9 +35,7 @@ namespace Contoso
                 
             await OutMessage.AddAsync(m);  
 
-            CloudBlockBlob cbb = inputBlob.GetBlockBlobReference($"{reqid}.blobdata");
-            var sasUri = cbb.GenerateSASURI();
-            return (ActionResult) new AcceptedResult(rqs, $"Request Accepted for Processing{Environment.NewLine}ValetKey: {sasUri}{Environment.NewLine}ProxyStatus: {rqs}");  
+            return (ActionResult) new AcceptedResult(rqs, $"Request Accepted for Processing{Environment.NewLine}ProxyStatus: {rqs}");  
         }
     }
 }
