@@ -84,7 +84,7 @@ namespace Contoso
                     {
                         // Redirect to the SAS URI to blob storage
                        
-                        return (ActionResult)new SeeOtherResult(inputBlob.GenerateSASURI());
+                        return (ActionResult)new RedirectResult(inputBlob.GenerateSASURI());
                     }
 
                 case OnCompleteEnum.Stream:
@@ -99,15 +99,6 @@ namespace Contoso
                         throw new InvalidOperationException($"Unexpected value: {OnComplete}");
                     }
             }
-        }
-    }
-
-    public class SeeOtherResult : AcceptedResult
-    {
-        public SeeOtherResult(string location)
-        {
-            Location = location;
-            StatusCode = 303;
         }
     }
 
