@@ -13,6 +13,7 @@
         "appStorageAccountName": "[toLower(concat(parameters('appName'),uniqueString(subscription().subscriptionId, resourceGroup().id)))]",
         "appStorageAccountId": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('appStorageAccountName'))]",
         "dataStorageAccountName": "[toLower(concat(parameters('appName'),'data',uniqueString(subscription().subscriptionId, resourceGroup().id)))]",
+        "dataStorageAccountId": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('dataStorageAccountName'))]",
         "hostingPlanName": "[parameters('appName')]",
         "functionAppName": "[concat(parameters('appName'),'-fn')]",
         "serviceBusNamespace": "[toLower(concat(parameters('appName'),'sb',uniqueString(subscription().subscriptionId, resourceGroup().id)))]"
@@ -27,7 +28,7 @@
               "name": "Basic",
               "tier": "Basic"
             },
-            "properties": {},
+            "properties": { },
             "resources": [
                 {
                     "name": "outqueue",
@@ -35,8 +36,11 @@
                     "apiVersion": "2017-04-01",
                     "dependsOn": [
                         "[variables('serviceBusNamespace')]"
-                    ]
-                }
+                    ],
+                    "properties": {
+                      "DefaultMessageTimeToLive": "P14D"
+                    }
+                  }
             ]
         },
         {
@@ -96,6 +100,7 @@
             "dependsOn": [
               "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
               "[resourceId('Microsoft.Storage/storageAccounts', variables('appStorageAccountName'))]",
+              "[resourceId('Microsoft.Storage/storageAccounts', variables('dataStorageAccountName'))]",
               "[resourceId('Microsoft.ServiceBus/namespaces', variables('serviceBusNamespace'))]"
             ],
             "properties": {
@@ -133,6 +138,10 @@
                   {
                       "name": "ServiceBusConnectionAppSetting",
                       "value": "[listKeys(resourceId(concat('Microsoft.ServiceBus/namespaces/AuthorizationRules'),variables('serviceBusNamespace'),'RootManageSharedAccessKey'),'2015-08-01').primaryConnectionString]"
+                  },
+                  {
+                      "name": "StorageConnectionAppSetting",
+                      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('dataStorageAccountName'), ';AccountKey=', listKeys(variables('dataStorageAccountId'),'2015-05-01-preview').key1)]"
                   }
                 ]
               }
