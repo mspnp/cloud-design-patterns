@@ -17,11 +17,8 @@ namespace ClientConsumer
 {
     class EventHubsConsumer : IConsumer
     {
-
         private BlobContainerClient blobContainerClient;
-
         private EventProcessorClient processor;
-
         private String downloadDestination;
 
         public void Configure()
@@ -41,11 +38,8 @@ namespace ClientConsumer
             downloadDestination = ConfigurationManager.AppSettings["DownloadDestination"];
             string blobContainerName = ConfigurationManager.AppSettings["BlobContainerName"];
             Console.WriteLine("Connecting to Storage account...");
-
             blobContainerClient = new BlobContainerClient(storageConnectionString, blobContainerName);
-            
             Console.WriteLine("Connecting to EventHub...");
-
             processor = new EventProcessorClient(blobContainerClient, EventHubConsumerClient.DefaultConsumerGroupName, eventhubConnectionString);
         }
 
@@ -54,17 +48,12 @@ namespace ClientConsumer
             Console.WriteLine("The application will now start to listen for incoming message.");
             int eventIndex = 0;
 
-
-
-             Task processEventHandlerAsync(ProcessEventArgs eventArgs)
-
+            Task processEventHandlerAsync(ProcessEventArgs eventArgs)
             {
-               if (eventArgs.CancellationToken.IsCancellationRequested)
-
+                if (eventArgs.CancellationToken.IsCancellationRequested)
                 {
                     return Task.CompletedTask;
                 }
-
                 try
                 {
                     ++eventIndex;
@@ -74,7 +63,6 @@ namespace ClientConsumer
                     Uri uploadedUri = new Uri(jsonMessage["data"]["url"].ToString());
                     Console.WriteLine("Blob available at: {0}", uploadedUri);
                     BlockBlobClient blockBlob = new BlockBlobClient(uploadedUri);
-       
                     string uploadedFile = Path.GetFileName(jsonMessage["data"]["url"].ToString());
                     string destinationFile = Path.Combine(downloadDestination, Path.GetFileName(uploadedFile));
                     Console.WriteLine("Downloading to {0}...", destinationFile);
@@ -90,13 +78,12 @@ namespace ClientConsumer
             };
 
             Task processErrorHandler(ProcessErrorEventArgs eventArgs)
-
             {
                 if (eventArgs.CancellationToken.IsCancellationRequested)
                 {
                     return Task.CompletedTask;
                 }
-                Console.WriteLine();           
+                Console.WriteLine();
                 Console.WriteLine("===============================");
                 Console.WriteLine($"The error handler was invoked during the operation: { eventArgs.Operation ?? "Unknown" }, for Exception: { eventArgs.Exception.Message }");
                 Console.WriteLine("===============================");
@@ -122,7 +109,6 @@ namespace ClientConsumer
                 processor.ProcessEventAsync -= processEventHandlerAsync;
                 processor.ProcessErrorAsync -= processErrorHandler;
             }
-            Console.WriteLine();
         }
     }
 }
