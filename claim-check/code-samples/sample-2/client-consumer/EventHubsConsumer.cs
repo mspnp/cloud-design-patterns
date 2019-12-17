@@ -24,7 +24,7 @@ namespace ClientConsumer
         public void Configure()
         {
             Console.WriteLine("Validating settings...");
-            foreach (string option in new string[] { "EventHubConnectionString", "StorageConnectionString", "blobContainerName" })
+            foreach (string option in new string[] { "EventHubConnectionString", "StorageConnectionString", "blobContainerName", "DownloadDestination" })
             {
                 if (string.IsNullOrEmpty(ConfigurationManager.AppSettings?[option]))
                 {
