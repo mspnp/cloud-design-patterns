@@ -3,6 +3,7 @@
   <appSettings>
     <add key="EventHubConnectionString" value="{EventHubConnectionString}"/>
     <add key="StorageConnectionString" value="{StorageConnectionString}"/>
+    <add key="BlobContainerName" value="{BlobContainerName}"/>
     <add key="DownloadDestination" value="temp"/>
   </appSettings>
 </configuration>
