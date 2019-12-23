@@ -3,7 +3,6 @@ using System.Configuration;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace ClientConsumer
 {
@@ -34,7 +33,6 @@ namespace ClientConsumer
             Console.WriteLine("Press any key to terminate the application...");
             Console.ReadKey(true);
             cts.Cancel();
-
             Console.WriteLine("Exiting...");
             await task;
 
