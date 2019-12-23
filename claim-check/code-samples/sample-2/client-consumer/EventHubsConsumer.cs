@@ -6,25 +6,66 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Messaging.EventHubs;
-using Azure.Messaging.EventHubs.Processor;
-using Azure.Storage;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Specialized;
+using Microsoft.Azure.EventHubs;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json.Linq;
 
 namespace ClientConsumer
 {
+    class PartitionReceiver : IPartitionReceiveHandler
+    {
+        readonly CloudBlobClient _cloudBlobClient = null;
+        readonly string _downloadDestination = string.Empty;
+        int _maxBatchSize = 1;
+        public int MaxBatchSize { get => _maxBatchSize; set => _maxBatchSize = value; }
+
+        public PartitionReceiver(CloudStorageAccount storageAccount, string downloadDestination)
+        {
+            _cloudBlobClient = storageAccount.CreateCloudBlobClient();
+            _downloadDestination = downloadDestination;
+        }
+
+        public Task ProcessErrorAsync(Exception error)
+        {
+            Console.WriteLine(error.Message);
+            return Task.FromException(error);
+        }
+
+        public async Task ProcessEventsAsync(IEnumerable<EventData> events)
+        {
+            foreach(var e in events)
+            {
+                string body = Encoding.UTF8.GetString(e.Body);
+
+                var jsonMessage = JArray.Parse(body).First;
+
+                Uri uploadedUri = new Uri(jsonMessage["data"]["url"].ToString());
+                Console.WriteLine("Blob available at: {0}", uploadedUri);
+                var cloudBlob = _cloudBlobClient.GetBlobReferenceFromServer(uploadedUri);
+
+                string uploadedFile = Path.GetFileName(jsonMessage["data"]["url"].ToString());
+                string destinationFile = Path.Combine(_downloadDestination, Path.GetFileName(uploadedFile));
+                Console.WriteLine("Downloading to {0}...", destinationFile);
+                await cloudBlob.DownloadToFileAsync(destinationFile, FileMode.Create);
+                Console.WriteLine("Done.");
+                Console.WriteLine();
+            }
+        }
+    }
+
     class EventHubsConsumer : IConsumer
     {
-        private BlobContainerClient blobContainerClient;
-        private EventProcessorClient processor;
-        private String downloadDestination;
+        private string downloadDestination;
+
+        private CloudStorageAccount storageAccount;
+
+        private EventHubClient client;
 
         public void Configure()
         {
             Console.WriteLine("Validating settings...");
-            foreach (string option in new string[] { "EventHubConnectionString", "StorageConnectionString", "blobContainerName", "DownloadDestination" })
+            foreach (string option in new string[] { "EventHubConnectionString", "StorageConnectionString", "DownloadDestination" })
             {
                 if (string.IsNullOrEmpty(ConfigurationManager.AppSettings?[option]))
                 {
@@ -35,70 +76,37 @@ namespace ClientConsumer
 
             string storageConnectionString = ConfigurationManager.AppSettings["StorageConnectionString"];
             string eventhubConnectionString = ConfigurationManager.AppSettings["EventHubConnectionString"];
+
             downloadDestination = ConfigurationManager.AppSettings["DownloadDestination"];
-            string blobContainerName = ConfigurationManager.AppSettings["BlobContainerName"];
+
             Console.WriteLine("Connecting to Storage account...");
-            blobContainerClient = new BlobContainerClient(storageConnectionString, blobContainerName);
+
+            storageAccount = CloudStorageAccount.Parse(storageConnectionString);
+
             Console.WriteLine("Connecting to EventHub...");
-            processor = new EventProcessorClient(blobContainerClient, EventHubConsumerClient.DefaultConsumerGroupName, eventhubConnectionString);
+            
+            client = EventHubClient.CreateFromConnectionString(eventhubConnectionString);
         }
 
         public async Task ProcessMessages(CancellationToken cancellationToken)
         {
             Console.WriteLine("The application will now start to listen for incoming message.");
-            int eventIndex = 0;
 
-            Task processEventHandlerAsync(ProcessEventArgs eventArgs)
-            {
-                if (eventArgs.CancellationToken.IsCancellationRequested)
-                {
-                    return Task.CompletedTask;
-                }
-                try
-                {
-                    ++eventIndex;
-                    Console.WriteLine($"Event Received: { Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()) }");
-                    string body = Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray());
-                    var jsonMessage = JArray.Parse(body).First;
-                    Uri uploadedUri = new Uri(jsonMessage["data"]["url"].ToString());
-                    Console.WriteLine("Blob available at: {0}", uploadedUri);
-                    BlockBlobClient blockBlob = new BlockBlobClient(uploadedUri);
-                    string uploadedFile = Path.GetFileName(jsonMessage["data"]["url"].ToString());
-                    string destinationFile = Path.Combine(downloadDestination, Path.GetFileName(uploadedFile));
-                    Console.WriteLine("Downloading to {0}...", destinationFile);
-                    blockBlob.DownloadTo(destinationFile);
-                    Console.WriteLine("Done.");
-                    Console.WriteLine();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"An error was observed while processing events.  Message: { ex.Message }");
-                }
-                return Task.CompletedTask;
-            };
-
-            Task processErrorHandler(ProcessErrorEventArgs eventArgs)
-            {
-                if (eventArgs.CancellationToken.IsCancellationRequested)
-                {
-                    return Task.CompletedTask;
-                }
-                Console.WriteLine();
-                Console.WriteLine("===============================");
-                Console.WriteLine($"The error handler was invoked during the operation: { eventArgs.Operation ?? "Unknown" }, for Exception: { eventArgs.Exception.Message }");
-                Console.WriteLine("===============================");
-                Console.WriteLine();
-                return Task.CompletedTask;
-            }
-            processor.ProcessEventAsync += processEventHandlerAsync;
-            processor.ProcessErrorAsync += processErrorHandler;
+            var runtimeInfo = await client.GetRuntimeInformationAsync();
+            Console.WriteLine("Creating receiver handlers...");
+            var utcNow = DateTime.UtcNow;
+            var receivers = runtimeInfo.PartitionIds
+                .Select(pid => {
+                    var receiver = client.CreateReceiver("$Default", pid, EventPosition.FromEnqueuedTime(utcNow));
+                    Console.WriteLine("Created receiver for partition '{0}'.", pid);
+                    receiver.SetReceiveHandler(new PartitionReceiver(storageAccount, downloadDestination));
+                    return receiver;
+                })
+                .ToList();
 
             try
             {
-                eventIndex = 0;
-                await processor.StartProcessingAsync();
                 await Task.Delay(-1, cancellationToken);
-                await processor.StopProcessingAsync();
             }
             catch (TaskCanceledException)
             {
@@ -106,8 +114,10 @@ namespace ClientConsumer
             }
             finally
             {
-                processor.ProcessEventAsync -= processEventHandlerAsync;
-                processor.ProcessErrorAsync -= processErrorHandler;
+                // Clean up nicely.
+                await Task.WhenAll(
+                    receivers.Select(receiver => receiver.CloseAsync())
+                );
             }
         }
     }
