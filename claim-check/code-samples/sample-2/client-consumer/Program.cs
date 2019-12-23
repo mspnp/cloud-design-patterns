@@ -33,6 +33,7 @@ namespace ClientConsumer
             Console.WriteLine("Press any key to terminate the application...");
             Console.ReadKey(true);
             cts.Cancel();
+
             Console.WriteLine("Exiting...");
             await task;
 
