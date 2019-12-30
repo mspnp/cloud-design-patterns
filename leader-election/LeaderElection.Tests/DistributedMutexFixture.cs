@@ -8,7 +8,6 @@ namespace LeaderElection.Tests
     using System.Threading.Tasks;
     using DistributedMutex;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.WindowsAzure.Storage;
 
     [TestClass]
     public class DistributedMutexFixture
@@ -17,7 +16,7 @@ namespace LeaderElection.Tests
         public void OnlyOneMutexStartsTask()
         {
             const int ConcurrentMutexes = 5;
-            var settings = new BlobSettings(CloudStorageAccount.DevelopmentStorageAccount, "leases", "OnlyOneMutexStartsTask");
+            var settings = new BlobSettings("<blob-connection-string>", "leases", "OnlyOneMutexStartsTask");
 
             var mutexAcquired = Enumerable.Range(0, ConcurrentMutexes).Select(_ => new TaskCompletionSource<bool>()).ToArray();
 
@@ -42,7 +41,7 @@ namespace LeaderElection.Tests
         public void LeaderRenewsLease()
         {
             const int ConcurrentMutexes = 5;
-            var settings = new BlobSettings(CloudStorageAccount.DevelopmentStorageAccount, "leases", "LeaderRenewsLease");
+            var settings = new BlobSettings("<blob-connection-string>", "leases", "LeaderRenewsLease");
 
             var mutexAcquired = Enumerable.Range(0, ConcurrentMutexes).Select(_ => new TaskCompletionSource<bool>()).ToArray();
 
@@ -67,7 +66,7 @@ namespace LeaderElection.Tests
         public void LeaderAbortingCreatesNewLeader()
         {
             const int ConcurrentMutexes = 5;
-            var settings = new BlobSettings(CloudStorageAccount.DevelopmentStorageAccount, "leases", "LeaderAbortingCreatesNewLeader");
+            var settings = new BlobSettings("<blob-connection-string>", "leases", "LeaderAbortingCreatesNewLeader");
 
             var firstCts = new CancellationTokenSource();
             var firstMutexAcquired = new TaskCompletionSource<bool>();
