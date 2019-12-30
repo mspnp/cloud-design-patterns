@@ -1,14 +1,14 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Configuration;
 using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Text;
+using Azure.Storage.Blobs;
+using Azure;
 
 namespace azure_function
 {
@@ -24,27 +24,19 @@ namespace azure_function
 
             // Downloading the message from blob storage for processing
             string storageConnectionString = Environment.GetEnvironmentVariable("STORAGE_CONNECTION_STRING");
-            CloudStorageAccount storageAccount = null;
-            CloudBlobContainer cloudBlobContainer = null;
 
-            // Check whether the connection string can be parsed.
-            if (CloudStorageAccount.TryParse(storageConnectionString, out storageAccount))
-            {
                 try
                 {
-                    // Create the CloudBlobClient that represents the Blob storage endpoint for the storage account.
-                    CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
+                    BlobContainerClient container = new BlobContainerClient(storageConnectionString, containerName);
 
-                    // Get reference to the container
-                    cloudBlobContainer = cloudBlobClient.GetContainerReference(containerName);
-
-                    // Get reference to the blob with heavy payload
-                    CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(blobName);
+                    // Get a reference to a blob named "sample-file" in a container named "sample-container"
+                    BlobClient blob = container.GetBlobClient(blobName);
 
                     log.LogInformation("Here is the large payload information");
 
-                    // Reading payload
-                    Stream blobStream = await cloudBlockBlob.OpenReadAsync();
+                // Reading payload
+                    Stream blobStream=null;
+                    await blob.DownloadToAsync(blobStream);
                     using (StreamReader reader = new StreamReader(blobStream))
                     {
                         string data = reader.ReadToEnd();
@@ -53,11 +45,11 @@ namespace azure_function
                     // The large payload can be processed further
 
                 }
-                catch (StorageException ex)
+                catch (RequestFailedException ex)
                 {
                     log.LogError("Error returned from the service: {0}", ex.Message);
                 }
-            }
+            
         }
     }
 }
