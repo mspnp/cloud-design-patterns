@@ -1,16 +1,18 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Threading;
+using System.Threading.Tasks;
+using Azure;
+using ExternalConfigurationStore.Cloud.SettingsStore;
+
 namespace ExternalConfigurationStore.Cloud
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using System.Reactive.Subjects;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using SettingsStore;
-
     public class ExternalConfigurationManager : IDisposable
     {
         // An abstraction of the configuration store.
@@ -26,7 +28,7 @@ namespace ExternalConfigurationStore.Cloud
         private readonly SemaphoreSlim syncCacheSemaphore = new SemaphoreSlim(1);
 
         private Dictionary<string, string> settingsCache;
-        private string currentVersion;
+        private ETag currentVersion;
 
         public ExternalConfigurationManager(string environment) : this(new BlobSettingsStore(environment), TimeSpan.FromSeconds(15), environment)
         {
