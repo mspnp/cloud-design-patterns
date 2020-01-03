@@ -1,15 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.Diagnostics;
+using System.Net;
+using System.Threading;
+using Microsoft.Azure;
+using Microsoft.WindowsAzure.ServiceRuntime;
+using Azure.Storage.Blobs;
+
 namespace ExternalConfigurationStore.Cloud
 {
-    using System;
-    using System.Diagnostics;
-    using System.Net;
-    using System.Threading;
-    using Microsoft.Azure;
-    using Microsoft.WindowsAzure.ServiceRuntime;
-    using Microsoft.WindowsAzure.Storage;
-
     public class WorkerRole : RoleEntryPoint
     {
         // Storing blob data here for sample purposes only.
@@ -46,7 +47,7 @@ namespace ExternalConfigurationStore.Cloud
 
             return base.OnStart();
         }
-        
+
         public override void OnStop()
         {
             ExternalConfiguration.Instance.StopMonitor();
@@ -67,16 +68,16 @@ namespace ExternalConfigurationStore.Cloud
         private void UploadConfigurationBlob()
         {
             // Setup blobs for sample.
-            var account = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("storageAccount"));
-            var client = account.CreateCloudBlobClient();
-            var container = client.GetContainerReference(configContainer);
+            var connectionString = CloudConfigurationManager.GetSetting("storageAccount");
+            var blobServiceClient = new BlobServiceClient(connectionString);
+            var container = blobServiceClient.GetBlobContainerClient(configContainer);
             container.CreateIfNotExists();
 
-            var productionBlob = container.GetBlockBlobReference(configBlobNameProduction);
-            productionBlob.UploadFromFile(configBlobNameProduction);
+            var productionBlob = container.GetBlobClient(configBlobNameProduction);
+            productionBlob.Upload(configBlobNameProduction);
 
-            var stagingBlob = container.GetBlockBlobReference(configBlobNameStaging);
-            stagingBlob.UploadFromFile(configBlobNameStaging);
+            var stagingBlob = container.GetBlobClient(configBlobNameStaging);
+            stagingBlob.Upload(configBlobNameStaging);
         }
 
         /// <summary>
@@ -85,9 +86,9 @@ namespace ExternalConfigurationStore.Cloud
         private void DeleteConfigurationBlob()
         {
             // Cleanup sample resources.
-            var account = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("storageAccount"));
-            var client = account.CreateCloudBlobClient();
-            var container = client.GetContainerReference(configContainer);
+            var connectionString = CloudConfigurationManager.GetSetting("storageAccount");
+            var blobServiceClient = new BlobServiceClient(connectionString);
+            var container = blobServiceClient.GetBlobContainerClient(configContainer);
 
             container.DeleteIfExists();
         }
