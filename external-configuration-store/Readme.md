@@ -4,8 +4,8 @@ This document describes the External Configuration Store Pattern example from th
 
 ## System Requirements
 
-* Microsoft .NET Framework version 4.5
-* Microsoft Visual Studio 2015 Community, Enterprise, or Professional
+* Microsoft .NET Framework version 4.6
+* Microsoft Visual Studio 2019
 * Windows Azure SDK for .NET version 2.9
 
 ## Before you start
