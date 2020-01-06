@@ -14,3 +14,4 @@ namespace ExternalConfigurationStore.Cloud.SettingsStore
         Task<Dictionary<string, string>> FindAllAsync();
     }
 }
+
