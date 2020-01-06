@@ -1,13 +1,15 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Azure.Storage.Blobs;
+using Microsoft.WindowsAzure.ServiceRuntime;
+
 namespace StaticContentHosting.Web
 {
-    using Microsoft.WindowsAzure.ServiceRuntime;
-    using Microsoft.WindowsAzure.Storage;
-
     public class Settings
     {
-        public static string StaticContentStorageConnectionString {
+        public static string StaticContentStorageConnectionString
+        {
             get
             {
                 return RoleEnvironment.GetConfigurationSettingValue("StaticContent.StorageConnectionString");
@@ -26,9 +28,9 @@ namespace StaticContentHosting.Web
         {
             get
             {
-                var account = CloudStorageAccount.Parse(StaticContentStorageConnectionString);
+                var account = new BlobServiceClient(StaticContentStorageConnectionString);
 
-                return string.Format("{0}/{1}", account.BlobEndpoint.ToString().TrimEnd('/'), StaticContentContainer.TrimStart('/'));
+                return string.Format("{0}/{1}", account.Uri.ToString().TrimEnd('/'), StaticContentContainer.TrimStart('/'));
             }
         }
     }
