@@ -28,9 +28,9 @@ namespace StaticContentHosting.Web
         {
             get
             {
-                var account = new BlobServiceClient(StaticContentStorageConnectionString);
+                var blobServiceClient = new BlobServiceClient(StaticContentStorageConnectionString);
 
-                return string.Format("{0}/{1}", account.Uri.ToString().TrimEnd('/'), StaticContentContainer.TrimStart('/'));
+                return string.Format("{0}/{1}", blobServiceClient.Uri.ToString().TrimEnd('/'), StaticContentContainer.TrimStart('/'));
             }
         }
     }

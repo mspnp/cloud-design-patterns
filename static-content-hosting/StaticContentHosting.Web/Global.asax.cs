@@ -48,8 +48,8 @@ namespace StaticContentHosting.Web
             string connectionString = Settings.StaticContentStorageConnectionString;
             string containerName = Settings.StaticContentContainer;
 
-            var account = new BlobServiceClient(connectionString);
-            var staticContentContainer = account.GetBlobContainerClient(containerName);
+            var blobServiceClient = new BlobServiceClient(connectionString);
+            var staticContentContainer = blobServiceClient.GetBlobContainerClient(containerName);
 
             //Create the container with public access permissions on the blobs in those containers
             staticContentContainer.CreateIfNotExists(PublicAccessType.Blob);
@@ -84,8 +84,6 @@ namespace StaticContentHosting.Web
 
                 var blobFile = container.GetBlobClient(string.Format("{0}/{1}", folderName, fileName));
                 blobFile.Upload(imageFile);
-
-                //We should check to see if the file has changed and update it
             }
         }
     }
