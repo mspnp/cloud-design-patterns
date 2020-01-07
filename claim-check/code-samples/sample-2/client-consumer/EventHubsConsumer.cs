@@ -45,7 +45,7 @@ namespace ClientConsumer
 
         public async Task ProcessMessages(CancellationToken cancellationToken)
         {
-            Console.WriteLine("The application will now start to listen for incoming message.");
+            Console.WriteLine("The application will now start to listen for incoming messages.");
             int eventIndex = 0;
 
             Task processEventHandlerAsync(ProcessEventArgs eventArgs)
@@ -57,7 +57,6 @@ namespace ClientConsumer
                 try
                 {
                     ++eventIndex;
-                    Console.WriteLine($"Event Received: { Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()) }");
                     string body = Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray());
                     var jsonMessage = JArray.Parse(body).First;
                     Uri uploadedUri = new Uri(jsonMessage["data"]["url"].ToString());
