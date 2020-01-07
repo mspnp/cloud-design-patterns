@@ -4,20 +4,23 @@ namespace ValetKey.Web.Controllers
 {
     using System;
     using System.Diagnostics;
+    using System.Net;
     using System.Threading.Tasks;
     using System.Web.Mvc;
+    using Azure.Storage;
+    using Azure.Storage.Blobs;
+    using Azure.Storage.Sas;
     using Microsoft.Azure;
-    using Microsoft.WindowsAzure.Storage;
-    using Microsoft.WindowsAzure.Storage.Blob;
+
 
     public class HomeController : Controller
     {
-        private readonly CloudStorageAccount account;
+        private readonly BlobServiceClient blobServiceClient;
         private readonly string blobContainer;
 
         public HomeController()
-        {
-            this.account = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("Storage"));
+        {         
+            this.blobServiceClient = new BlobServiceClient(CloudConfigurationManager.GetSetting("Storage"));
             this.blobContainer = "valetkeysample";
         }
 
@@ -31,9 +34,10 @@ namespace ValetKey.Web.Controllers
                 }
 
                 var blobSas = await this.GetSharedAccessReferenceForDownload(id);
-
+                UriBuilder sasUri = new UriBuilder(blobSas.BlobUri);
+                sasUri.Query = blobSas.Credentials;
                 // Note that redirecting the user directly to the blob url may leak to IIS logs and/or browser history.
-                return this.Redirect(string.Format("{0}{1}", blobSas.BlobUri, blobSas.Credentials));
+                return this.Redirect(sasUri.Uri.ToString());
             }
             catch (Exception ex)
             {
@@ -52,28 +56,26 @@ namespace ValetKey.Web.Controllers
 
         private async Task<StorageEntitySas> GetSharedAccessReferenceForDownload(string blobName)
         {
-            var blobClient = this.account.CreateCloudBlobClient();
-            var container = blobClient.GetContainerReference(this.blobContainer);
+            var container = blobServiceClient.GetBlobContainerClient(this.blobContainer);
 
-            var blob = container.GetBlockBlobReference(blobName);
-            
-            if (!await blob.ExistsAsync())
+            var blob = container.GetBlobClient(blobName);
+
+            StorageSharedKeyCredential storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==");
+       
+            var policy = new BlobSasBuilder
+
             {
-                throw new Exception("Blob does not exist");
-            }
-
-            var policy = new SharedAccessBlobPolicy
-            {
-                Permissions = SharedAccessBlobPermissions.Read,
-
-                // Create a signature for 5 min earlier to leave room for clock skew
-                SharedAccessStartTime = DateTime.UtcNow.AddMinutes(-5),
-
-                // Create the signature for as long as necessary -  we can 
-                SharedAccessExpiryTime = DateTime.UtcNow.AddMinutes(5)
+                Protocol = SasProtocol.None,
+                BlobContainerName = this.blobContainer,
+                BlobName = blobName,
+                Resource = "b",
+                StartsOn = DateTimeOffset.UtcNow,
+                ExpiresOn = DateTimeOffset.UtcNow.AddHours(1),
+                IPRange = new SasIPRange(IPAddress.None, IPAddress.None)
             };
-            
-            var sas = blob.GetSharedAccessSignature(policy);
+
+            policy.SetPermissions(BlobSasPermissions.Read);
+            var sas = policy.ToSasQueryParameters(storageSharedKeyCredential).ToString();
 
             return new StorageEntitySas
             {
@@ -81,7 +83,6 @@ namespace ValetKey.Web.Controllers
                 Credentials = sas
             };
         }
-
         public struct StorageEntitySas
         {
             public string Credentials;
