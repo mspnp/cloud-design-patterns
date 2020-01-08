@@ -62,9 +62,8 @@ namespace ValetKey.Web.Controllers
         {
             var blob = blobServiceClient.GetBlobContainerClient(this.blobContainer).GetBlobClient(blobName);
 
-            //find AzureStorageEmulatorAccountKey in https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator.
-            var storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, "<AzureStorageEmulatorAccountKey>");
-       
+            var storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, ConfigurationManager.AppSettings["AzureStorageEmulatorAccountKey"]);
+
             var blobSasBuilder = new BlobSasBuilder
 
             {
