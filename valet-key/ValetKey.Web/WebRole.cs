@@ -5,10 +5,11 @@ namespace ValetKey.Web
     using Azure.Storage.Blobs;
     using Microsoft.Azure;
     using Microsoft.WindowsAzure.ServiceRuntime;
+    using System.Configuration;
 
     public class WebRole : RoleEntryPoint
     {
-        private const string BlobContainer = "valetkeysample";
+        private static readonly string BlobContainer = ConfigurationManager.AppSettings["ContainerName"];
 
         public override bool OnStart()
         {

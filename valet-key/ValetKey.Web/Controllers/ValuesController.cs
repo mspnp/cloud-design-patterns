@@ -4,6 +4,7 @@
 namespace ValetKey.Api.Controllers
 {
     using System;
+    using System.Configuration;
     using System.Diagnostics;
     using System.Net;
     using System.Net.Http;
@@ -20,9 +21,8 @@ namespace ValetKey.Api.Controllers
 
         public ValuesController()
         {
-            string a = CloudConfigurationManager.GetSetting("Storage");
             this.blobServiceClient = new BlobServiceClient(CloudConfigurationManager.GetSetting("Storage"));
-            this.blobContainer = "valetkeysample";
+            this.blobContainer = ConfigurationManager.AppSettings["ContainerName"];
         }
 
         // GET api/Values
@@ -53,25 +53,20 @@ namespace ValetKey.Api.Controllers
         /// We return a limited access key that allows the caller to upload a file to this specific destination for defined period of time
         /// </summary>
         private StorageEntitySas GetSharedAccessReferenceForUpload(string blobName)
-        {
-            var container = blobServiceClient.GetBlobContainerClient(this.blobContainer);
-         
-            var blob = container.GetBlobClient(blobName);
+        {          
+            var blob = blobServiceClient.GetBlobContainerClient(this.blobContainer).GetBlobClient(blobName);
 
-            StorageSharedKeyCredential storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==");
+            //find AzureStorageEmulatorAccountKey in https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator.
+            var storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, "<AzureStorageEmulatorAccountKey>");
 
-            //UriBuilder sasUri = new UriBuilder(blob.Uri);
-
-            var policy = new BlobSasBuilder
+            var blobSasBuilder = new BlobSasBuilder
 
             {
-                Protocol = SasProtocol.HttpsAndHttp,
                 BlobContainerName = this.blobContainer,
                 BlobName = blobName,
                 Resource = "b",
                 StartsOn = DateTimeOffset.UtcNow,
                 ExpiresOn = DateTimeOffset.UtcNow.AddHours(1),
-                IPRange = new SasIPRange(IPAddress.None, IPAddress.None)
             };
             policy.SetPermissions(BlobSasPermissions.Write);
             var sas = policy.ToSasQueryParameters(storageSharedKeyCredential).ToString();

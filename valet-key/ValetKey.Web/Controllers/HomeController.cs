@@ -3,6 +3,7 @@
 namespace ValetKey.Web.Controllers
 {
     using System;
+    using System.Configuration;
     using System.Diagnostics;
     using System.Net;
     using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace ValetKey.Web.Controllers
         public HomeController()
         {         
             this.blobServiceClient = new BlobServiceClient(CloudConfigurationManager.GetSetting("Storage"));
-            this.blobContainer = "valetkeysample";
+            this.blobContainer = ConfigurationManager.AppSettings["ContainerName"];
         }
 
         public async Task<ActionResult> RedirectTest(string id)
@@ -54,24 +55,24 @@ namespace ValetKey.Web.Controllers
             return this.View();
         }
 
+        /// <summary>
+        /// We return a limited access key that allows the caller to download a file to this specific destination for defined period of time
+        /// </summary>
         private async Task<StorageEntitySas> GetSharedAccessReferenceForDownload(string blobName)
         {
-            var container = blobServiceClient.GetBlobContainerClient(this.blobContainer);
+            var blob = blobServiceClient.GetBlobContainerClient(this.blobContainer).GetBlobClient(blobName);
 
-            var blob = container.GetBlobClient(blobName);
-
-            StorageSharedKeyCredential storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==");
+            //find AzureStorageEmulatorAccountKey in https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator.
+            var storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, "<AzureStorageEmulatorAccountKey>");
        
-            var policy = new BlobSasBuilder
+            var blobSasBuilder = new BlobSasBuilder
 
             {
-                Protocol = SasProtocol.None,
                 BlobContainerName = this.blobContainer,
                 BlobName = blobName,
                 Resource = "b",
                 StartsOn = DateTimeOffset.UtcNow,
                 ExpiresOn = DateTimeOffset.UtcNow.AddHours(1),
-                IPRange = new SasIPRange(IPAddress.None, IPAddress.None)
             };
 
             policy.SetPermissions(BlobSasPermissions.Read);
