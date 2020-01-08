@@ -126,17 +126,11 @@ namespace DistributedMutex
             {
                 await this.leaseBlobClient.CreateIfNotExistsAsync(0, cancellationToken: token);
             }
-            catch (Exception e) 
+            catch (Azure.RequestFailedException e) 
             {
-                if (e.InnerException is WebException)
+                if (e.Status != (int) HttpStatusCode.PreconditionFailed)
                 {
-                    var webException = e.InnerException as WebException;
-                    var response = webException.Response as HttpWebResponse;
-
-                    if (response == null || response.StatusCode != HttpStatusCode.PreconditionFailed)
-                    {
-                        throw;
-                    }
+                    throw;
                 }
             }
         }
