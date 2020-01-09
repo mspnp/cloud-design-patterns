@@ -17,14 +17,14 @@ namespace ClientConsumer
 {
     class EventHubsConsumer : IConsumer
     {
-        private String downloadDestination;
+        private string downloadDestination;
        
         private EventProcessorClient processor;
 
         public void Configure()
         {
             Console.WriteLine("Validating settings...");
-            foreach (string option in new string[] { "EventHubConnectionString", "StorageConnectionString", "blobContainerName", "DownloadDestination" })
+            foreach (string option in new string[] { "EventHubConnectionString", "StorageConnectionString", "BlobContainerName", "DownloadDestination" })
             {
                 if (string.IsNullOrEmpty(ConfigurationManager.AppSettings?[option]))
                 {
@@ -46,9 +46,8 @@ namespace ClientConsumer
         public async Task ProcessMessages(CancellationToken cancellationToken)
         {
             Console.WriteLine("The application will now start to listen for incoming messages.");
-            int eventIndex = 0;
 
-            Task processEventHandlerAsync(ProcessEventArgs eventArgs)
+            Task partitionInitializingHandler(PartitionInitializingEventArgs eventArgs)
             {
                 if (eventArgs.CancellationToken.IsCancellationRequested)
                 {
@@ -56,7 +55,29 @@ namespace ClientConsumer
                 }
                 try
                 {
-                    ++eventIndex;
+                    var utcNow = DateTime.UtcNow;
+                    eventArgs.DefaultStartingPosition = EventPosition.FromEnqueuedTime(utcNow);
+                    Console.WriteLine($"Initialized partition: { eventArgs.PartitionId }");
+                }
+                catch (Exception ex)
+                {
+                    // For real-world scenarios, you should take action appropriate to your application.  For our example, we'll just log
+                    // the exception to the console.
+                    Console.WriteLine();
+                    Console.WriteLine($"An error was observed while initializing partition: { eventArgs.PartitionId }.  Message: { ex.Message }");
+                    Console.WriteLine();
+                }
+                return Task.CompletedTask;
+            }
+
+            async Task processEventHandlerAsync(ProcessEventArgs eventArgs)
+            {
+                if (eventArgs.CancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                try
+                {                  
                     string body = Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray());
                     var jsonMessage = JArray.Parse(body).First;
                     Uri uploadedUri = new Uri(jsonMessage["data"]["url"].ToString());
@@ -65,15 +86,14 @@ namespace ClientConsumer
                     string uploadedFile = Path.GetFileName(jsonMessage["data"]["url"].ToString());
                     string destinationFile = Path.Combine(downloadDestination, Path.GetFileName(uploadedFile));
                     Console.WriteLine("Downloading to {0}...", destinationFile);
-                    blockBlob.DownloadTo(destinationFile);
+                    await blockBlob.DownloadToAsync(destinationFile);
                     Console.WriteLine("Done.");
                     Console.WriteLine();
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"An error was observed while processing events.  Message: { ex.Message }");
-                }
-                return Task.CompletedTask;
+                }             
             };
 
             Task processErrorHandler(ProcessErrorEventArgs eventArgs)
@@ -89,15 +109,14 @@ namespace ClientConsumer
                 Console.WriteLine();
                 return Task.CompletedTask;
             }
+            processor.PartitionInitializingAsync += partitionInitializingHandler;
             processor.ProcessEventAsync += processEventHandlerAsync;
             processor.ProcessErrorAsync += processErrorHandler;
 
             try
             {
-                eventIndex = 0;
                 await processor.StartProcessingAsync();
                 await Task.Delay(-1, cancellationToken);
-                await processor.StopProcessingAsync();
             }
             catch (TaskCanceledException)
             {
@@ -105,6 +124,8 @@ namespace ClientConsumer
             }
             finally
             {
+                await processor.StopProcessingAsync();
+                processor.PartitionInitializingAsync -= partitionInitializingHandler;
                 processor.ProcessEventAsync -= processEventHandlerAsync;
                 processor.ProcessErrorAsync -= processErrorHandler;
             }
