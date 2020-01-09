@@ -33,9 +33,8 @@ namespace ExternalConfigurationStore.Cloud.SettingsStore
         public async Task<ETag> GetVersionAsync()
         {
             var response = await configBlob.GetPropertiesAsync();
-            var eTag = response.Value.ETag;
 
-            return eTag;
+            return response.Value.ETag;
         }
 
         public async Task<Dictionary<string, string>> FindAllAsync()
