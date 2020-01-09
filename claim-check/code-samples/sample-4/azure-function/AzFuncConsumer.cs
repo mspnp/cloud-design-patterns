@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System.Text;
 using Azure.Storage.Blobs;
 using Azure;
+using Azure.Storage.Blobs.Models;
 
 namespace azure_function
 {
@@ -34,10 +35,9 @@ namespace azure_function
 
                     log.LogInformation("Here is the large payload information");
 
-                // Reading payload
-                    Stream blobStream=null;
-                    await blob.DownloadToAsync(blobStream);
-                    using (StreamReader reader = new StreamReader(blobStream))
+                    // Reading payload
+                    BlobDownloadInfo download =await blob.DownloadAsync();
+                    using (StreamReader reader = new StreamReader(download.Content))
                     {
                         string data = reader.ReadToEnd();
                         log.LogInformation(data);

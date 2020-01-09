@@ -43,9 +43,9 @@ namespace ClientProducer
         {
             // Store message in blob storage
             string storageConnectionString = ConfigurationManager.AppSettings["STORAGE_CONNECTION_STRING"];
-            
+
             // Check whether the connection string can be parsed.
-            if (storageConnectionString!=null & storageConnectionString !="")
+            if (!string.IsNullOrEmpty(storageConnectionString))
             {
                 // Create a container called 'heavypayload' if not exists;
                 var containerName = "heavypayload";
