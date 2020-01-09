@@ -64,8 +64,8 @@ namespace ValetKey.Api.Controllers
                 BlobContainerName = this.blobContainer,
                 BlobName = blobName,
                 Resource = "b",
-                StartsOn = DateTimeOffset.UtcNow,
-                ExpiresOn = DateTimeOffset.UtcNow.AddHours(1),
+                StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
+                ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(5)
             };
             policy.SetPermissions(BlobSasPermissions.Write);
             var sas = policy.ToSasQueryParameters(storageSharedKeyCredential).ToString();
