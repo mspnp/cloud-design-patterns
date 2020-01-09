@@ -7,6 +7,7 @@ namespace DistributedMutex
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure;
     using Azure.Storage.Blobs;
     using Azure.Storage.Blobs.Specialized;
 
@@ -36,7 +37,6 @@ namespace DistributedMutex
     {
         private readonly BlobContainerClient leaseContainerClient;
         private readonly PageBlobClient leaseBlobClient;
-        private BlobLeaseClient leaseClient;
 
         public BlobLeaseManager(BlobSettings settings)
             : this(settings.BlobServiceClient, settings.Container, settings.BlobName)
@@ -57,7 +57,7 @@ namespace DistributedMutex
                 var leaseClient = this.leaseBlobClient.GetBlobLeaseClient(leaseId);
                 leaseClient.Release();
             }
-            catch (Azure.RequestFailedException e) 
+            catch (RequestFailedException e) 
             {
                 // Lease will eventually be released.
                 Trace.TraceError(e.ErrorCode);
@@ -73,7 +73,7 @@ namespace DistributedMutex
                 var lease = await leaseClient.AcquireAsync(TimeSpan.FromSeconds(60), null, token);
                 return lease.Value.LeaseId;
             }
-            catch (Azure.RequestFailedException storageException) 
+            catch (RequestFailedException storageException) 
             {
                 Trace.TraceError(storageException.ErrorCode);
 
@@ -102,15 +102,11 @@ namespace DistributedMutex
         {
             try
             {
-                if (this.leaseClient == null)
-                {
-                    this.leaseClient = this.leaseBlobClient.GetBlobLeaseClient(leaseId);
-                }
-
-                await this.leaseClient.RenewAsync(cancellationToken: token);
+                var leaseClient = this.leaseBlobClient.GetBlobLeaseClient(leaseId);
+                await leaseClient.RenewAsync(cancellationToken: token);
                 return true;
             }
-            catch (Azure.RequestFailedException storageException)
+            catch (RequestFailedException storageException)
             {
                 Trace.TraceError(storageException.ErrorCode);
 
@@ -121,18 +117,7 @@ namespace DistributedMutex
         private async Task CreateBlobAsync(CancellationToken token)
         {
             await this.leaseContainerClient.CreateIfNotExistsAsync(cancellationToken: token);
-
-            try
-            {
-                await this.leaseBlobClient.CreateIfNotExistsAsync(0, cancellationToken: token);
-            }
-            catch (Azure.RequestFailedException e) 
-            {
-                if (e.Status != (int) HttpStatusCode.PreconditionFailed)
-                {
-                    throw;
-                }
-            }
+            await this.leaseBlobClient.CreateIfNotExistsAsync(0, cancellationToken: token);
         }
-        }
+    }
 }
