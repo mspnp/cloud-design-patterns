@@ -9,7 +9,7 @@ namespace ClientConsumer
     public class Program
     {
         private static async Task MessageLoop(object state) {
-            (var consumer, var cancellationToken) = (ValueTuple<IConsumer, CancellationToken>)state;
+            (var consumer, var cancellationToken) = (ValueTuple<IReader, CancellationToken>)state;
             while (!cancellationToken.IsCancellationRequested)
             {
                 await consumer.ProcessMessages(cancellationToken);
@@ -18,13 +18,13 @@ namespace ClientConsumer
 
         public static async Task Main(string[] args)
         {
-            IConsumer consumer = new EventHubsConsumer();
-            consumer.Configure();
+            IReader reader = new EventReader();
+            reader.Configure();
 
             Console.WriteLine("Dequeuing messages...");
             var cts = new CancellationTokenSource();
             var task = Task.Factory.StartNew(MessageLoop,
-                (consumer, cts.Token),
+                (reader, cts.Token),
                 CancellationToken.None,
                 TaskCreationOptions.DenyChildAttach | TaskCreationOptions.LongRunning,
                 TaskScheduler.Default

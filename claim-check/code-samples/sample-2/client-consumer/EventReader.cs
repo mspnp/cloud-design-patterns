@@ -15,7 +15,7 @@ using Newtonsoft.Json.Linq;
 
 namespace ClientConsumer
 {
-    class EventHubsConsumer : IConsumer
+    class EventReader : IReader
     {
         private string downloadDestination;
        
@@ -43,6 +43,8 @@ namespace ClientConsumer
             processor = new EventProcessorClient(blobContainerClient, EventHubConsumerClient.DefaultConsumerGroupName, eventhubConnectionString);
         }
 
+        //As an example, we'll just log the exception to the console in try/catch block.
+        //For real-world scenarios, you should take action appropriate to your application.
         public async Task ProcessMessages(CancellationToken cancellationToken)
         {
             Console.WriteLine("The application will now start to listen for incoming messages.");
@@ -61,8 +63,6 @@ namespace ClientConsumer
                 }
                 catch (Exception ex)
                 {
-                    // For real-world scenarios, you should take action appropriate to your application.  For our example, we'll just log
-                    // the exception to the console.
                     Console.WriteLine();
                     Console.WriteLine($"An error was observed while initializing partition: { eventArgs.PartitionId }.  Message: { ex.Message }");
                     Console.WriteLine();
@@ -116,11 +116,11 @@ namespace ClientConsumer
             try
             {
                 await processor.StartProcessingAsync();
-                await Task.Delay(-1, cancellationToken);
+                await Task.Delay(Timeout.Infinite, cancellationToken);
             }
             catch (TaskCanceledException)
             {
-                // This is okay because the task was cancelled. :)
+                // This is okay because when pressing any key, it will send a cancellation, then the task was cancelled. :)
             }
             finally
             {

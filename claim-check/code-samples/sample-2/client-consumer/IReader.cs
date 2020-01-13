@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace ClientConsumer
 {
-    public interface IConsumer
+    public interface IReader
     {
         void Configure();
         Task ProcessMessages(CancellationToken token);
