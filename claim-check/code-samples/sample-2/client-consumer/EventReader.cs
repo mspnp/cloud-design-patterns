@@ -22,21 +22,17 @@ namespace ClientConsumer
         private EventProcessorClient processor;
 
         public void Configure()
-        {
-            Console.WriteLine("Validating settings...");
-            foreach (string option in new string[] { "EventHubConnectionString", "StorageConnectionString", "BlobContainerName", "DownloadDestination" })
-            {
-                if (string.IsNullOrEmpty(ConfigurationManager.AppSettings?[option]))
-                {
-                    Console.WriteLine($"Missing '{option}' in App.config.");
-                    return;
-                }
-            }
-
+        {            
             string storageConnectionString = ConfigurationManager.AppSettings["StorageConnectionString"];
             string eventhubConnectionString = ConfigurationManager.AppSettings["EventHubConnectionString"];
             downloadDestination = ConfigurationManager.AppSettings["DownloadDestination"];
             string blobContainerName = ConfigurationManager.AppSettings["BlobContainerName"];
+            Console.WriteLine("Validating settings...");
+            if(string.IsNullOrEmpty(storageConnectionString) | string.IsNullOrEmpty(eventhubConnectionString) | string.IsNullOrEmpty(downloadDestination) | string.IsNullOrEmpty(blobContainerName))
+            {
+                Console.WriteLine($"Missing AppSetting value in App.config.");
+                return;
+            }
             Console.WriteLine("Connecting to Storage account...");
             BlobContainerClient blobContainerClient = new BlobContainerClient(storageConnectionString, blobContainerName);
             Console.WriteLine("Connecting to EventHub...");
@@ -57,8 +53,7 @@ namespace ClientConsumer
                 }
                 try
                 {
-                    var utcNow = DateTime.UtcNow;
-                    eventArgs.DefaultStartingPosition = EventPosition.FromEnqueuedTime(utcNow);
+                    eventArgs.DefaultStartingPosition = EventPosition.FromEnqueuedTime(DateTimeOffset.UtcNow);
                     Console.WriteLine($"Initialized partition: { eventArgs.PartitionId }");
                 }
                 catch (Exception ex)
@@ -83,7 +78,7 @@ namespace ClientConsumer
                     Uri uploadedUri = new Uri(jsonMessage["data"]["url"].ToString());
                     Console.WriteLine("Blob available at: {0}", uploadedUri);
                     BlockBlobClient blockBlob = new BlockBlobClient(uploadedUri);
-                    string uploadedFile = Path.GetFileName(jsonMessage["data"]["url"].ToString());
+                    string uploadedFile = Path.GetFileName(uploadedUri.ToString());
                     string destinationFile = Path.Combine(downloadDestination, Path.GetFileName(uploadedFile));
                     Console.WriteLine("Downloading to {0}...", destinationFile);
                     await blockBlob.DownloadToAsync(destinationFile);
