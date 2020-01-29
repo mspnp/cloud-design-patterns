@@ -1,18 +1,18 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.IO;
+using System.Web.Optimization;
+
 namespace StaticContentHosting.Web
 {
-    using System.IO;
-    using System.Web.Optimization;
-
     public class BundleConfig
     {
         // For more information on Bundling, visit http://go.microsoft.com/fwlink/?LinkId=254725
         public static void RegisterBundles(BundleCollection bundles)
         {
-
             var staticContentBaseUrl = Settings.StaticContentBaseUrl;
-//If you would like to use files from static storage during debug comment out the preprocessor statement
+            //If you would like to use files from static storage during debug comment out the preprocessor statement
 #if !DEBUG
             //This explicitly sets the bundling to optimize even when in debug, which will utilize the CDN url if specified
             BundleTable.EnableOptimizations = true;
