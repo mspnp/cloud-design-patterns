@@ -3,33 +3,30 @@ using System.Configuration;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace ClientConsumer
 {
     public class Program
     {
         private static async Task MessageLoop(object state) {
-            (var consumer, var cancellationToken) = (ValueTuple<IConsumer, CancellationToken>)state;
+            (var reader, var cancellationToken) = (ValueTuple<IReader, CancellationToken>)state;
             while (!cancellationToken.IsCancellationRequested)
             {
-                await consumer.ProcessMessages(cancellationToken);
+                await reader.ProcessMessages(cancellationToken);
             }
         }
 
         public static async Task Main(string[] args)
         {
-            IConsumer consumer = new EventHubsConsumer();
-            consumer.Configure();
+            IReader reader = new EventReader();
+            reader.Configure();
 
             Console.WriteLine("Dequeuing messages...");
             var cts = new CancellationTokenSource();
-            var task = Task.Factory.StartNew(MessageLoop,
-                (consumer, cts.Token),
-                CancellationToken.None,
-                TaskCreationOptions.DenyChildAttach | TaskCreationOptions.LongRunning,
-                TaskScheduler.Default
-            );
+            var task = Task.Run(async () =>
+            {
+                await MessageLoop((reader, cts.Token));
+            });
 
             Console.WriteLine("Press any key to terminate the application...");
             Console.ReadKey(true);
