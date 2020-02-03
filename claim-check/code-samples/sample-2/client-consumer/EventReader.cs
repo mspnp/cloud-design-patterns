@@ -76,7 +76,7 @@ namespace ClientConsumer
                 try
                 {                  
                     string body = Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray());
-                    JToken jsonMessage = JArray.Parse(body).First;
+                    var jsonMessage = JArray.Parse(body).First;
                     Uri uploadedUri = new Uri(jsonMessage["data"]["url"].ToString());
                     Console.WriteLine("Blob available at: {0}", uploadedUri);
                     BlockBlobClient blockBlob = new BlockBlobClient(uploadedUri);
