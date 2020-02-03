@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using System;
 using System.Configuration;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
+
 
 namespace ClientProducer
 {
@@ -42,30 +43,15 @@ namespace ClientProducer
         {
             // Store message in blob storage
             string storageConnectionString = ConfigurationManager.AppSettings["STORAGE_CONNECTION_STRING"];
-            
-            // Check whether the connection string can be parsed.
-            if (CloudStorageAccount.TryParse(storageConnectionString, out var storageAccount))
-            {
-                // Create the CloudBlobClient that represents the Blob storage endpoint for the storage account.
-                CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
 
+            // Check whether the connection string can be parsed.
+            if (!string.IsNullOrEmpty(storageConnectionString))
+            {
                 // Create a container called 'heavypayload' if not exists;
                 var containerName = "heavypayload";
-                Console.WriteLine("- Checking for existence of container '{0}'", containerName);                
-                var cloudBlobContainer = cloudBlobClient.GetContainerReference(containerName);
-                if (!await cloudBlobContainer.ExistsAsync())
-                {
-                    Console.WriteLine("- Creating container '{0}'", containerName);                
-                    await cloudBlobContainer.CreateAsync();
-                }                
-
-                // Set the permissions so the blobs are private. 
-                BlobContainerPermissions permissions = new BlobContainerPermissions() {
-                    PublicAccess = BlobContainerPublicAccessType.Off
-                };                
-                Console.WriteLine("- Setting permissions");
-                await cloudBlobContainer.SetPermissionsAsync(permissions);
-
+                BlobContainerClient container = new BlobContainerClient(storageConnectionString, containerName);
+                await container.CreateIfNotExistsAsync(PublicAccessType.None);
+            
                 // This would ideally be a large message/payload/file
                 // Create a file in your local MyDocuments folder to upload to a blob.
                 string localPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -80,8 +66,8 @@ namespace ClientProducer
 
                 // Get a reference to the blob address, then upload the file to the blob.
                 // Use the value of localFileName for the blob name.
-                CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(localFileName);
-                await cloudBlockBlob.UploadFromFileAsync(sourceFile);
+                BlobClient blobClient = container.GetBlobClient(localFileName);
+                await blobClient.UploadAsync(sourceFile);
 
                 // Delete tempo file
                 Console.WriteLine("- Deleting temp file {0}", sourceFile);
@@ -90,7 +76,7 @@ namespace ClientProducer
                 // Store details of blob to be sent as a message
                 return new PayloadDetails
                 {
-                    ContainerName = cloudBlobContainer.Name,
+                    ContainerName = container.Name,
                     BlobName = localFileName
                 };
             }
