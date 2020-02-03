@@ -109,8 +109,6 @@ sed "s|{EventHubConnectionString}|${EVENTHUB_CONNECTION_STRING}|g" client-consum
 echo "StorageConnectionString = ${STORAGE_CONNECTION_STRING}"
 sed -i.bak "s|{StorageConnectionString}|${STORAGE_CONNECTION_STRING}|g" client-consumer/App.config
 
-sed -i "s|{BlobContainerName}|eventhubs|g" client-consumer/App.config
-
 rm -f client-consumer/App.config.bak
 
 echo "done"

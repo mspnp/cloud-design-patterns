@@ -6,11 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Messaging.EventHubs;
-using Azure.Messaging.EventHubs.Processor;
-using Azure.Storage;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Specialized;
+using Microsoft.Azure.EventHubs;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json.Linq;
 
 namespace ClientConsumer
@@ -25,6 +23,7 @@ namespace ClientConsumer
         {            
             string storageConnectionString = ConfigurationManager.AppSettings["StorageConnectionString"];
             string eventhubConnectionString = ConfigurationManager.AppSettings["EventHubConnectionString"];
+
             downloadDestination = ConfigurationManager.AppSettings["DownloadDestination"];
             string blobContainerName = ConfigurationManager.AppSettings["BlobContainerName"];
             Console.WriteLine("Validating settings...");
@@ -34,9 +33,12 @@ namespace ClientConsumer
                 return;
             }
             Console.WriteLine("Connecting to Storage account...");
-            BlobContainerClient blobContainerClient = new BlobContainerClient(storageConnectionString, blobContainerName);
+
+            storageAccount = CloudStorageAccount.Parse(storageConnectionString);
+
             Console.WriteLine("Connecting to EventHub...");
-            processor = new EventProcessorClient(blobContainerClient, EventHubConsumerClient.DefaultConsumerGroupName, eventhubConnectionString);
+            
+            client = EventHubClient.CreateFromConnectionString(eventhubConnectionString);
         }
 
         //As an example, we'll just log the exception to the console in try/catch block.
