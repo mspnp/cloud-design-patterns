@@ -2,18 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 namespace ValetKey.Web
 {
-    using Azure.Storage.Blobs;
     using Microsoft.Azure;
     using Microsoft.WindowsAzure.ServiceRuntime;
-    using System.Configuration;
+    using Microsoft.WindowsAzure.Storage;
 
     public class WebRole : RoleEntryPoint
     {
-        private static readonly string BlobContainer = ConfigurationManager.AppSettings["ContainerName"];
+        private const string BlobContainer = "valetkeysample";
 
         public override bool OnStart()
         {
-            BlobContainerClient container = new BlobContainerClient(CloudConfigurationManager.GetSetting("Storage"), BlobContainer);
+            // Setup blob container
+            var account = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("Storage"));
+
+            var blobClient = account.CreateCloudBlobClient();
+            var container = blobClient.GetContainerReference(BlobContainer);
             container.CreateIfNotExists();
 
             return base.OnStart();

@@ -10,12 +10,12 @@ namespace HealthEndPointMonitoring.Web
 
         public void CoreHealthCheck()
         {
-            var blobClient = Settings.StorageAccount;
+            var blobClient = Settings.StorageAccount.CreateCloudBlobClient();
             
             //Check to see if the service is available and handling requests
             //This could be a listing or simply retrieving metadata for a known file
             //The operation selected here is not based on the lowest impact/load on the service but simple set of requirements.  Consider an operation that does not put a of load on the service when performing a simple ping to determine if the service is alive.
-            blobClient.GetBlobContainers(prefix:"healthcheck");
+            blobClient.ListContainers("healthcheck");
 
             //In addition to a simple operation to determine if the service is available and responding
             //  We could check that connection strings match the environment

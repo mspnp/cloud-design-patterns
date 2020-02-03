@@ -1,40 +1,38 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Azure;
-using Azure.Storage.Blobs;
-using Microsoft.Azure;
-
 namespace ExternalConfigurationStore.Cloud.SettingsStore
 {
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using System.Xml.Linq;
+    using Microsoft.Azure;
+    using Microsoft.WindowsAzure.Storage;
+    using Microsoft.WindowsAzure.Storage.Blob;
+
     public class BlobSettingsStore : ISettingsStore
     {
-        private readonly BlobClient configBlob;
+        private readonly CloudBlockBlob configBlob;
 
         public BlobSettingsStore(string environment) : this(CloudConfigurationManager.GetSetting("storageAccount"), "configuration", "configurationdata", environment)
         {
         }
 
-        public BlobSettingsStore(string connectionString, string configContainer, string configBlobName, string environment)
+        public BlobSettingsStore(string storageAccount, string configContainer, string configBlobName, string environment)
         {
-            var blobServiceClient = new BlobServiceClient(connectionString);
-            var container = blobServiceClient.GetBlobContainerClient(configContainer);
-            container.CreateIfNotExists();
+            var account = CloudStorageAccount.Parse(storageAccount);
+            var client = account.CreateCloudBlobClient();
+            var container = client.GetContainerReference(configContainer);
 
-            this.configBlob = container.GetBlobClient(configBlobName + "-" + environment + ".config");
+            this.configBlob = container.GetBlockBlobReference(configBlobName + "-" + environment + ".config");
         }
 
-        public async Task<ETag> GetVersionAsync()
+        public async Task<string> GetVersionAsync()
         {
-            var response = await configBlob.GetPropertiesAsync();
+                await this.configBlob.FetchAttributesAsync();
 
-            return response.Value.ETag;
+                return this.configBlob.Properties.ETag;
         }
 
         public async Task<Dictionary<string, string>> FindAllAsync()
@@ -49,7 +47,7 @@ namespace ExternalConfigurationStore.Cloud.SettingsStore
             // Read the configuration blob and return the settings as a Dictionary.
             using (var stream = new MemoryStream())
             {
-                await this.configBlob.DownloadToAsync(stream);
+                await this.configBlob.DownloadToStreamAsync(stream);
 
                 stream.Position = 0;
                 using (var reader = new StreamReader(stream))

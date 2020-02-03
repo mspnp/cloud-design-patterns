@@ -6,9 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.EventHubs;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
+using Azure.Messaging.EventHubs;
+using Azure.Messaging.EventHubs.Processor;
+using Azure.Storage;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Specialized;
 using Newtonsoft.Json.Linq;
 
 namespace ClientConsumer
@@ -23,7 +25,6 @@ namespace ClientConsumer
         {            
             string storageConnectionString = ConfigurationManager.AppSettings["StorageConnectionString"];
             string eventhubConnectionString = ConfigurationManager.AppSettings["EventHubConnectionString"];
-
             downloadDestination = ConfigurationManager.AppSettings["DownloadDestination"];
             string blobContainerName = ConfigurationManager.AppSettings["BlobContainerName"];
             Console.WriteLine("Validating settings...");
@@ -33,12 +34,9 @@ namespace ClientConsumer
                 return;
             }
             Console.WriteLine("Connecting to Storage account...");
-
-            storageAccount = CloudStorageAccount.Parse(storageConnectionString);
-
+            BlobContainerClient blobContainerClient = new BlobContainerClient(storageConnectionString, blobContainerName);
             Console.WriteLine("Connecting to EventHub...");
-            
-            client = EventHubClient.CreateFromConnectionString(eventhubConnectionString);
+            processor = new EventProcessorClient(blobContainerClient, EventHubConsumerClient.DefaultConsumerGroupName, eventhubConnectionString);
         }
 
         //As an example, we'll just log the exception to the console in try/catch block.
@@ -76,7 +74,7 @@ namespace ClientConsumer
                 try
                 {                  
                     string body = Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray());
-                    var jsonMessage = JArray.Parse(body).First;
+                    JToken jsonMessage = JArray.Parse(body).First;
                     Uri uploadedUri = new Uri(jsonMessage["data"]["url"].ToString());
                     Console.WriteLine("Blob available at: {0}", uploadedUri);
                     BlockBlobClient blockBlob = new BlockBlobClient(uploadedUri);

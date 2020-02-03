@@ -1,11 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
-using Microsoft.Azure;
-
 namespace ExternalConfigurationStore.Cloud
 {
+    using System;
+    using Microsoft.Azure;
+
     public static class ExternalConfiguration
     {
         private static readonly Lazy<ExternalConfigurationManager> configuredInstance = new Lazy<ExternalConfigurationManager>(

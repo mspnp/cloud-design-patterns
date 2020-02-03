@@ -2,13 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.===
 namespace ValetKey.Client
 {
-    using Azure.Storage.Blobs;
     using System;
     using System.Configuration;
     using System.IO;
     using System.Net;
     using System.Runtime.Serialization.Json;
     using System.Threading.Tasks;
+    using Microsoft.WindowsAzure.Storage.Auth;
+    using Microsoft.WindowsAzure.Storage.Blob;
 
     public class Program
     {
@@ -23,17 +24,19 @@ namespace ValetKey.Client
             try
             {
                 var blobSas = GetBlobSas(new Uri(tokenServiceEndpoint)).Result;
-                UriBuilder sasUri = new UriBuilder(blobSas.BlobUri);
-                sasUri.Query = blobSas.Credentials;
 
-                var blob = new BlobClient(sasUri.Uri);
+                // Create storage credentials object based on SAS
+                var credentials = new StorageCredentials(blobSas.Credentials);
+
+                // Using the returned SAS credentials and BLOB Uri create a block blob instance to upload
+                var blob = new CloudBlockBlob(blobSas.BlobUri, credentials);
 
                 using (var stream = GetFileToUpload(10))
                 {
-                    blob.Upload(stream);
+                    blob.UploadFromStream(stream);
                 }
 
-                Console.WriteLine("Blob uploaded successful: {0}", blob.Name);
+                Console.WriteLine("Blob uploaded successful: {0}", blobSas.Name);
             }
             catch (Exception ex)
             {
@@ -84,6 +87,7 @@ namespace ValetKey.Client
         {
             public string Credentials;
             public Uri BlobUri;
+            public string Name;
         }
     }
 }

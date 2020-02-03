@@ -1,15 +1,14 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.Web.Mvc;
-
 namespace StaticContentHosting.Web
 {
+    using System.Web.Mvc;
+
     public static class StaticContentUrlHtmlHelper
     {
         public static string StaticContentUrl(this HtmlHelper helper, string contentPath)
         {
-            if (contentPath.StartsWith("~"))
+            if (contentPath.StartsWith("~"))					
             {
                 contentPath = contentPath.Substring(1);
             }

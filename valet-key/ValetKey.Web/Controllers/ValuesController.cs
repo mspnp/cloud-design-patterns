@@ -1,28 +1,25 @@
-﻿
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 namespace ValetKey.Api.Controllers
 {
     using System;
-    using System.Configuration;
     using System.Diagnostics;
     using System.Net;
     using System.Net.Http;
     using System.Web.Http;
-    using Azure.Storage;
-    using Azure.Storage.Blobs;
-    using Azure.Storage.Sas;
     using Microsoft.Azure;
+    using Microsoft.WindowsAzure.Storage;
+    using Microsoft.WindowsAzure.Storage.Blob;
 
     public class ValuesController : ApiController
     {
-        private readonly BlobServiceClient blobServiceClient;
+        private readonly CloudStorageAccount account;
         private readonly string blobContainer;
 
         public ValuesController()
         {
-            this.blobServiceClient = new BlobServiceClient(CloudConfigurationManager.GetSetting("Storage"));
-            this.blobContainer = ConfigurationManager.AppSettings["ContainerName"];
+            this.account = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("Storage"));
+            this.blobContainer = "valetkeysample";
         }
 
         // GET api/Values
@@ -48,38 +45,43 @@ namespace ValetKey.Api.Controllers
                     });
             }
         }
-      
+
         /// <summary>
         /// We return a limited access key that allows the caller to upload a file to this specific destination for defined period of time
         /// </summary>
         private StorageEntitySas GetSharedAccessReferenceForUpload(string blobName)
-        {          
-            var blob = blobServiceClient.GetBlobContainerClient(this.blobContainer).GetBlobClient(blobName);
+        {
+            var blobClient = this.account.CreateCloudBlobClient();
+            var container = blobClient.GetContainerReference(this.blobContainer);
 
-            var storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, ConfigurationManager.AppSettings["AzureStorageEmulatorAccountKey"]);
+            var blob = container.GetBlockBlobReference(blobName);
 
-            var blobSasBuilder = new BlobSasBuilder
-
+            var policy = new SharedAccessBlobPolicy
             {
-                BlobContainerName = this.blobContainer,
-                BlobName = blobName,
-                Resource = "b",
-                StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
-                ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(5)
+                Permissions = SharedAccessBlobPermissions.Write,
+
+                // Create a signature for 5 min earlier to leave room for clock skew
+                SharedAccessStartTime = DateTime.UtcNow.AddMinutes(-5),
+
+                // Create the signature for as long as necessary -  we can 
+                SharedAccessExpiryTime = DateTime.UtcNow.AddMinutes(5)
             };
-            policy.SetPermissions(BlobSasPermissions.Write);
-            var sas = policy.ToSasQueryParameters(storageSharedKeyCredential).ToString();
-       
+
+            var sas = blob.GetSharedAccessSignature(policy);
+
             return new StorageEntitySas
             {
                 BlobUri = blob.Uri,
-                Credentials = sas        
+                Credentials = sas,
+                Name = blobName
             };
         }
+
         public struct StorageEntitySas
         {
             public string Credentials;
             public Uri BlobUri;
+            public string Name;
         }
     }
 }

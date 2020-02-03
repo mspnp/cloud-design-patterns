@@ -7,24 +7,19 @@ namespace DistributedMutex
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
-    using Azure;
-    using Azure.Storage.Blobs;
-    using Azure.Storage.Blobs.Specialized;
+    using Microsoft.WindowsAzure.Storage;
+    using Microsoft.WindowsAzure.Storage.Blob;
+    using Microsoft.WindowsAzure.Storage.RetryPolicies;
 
     public struct BlobSettings
     {
         public readonly string Container;
         public readonly string BlobName;
-        public BlobServiceClient BlobServiceClient;
+        public CloudStorageAccount StorageAccount;
 
-
-        public BlobSettings(String storageConnStr, string container, string blobName)
+        public BlobSettings(CloudStorageAccount storageAccount, string container, string blobName)
         {
-            var blobClientOptions = new BlobClientOptions();
-            blobClientOptions.Retry.Delay = TimeSpan.FromSeconds(5);
-            blobClientOptions.Retry.MaxRetries = 3;
-            
-            this.BlobServiceClient = new BlobServiceClient(storageConnStr, blobClientOptions);
+            this.StorageAccount = storageAccount;
             this.Container = container;
             this.BlobName = blobName;
         }
@@ -35,32 +30,30 @@ namespace DistributedMutex
     /// </summary>
     internal class BlobLeaseManager
     {
-        private readonly BlobContainerClient leaseContainerClient;
-        private readonly PageBlobClient leaseBlobClient;
+        private readonly CloudPageBlob leaseBlob;
 
         public BlobLeaseManager(BlobSettings settings)
-            : this(settings.BlobServiceClient, settings.Container, settings.BlobName)
+            : this(settings.StorageAccount.CreateCloudBlobClient(), settings.Container, settings.BlobName)
         {
         }
 
-        public BlobLeaseManager(BlobServiceClient blobServiceClient, string leaseContainerName, string leaseBlobName)
+        public BlobLeaseManager(CloudBlobClient blobClient, string leaseContainerName, string leaseBlobName)
         {
-            this.leaseContainerClient = blobServiceClient.GetBlobContainerClient(leaseContainerName);
-            this.leaseBlobClient = this.leaseContainerClient.GetPageBlobClient(leaseBlobName);
-            
+            blobClient.RetryPolicy = new LinearRetry(TimeSpan.FromSeconds(1), 3);
+            var container = blobClient.GetContainerReference(leaseContainerName);
+            this.leaseBlob = container.GetPageBlobReference(leaseBlobName);
         }
 
         public void ReleaseLease(string leaseId)
         {
             try
             {
-                var leaseClient = this.leaseBlobClient.GetBlobLeaseClient(leaseId);
-                leaseClient.Release();
+                this.leaseBlob.ReleaseLease(new AccessCondition { LeaseId = leaseId });
             }
-            catch (RequestFailedException e) 
+            catch (StorageException e)
             {
                 // Lease will eventually be released.
-                Trace.TraceError(e.ErrorCode);
+                Trace.TraceError(e.Message);
             }
         }
 
@@ -69,23 +62,33 @@ namespace DistributedMutex
             bool blobNotFound = false;
             try
             {
-                var leaseClient = this.leaseBlobClient.GetBlobLeaseClient();
-                var lease = await leaseClient.AcquireAsync(TimeSpan.FromSeconds(60), null, token);
-                return lease.Value.LeaseId;
+                return await this.leaseBlob.AcquireLeaseAsync(TimeSpan.FromSeconds(60), null, token);
             }
-            catch (RequestFailedException storageException) 
+            catch (StorageException storageException)
             {
-                Trace.TraceError(storageException.ErrorCode);
+                Trace.TraceError(storageException.Message);
 
-                var status = storageException.Status;
-                if (status == (int) HttpStatusCode.NotFound)
-                {
-                    blobNotFound = true;
-                }
+                var webException = storageException.InnerException as WebException;
 
-                if (status == (int)HttpStatusCode.Conflict)
+                if (webException != null)
                 {
-                    return null;
+                    var response = webException.Response as HttpWebResponse;
+                    if (response != null)
+                    {
+                        if (response.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            blobNotFound = true;
+                        }
+
+                        if (response.StatusCode == HttpStatusCode.Conflict)
+                        {
+                            return null;
+                        }
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
             }
 
@@ -102,13 +105,13 @@ namespace DistributedMutex
         {
             try
             {
-                var leaseClient = this.leaseBlobClient.GetBlobLeaseClient(leaseId);
-                await leaseClient.RenewAsync(cancellationToken: token);
+                await this.leaseBlob.RenewLeaseAsync(new AccessCondition { LeaseId = leaseId }, token);
                 return true;
             }
-            catch (RequestFailedException storageException)
+            catch (StorageException storageException)
             {
-                Trace.TraceError(storageException.ErrorCode);
+                // catch (WebException webException)
+                Trace.TraceError(storageException.Message);
 
                 return false;
             }
@@ -116,8 +119,27 @@ namespace DistributedMutex
 
         private async Task CreateBlobAsync(CancellationToken token)
         {
-            await this.leaseContainerClient.CreateIfNotExistsAsync(cancellationToken: token);
-            await this.leaseBlobClient.CreateIfNotExistsAsync(0, cancellationToken: token);
+            await this.leaseBlob.Container.CreateIfNotExistsAsync(token);
+            if (!await this.leaseBlob.ExistsAsync(token))
+            {
+                try
+                {
+                    await this.leaseBlob.CreateAsync(0, token);
+                }
+                catch (StorageException e)
+                {
+                    if (e.InnerException is WebException)
+                    {
+                        var webException = e.InnerException as WebException;
+                        var response = webException.Response as HttpWebResponse;
+
+                        if (response == null || response.StatusCode != HttpStatusCode.PreconditionFailed)
+                        {
+                            throw;
+                        }
+                    }
+                }
+            }
         }
     }
 }

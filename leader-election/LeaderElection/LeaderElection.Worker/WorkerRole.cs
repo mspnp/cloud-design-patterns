@@ -9,6 +9,7 @@ namespace LeaderElection.Worker
     using DistributedMutex;
     using Microsoft.Azure;
     using Microsoft.WindowsAzure.ServiceRuntime;
+    using Microsoft.WindowsAzure.Storage;
 
     public class WorkerRole : RoleEntryPoint
     {
@@ -17,7 +18,7 @@ namespace LeaderElection.Worker
 
         public override void Run()
         {
-            var settings = new BlobSettings(CloudConfigurationManager.GetSetting("Storage"), "leases", "MyLeaderCoordinatorTask");
+            var settings = new BlobSettings(CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("Storage")), "leases", "MyLeaderCoordinatorTask");
 
             var mutex = new BlobDistributedMutex(settings, MyLeaderCoordinatorTask);
 
