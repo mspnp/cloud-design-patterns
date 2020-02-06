@@ -1,0 +1,21 @@
+steps:
+# Restore those dependencies required for the Bot Logic
+- task: NuGetCommand@2
+  displayName: 'NuGet restore'
+  inputs:
+    restoreSolution: 'application/*.sln'
+# Build the bot logic, packaging it as a zip file.
+# The reason we want a zip file is because we will
+# push the end result to Azure App Service.
+- task: VSBuild@1
+  displayName: 'Build solution application/*.sln'
+  inputs:
+    solution: 'application/*.sln'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(Build.ArtifactStagingDirectory)/package/$(Build.BuildId).zip"'
+# Push the output of the Build Step (i.e. the zip
+# held in the package subdirectory of our staging directory
+# so that our release pipeline can access
+- task: PublishPipelineArtifact@0
+  inputs:
+    artifactName: 'applicationpackage'
+    targetPath: '$(Build.ArtifactStagingDirectory)/package'

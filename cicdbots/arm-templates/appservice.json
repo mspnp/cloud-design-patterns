@@ -1,0 +1,70 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appservicePlanName": {
+           "type": "string",
+           "metadata": {
+                "description": "Name of the App Service Plan"
+            }
+        },
+        "appserviceName": {
+           "type": "string",
+           "metadata": {
+                "description": "Name of the App Service"
+            }
+        },              
+        "botserviceName": {
+            "type": "string",
+            "metadata": {
+                 "description": "Name of the Bot Service"
+             }
+         },         
+         "botMsaAppId": {
+            "type": "string",
+            "metadata": {
+                 "description": "Microsoft Application ID for the bot"
+             }
+         },         
+         "botMsaAppPassword": {
+            "type": "securestring",
+            "metadata": {
+                 "description": "Microsoft Application Password for the bot"
+             }
+         }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2015-08-01",
+            "name": "[parameters('appserviceName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', parameters('appservicePlanName'))]",
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "BotId",
+                            "value": "[parameters('botserviceName')]"
+                        },
+                        {
+                            "name": "MicrosoftAppId",
+                            "value": "[parameters('botMsaAppId')]"
+                        },
+                        {
+                            "name": "MicrosoftAppPassword",
+                            "value": "[parameters('botMsaAppPassword')]"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "siteUri": {
+            "type": "string",
+            "value": "[reference(concat('Microsoft.Web/sites/', parameters('appserviceName'))).hostnames[0]]"
+        }
+    }
+}

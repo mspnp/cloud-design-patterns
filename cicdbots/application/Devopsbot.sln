@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2043
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devopsbot", "Devopsbot\Devopsbot.csproj", "{A052E997-FF4D-48A4-A880-E5710CB29C74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devopsbttest", "Devopsbttest\Devopsbttest.csproj", "{8B5B97B2-B0EA-48AE-9A56-4CED2F44A9A1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A052E997-FF4D-48A4-A880-E5710CB29C74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A052E997-FF4D-48A4-A880-E5710CB29C74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A052E997-FF4D-48A4-A880-E5710CB29C74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A052E997-FF4D-48A4-A880-E5710CB29C74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B5B97B2-B0EA-48AE-9A56-4CED2F44A9A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B5B97B2-B0EA-48AE-9A56-4CED2F44A9A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B5B97B2-B0EA-48AE-9A56-4CED2F44A9A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B5B97B2-B0EA-48AE-9A56-4CED2F44A9A1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C9D65DE2-CD98-471E-BBD4-623572218CEF}
+	EndGlobalSection
+EndGlobal
