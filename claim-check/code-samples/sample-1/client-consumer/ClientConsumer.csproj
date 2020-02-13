@@ -10,8 +10,6 @@
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.1.0" />
     <PackageReference Include="Azure.Storage.Queues" Version="12.1.0" />
-    <PackageReference Include="Microsoft.Azure.EventHubs" Version="2.2.1" />
-    <PackageReference Include="Microsoft.Azure.KeyVault.Core" Version="3.0.3" />
     <PackageReference Include="Microsoft.Azure.ServiceBus" Version="3.3.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
   </ItemGroup>
