@@ -42,18 +42,18 @@ namespace ValetKey.Api.Controllers
             {
                 Trace.TraceError(ex.Message);
                 throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError)
-                    {
-                        Content = new StringContent("An error has ocurred"),
-                        ReasonPhrase = "Critical Exception"
-                    });
+                {
+                    Content = new StringContent("An error has ocurred"),
+                    ReasonPhrase = "Critical Exception"
+                });
             }
         }
-      
+
         /// <summary>
         /// We return a limited access key that allows the caller to upload a file to this specific destination for defined period of time
         /// </summary>
         private StorageEntitySas GetSharedAccessReferenceForUpload(string blobName)
-        {          
+        {
             var blob = blobServiceClient.GetBlobContainerClient(this.blobContainer).GetBlobClient(blobName);
 
             var storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, ConfigurationManager.AppSettings["AzureStorageEmulatorAccountKey"]);
@@ -67,13 +67,13 @@ namespace ValetKey.Api.Controllers
                 StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
                 ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(5)
             };
-            policy.SetPermissions(BlobSasPermissions.Write);
-            var sas = policy.ToSasQueryParameters(storageSharedKeyCredential).ToString();
-       
+            blobSasBuilder.SetPermissions(BlobSasPermissions.Write);
+            var sas = blobSasBuilder.ToSasQueryParameters(storageSharedKeyCredential).ToString();
+
             return new StorageEntitySas
             {
                 BlobUri = blob.Uri,
-                Credentials = sas        
+                Credentials = sas
             };
         }
         public struct StorageEntitySas

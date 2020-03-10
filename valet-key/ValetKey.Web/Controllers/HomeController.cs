@@ -13,14 +13,13 @@ namespace ValetKey.Web.Controllers
     using Azure.Storage.Sas;
     using Microsoft.Azure;
 
-
     public class HomeController : Controller
     {
         private readonly BlobServiceClient blobServiceClient;
         private readonly string blobContainer;
 
         public HomeController()
-        {         
+        {
             this.blobServiceClient = new BlobServiceClient(CloudConfigurationManager.GetSetting("Storage"));
             this.blobContainer = ConfigurationManager.AppSettings["ContainerName"];
         }
@@ -74,8 +73,8 @@ namespace ValetKey.Web.Controllers
                 ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(5)
             };
 
-            policy.SetPermissions(BlobSasPermissions.Read);
-            var sas = policy.ToSasQueryParameters(storageSharedKeyCredential).ToString();
+            blobSasBuilder.SetPermissions(BlobSasPermissions.Read);
+            var sas = blobSasBuilder.ToSasQueryParameters(storageSharedKeyCredential).ToString();
 
             return new StorageEntitySas
             {
