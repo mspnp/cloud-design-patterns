@@ -54,6 +54,8 @@ The provided ARM template is used to deploy the required resources:
 
 ## Creating the Web Jobs
 
+Refer to [this article](https://docs.microsoft.com/azure/app-service/webjobs-dotnet-deploy-vs) for more information on how to Develop and deploy WebJobs using Visual Studio - Azure App Service.
+
 You can publish the Web Jobs by using Visual Studio 2019, follow these instructions for every project in the solution:
  
 * Start Visual Studio using an account that has Administrator privileges ("Run as Administrator").
@@ -103,3 +105,4 @@ Once all the Web Jobs are running, the sender job will be sending messages to th
 * Competing receiver:
 
 [06/23/2020 02:29:23 > 360773: INFO] Received message: SequenceNumber:1233 Body:Message 1233
+
