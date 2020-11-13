@@ -1,8 +1,8 @@
-FROM openjdk:8-jre-alpine as base
+FROM mcr.microsoft.com/java/jre:8-zulu-debian10 as base
 WORKDIR /usr/src/app
 EXPOSE 80
 
-FROM maven:3.5-jdk-8-slim as build
+FROM mcr.microsoft.com/java/maven:8-zulu-debian10 as build
 WORKDIR /usr/src/app
 
 COPY pom.xml ./
