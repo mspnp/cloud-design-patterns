@@ -1,34 +1,36 @@
-FROM microsoft/dotnet:2.2-aspnetcore-runtime as base
+FROM mcr.microsoft.com/dotnet/core/aspnet:2.2 AS base
 WORKDIR /app
 EXPOSE 8080
 
-FROM microsoft/dotnet:2.2-sdk AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
+WORKDIR /src
 
-WORKDIR /app
-COPY Fabrikam.Choreography.ChoreographyService/*.csproj ./Fabrikam.Choreograph.ChoreographyService/
-WORKDIR /app
-RUN dotnet restore /app/Fabrikam.Choreography.ChoreographyService/
+# Copy over the test and main code csproj file into the image and restore dependencies
+COPY Fabrikam.Choreography.ChoreographyService/*.csproj Fabrikam.Choreography.ChoreographyService/
+COPY Frabrikam.Choreography.ChoreographyService.Tests/*.csproj Frabrikam.Choreography.ChoreographyService.Tests/
+RUN dotnet restore Fabrikam.Choreography.ChoreographyService/
+RUN dotnet restore Frabrikam.Choreography.ChoreographyService.Tests/
 
-WORKDIR /app
-COPY Fabrikam.Choreography.ChoreographyService/. ./Fabrikam.Choreography.ChoreographyService/
+# Now copy over all the files
+COPY Fabrikam.Choreography.ChoreographyService Fabrikam.Choreography.ChoreographyService
+COPY Frabrikam.Choreography.ChoreographyService.Tests Frabrikam.Choreography.ChoreographyService.Tests
 
-FROM build AS testrunner
+# Build the tests (which also builds the app)
+WORKDIR /src/Frabrikam.Choreography.ChoreographyService.Tests
+RUN dotnet build
 
-WORKDIR /app/tests
-COPY Frabrikam.Choreography.ChoreographyService.Tests/*.csproj .
-WORKDIR /app/tests
-RUN dotnet restore /app/tests/
-
-WORKDIR /app/tests
-COPY Frabrikam.Choreography.ChoreographyService.Tests/. .
+# run the unit tests (on demand)
+FROM build as testrunner
+WORKDIR /src/Frabrikam.Choreography.ChoreographyService.Tests
 ENTRYPOINT ["dotnet", "test", "--logger:trx"]
 
+# publish the code
 FROM build AS publish
+WORKDIR /src/Fabrikam.Choreography.ChoreographyService
+RUN dotnet publish -c Release -o ../out
 
-WORKDIR /app
-RUN dotnet publish /app/Fabrikam.Choreography.ChoreographyService/ -c Release -o ../out
-
-FROM base AS runtime
+# Run the app
+FROM base AS final
 
 LABEL Tags="Azure,AKS,Choreography"
 
@@ -37,7 +39,7 @@ ARG user=choreographyuser
 RUN useradd -m -s /bin/bash -U $user
 
 WORKDIR /app
-COPY --from=publish /app/out ./
+COPY --from=publish /src/out ./
 COPY scripts/. ./
 RUN \
     # Ensures the entry point is executable
@@ -47,5 +49,4 @@ RUN chown -R $user.$user /app
 
 # Set it for subsequent commands
 USER $user
-
-ENTRYPOINT ["/bin/bash", "/app/run.sh"]
+ENTRYPOINT ["dotnet", "Fabrikam.Choreography.ChoreographyService.dll"]
