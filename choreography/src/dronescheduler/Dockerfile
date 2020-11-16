@@ -1,32 +1,32 @@
-FROM microsoft/dotnet:2.2-aspnetcore-runtime as base
+FROM mcr.microsoft.com/dotnet/core/aspnet:2.2 AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM microsoft/dotnet:2.2-sdk AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
 
-MAINTAINER Fernando Antivero (https://github.com/ferantivero)
-
-WORKDIR /app
-COPY delivery/Fabrikam.DroneDelivery.Common/*.csproj ./Fabrikam.DroneDelivery.Common/
-COPY dronescheduler/Fabrikam.DroneDelivery.DroneScheduler/*.csproj ./Fabrikam.DroneDelivery.DroneScheduler/
-WORKDIR /app
-RUN dotnet restore /app/Fabrikam.DroneDelivery.Common/
-RUN dotnet restore /app/Fabrikam.DroneDelivery.DroneScheduler/
+LABEL Maintainer="Fernando Antivero (https://github.com/ferantivero)"
 
 WORKDIR /app
-COPY delivery/Fabrikam.DroneDelivery.Common/. ./Fabrikam.DroneDelivery.Common/
-COPY dronescheduler/Fabrikam.DroneDelivery.DroneScheduler/. ./Fabrikam.DroneDelivery.DroneScheduler/
+COPY delivery/Fabrikam.DroneDelivery.Common/*.csproj ./delivery/Fabrikam.DroneDelivery.Common/
+COPY dronescheduler/Fabrikam.DroneDelivery.DroneScheduler/*.csproj ./dronescheduler/Fabrikam.DroneDelivery.DroneScheduler/
+WORKDIR /app
+RUN dotnet restore /app/delivery/Fabrikam.DroneDelivery.Common/
+RUN dotnet restore /app/dronescheduler/Fabrikam.DroneDelivery.DroneScheduler/
+
+WORKDIR /app
+COPY delivery/Fabrikam.DroneDelivery.Common/. ./delivery/Fabrikam.DroneDelivery.Common/
+COPY dronescheduler/Fabrikam.DroneDelivery.DroneScheduler/. ./dronescheduler/Fabrikam.DroneDelivery.DroneScheduler/
 
 FROM build AS publish
 
-MAINTAINER Fernando Antivero (https://github.com/ferantivero)
+LABEL Maintainer="Microsoft Patterns & Practices (https://github.com/mspnp)"
 
 WORKDIR /app
-RUN dotnet publish /app/Fabrikam.DroneDelivery.DroneScheduler/ -c Release -o ../out
+RUN dotnet publish /app/dronescheduler/Fabrikam.DroneDelivery.DroneScheduler/ -c Release -o ../../out
 
 FROM base AS runtime
 
-MAINTAINER Fernando Antivero (https://github.com/ferantivero)
+LABEL Maintainer="Microsoft Patterns & Practices (https://github.com/mspnp)"
 
 LABEL Tags="Azure,AKS,DroneDelivery"
 
@@ -36,14 +36,10 @@ RUN useradd -m -s /bin/bash -U $user
 
 WORKDIR /app
 COPY --from=publish /app/out ./
-COPY dronescheduler/scripts/. ./
-RUN \
-    # Ensures the entry point is executable
-    chmod ugo+x /app/run.sh
 
 RUN chown -R $user.$user /app
 
 # Set it for subsequent commands
 USER $user
 
-ENTRYPOINT ["/bin/bash", "/app/run.sh"]
+ENTRYPOINT ["dotnet", "Fabrikam.DroneDelivery.DroneScheduler.dll"]

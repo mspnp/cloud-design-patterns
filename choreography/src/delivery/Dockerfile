@@ -1,8 +1,8 @@
-FROM microsoft/dotnet:2.2-aspnetcore-runtime as base
+FROM mcr.microsoft.com/dotnet/core/aspnet:2.2 as base
 WORKDIR /app
 EXPOSE 8080
 
-FROM microsoft/dotnet:2.2-sdk AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
 
 WORKDIR /app
 COPY Fabrikam.DroneDelivery.Common/*.csproj ./Fabrikam.DroneDelivery.Common/
@@ -28,14 +28,14 @@ ENTRYPOINT ["dotnet", "test", "--logger:trx"]
 
 FROM build AS publish
 
-MAINTAINER Fernando Antivero (https://github.com/ferantivero)
+LABEL Maintainer="Fernando Antivero (https://github.com/ferantivero)"
 
 WORKDIR /app
 RUN dotnet publish /app/Fabrikam.DroneDelivery.DeliveryService/ -c Release -o ../out
 
 FROM base AS runtime
 
-MAINTAINER Fernando Antivero (https://github.com/ferantivero)
+LABEL Maintainer="Microsoft Patterns & Practices (https://github.com/mspnp)"
 
 LABEL Tags="Azure,AKS,DroneDelivery"
 
@@ -45,14 +45,10 @@ RUN useradd -m -s /bin/bash -U $user
 
 WORKDIR /app
 COPY --from=publish /app/out ./
-COPY scripts/. ./
-RUN \
-    # Ensures the entry point is executable
-    chmod ugo+x /app/run.sh
 
 RUN chown -R $user.$user /app
 
 # Set it for subsequent commands
 USER $user
 
-ENTRYPOINT ["/bin/bash", "/app/run.sh"]
+ENTRYPOINT ["dotnet", "Fabrikam.DroneDelivery.DeliveryService.dll"]
