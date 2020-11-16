@@ -35,7 +35,7 @@ RUN dotnet publish /app/Fabrikam.DroneDelivery.DeliveryService/ -c Release -o ..
 
 FROM base AS runtime
 
-LABEL Maintainer="Fernando Antivero (https://github.com/ferantivero)"
+LABEL Maintainer="Microsoft Patterns & Practices (https://github.com/mspnp)"
 
 LABEL Tags="Azure,AKS,DroneDelivery"
 

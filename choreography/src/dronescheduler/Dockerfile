@@ -19,14 +19,14 @@ COPY dronescheduler/Fabrikam.DroneDelivery.DroneScheduler/. ./dronescheduler/Fab
 
 FROM build AS publish
 
-LABEL Maintainer="Fernando Antivero (https://github.com/ferantivero)"
+LABEL Maintainer="Microsoft Patterns & Practices (https://github.com/mspnp)"
 
 WORKDIR /app
 RUN dotnet publish /app/dronescheduler/Fabrikam.DroneDelivery.DroneScheduler/ -c Release -o ../../out
 
 FROM base AS runtime
 
-LABEL Maintainer="Fernando Antivero (https://github.com/ferantivero)"
+LABEL Maintainer="Microsoft Patterns & Practices (https://github.com/mspnp)"
 
 LABEL Tags="Azure,AKS,DroneDelivery"
 
