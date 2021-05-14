@@ -5,8 +5,8 @@
     <RootNamespace>azure_function</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.1.2" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.24" />
-    <PackageReference Include="ServiceBus.AttachmentPlugin" Version="3.0.1" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">

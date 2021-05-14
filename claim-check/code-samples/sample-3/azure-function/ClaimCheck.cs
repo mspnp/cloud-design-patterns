@@ -7,10 +7,8 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Microsoft.Azure.ServiceBus.Core;
-using ServiceBus.AttachmentPlugin;
 using System.Text;
-using Microsoft.Azure.ServiceBus;
+using Azure.Messaging.ServiceBus;
 
 namespace Microsoft.PnP.Messaging
 {
@@ -29,23 +27,19 @@ namespace Microsoft.PnP.Messaging
             // Getting connection information
             var serviceBusConnectionString = Environment.GetEnvironmentVariable("SERVICE_BUS_CONNECTION_STRING");
             var queueName = Environment.GetEnvironmentVariable("QUEUE_NAME");
-            var storageConnectionString = Environment.GetEnvironmentVariable("STORAGE_CONNECTION_STRING");
-
-            // Creating config for sending message
-            var config = new AzureStorageAttachmentConfiguration(storageConnectionString);
 
             // Creating and registering the sender using Service Bus Connection String and Queue Name
-            var sender = new MessageSender(serviceBusConnectionString, queueName);
-            sender.RegisterAzureStorageAttachmentPlugin(config);
-            
+            var client = new ServiceBusClient(serviceBusConnectionString);
+            ServiceBusSender sender = client.CreateSender(queueName);
+
             // Create payload
             var payload = new { data = requestContent };
             var serialized = JsonConvert.SerializeObject(payload);
             var payloadAsBytes = Encoding.UTF8.GetBytes(serialized);
-            var message = new Message(payloadAsBytes);
+            var message = new ServiceBusMessage(payloadAsBytes);
 
             // Send the message
-            await sender.SendAsync(message);
+            await sender.SendMessageAsync(message);
             return new OkObjectResult($"Message is sent!");
         }
     }
