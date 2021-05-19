@@ -7,7 +7,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 
 namespace ClientConsumer
@@ -42,10 +42,10 @@ namespace ClientConsumer
         {
             foreach (QueueMessage message in (await _queueClient.ReceiveMessagesAsync(maxMessages: 10)).Value)
             {
-                var jsonMessage = JObject.Parse(message.MessageText);
-                Uri uploadedUri = new Uri(jsonMessage["data"]["url"].ToString());
-                string uploadedFile = Path.GetFileName(jsonMessage["data"]["url"].ToString());
-                Console.WriteLine("Blob available at: {0}", jsonMessage["data"]["url"]);
+                JsonDocument jsonMessage = JsonDocument.Parse(message.MessageText);
+                Uri uploadedUri = new Uri(jsonMessage.RootElement.GetProperty("url").ToString());
+                string uploadedFile = Path.GetFileName(jsonMessage.RootElement.GetProperty("url").ToString());
+                Console.WriteLine("Blob available at: {0}", jsonMessage.RootElement.GetProperty("url"));
 
                 BlockBlobClient blockBlob = new BlockBlobClient(uploadedUri);
 
