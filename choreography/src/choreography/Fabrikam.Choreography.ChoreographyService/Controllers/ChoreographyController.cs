@@ -10,8 +10,8 @@ using Fabrikam.Choreography.ChoreographyService.Models;
 using Fabrikam.Choreography.ChoreographyService.Services;
 using Fabrikam.Communicator.Service.Operations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.EventGrid;
-using Microsoft.Azure.EventGrid.Models;
+using Azure.Messaging.EventGrid;
+using Azure.Messaging.EventGrid.SystemEvents;
 using Microsoft.Extensions.Logging;
 
 
@@ -56,12 +56,15 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
                 return BadRequest("No Event for Choreography");
             }
                 
-            if (events[0].EventType is EventTypes.EventGridSubscriptionValidationEvent)
+            if (events[0].EventType is "Microsoft.EventGrid.SubscriptionValidationEvent")
             {
                 try
                 {
                     var data = Operations.ConvertDataEventToType<SubscriptionValidationEventData>(events[0].Data);
-                    var response = new SubscriptionValidationResponse(data.ValidationCode);
+                    object[] parameters = new object[1];
+                    parameters[0] = data.ValidationCode;
+                    object obj = Activator.CreateInstance(typeof(SubscriptionValidationResponse), parameters);
+                    SubscriptionValidationResponse response = (SubscriptionValidationResponse) obj;
                     return Ok(response);
                 }
                 catch (NullReferenceException ex)

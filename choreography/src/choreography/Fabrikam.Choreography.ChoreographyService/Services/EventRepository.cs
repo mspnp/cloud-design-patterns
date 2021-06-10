@@ -3,25 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Azure.EventGrid;
-using Microsoft.Azure.EventGrid.Models;
+using Azure;
+using Azure.Messaging.EventGrid;
+using NUnit.Framework;
 using Microsoft.Extensions.Logging;
 
 namespace Fabrikam.Choreography.ChoreographyService.Services
 {
     public class EventRepository : IEventRepository
     {
-        private readonly TopicCredentials topicCredentials;
-        private readonly EventGridClient eventGridClient;
+        private readonly AzureKeyCredential topicCredentials;
+        private readonly EventGridPublisherClient eventGridClient;
         private readonly string eventGridHost;
         private readonly string[] Topics;
         private readonly Random random;
 
         public EventRepository(string eventGridHost,string eventKey, string Topics)
         {       
-            topicCredentials = new TopicCredentials(eventKey);
-            eventGridClient = new EventGridClient(topicCredentials);
+            topicCredentials = new AzureKeyCredential(eventKey);
             this.eventGridHost = eventGridHost;
+            eventGridClient = new EventGridPublisherClient(new Uri(eventGridHost), topicCredentials);
             this.Topics = Topics.Split(",");
             random = new Random();
         }
@@ -36,8 +37,8 @@ namespace Fabrikam.Choreography.ChoreographyService.Services
 
             try
             {             
-                var response = await eventGridClient.PublishEventsWithHttpMessagesAsync(eventGridHost, listEvents);
-                response.Response.EnsureSuccessStatusCode();
+                var response = await eventGridClient.SendEventsAsync(listEvents);
+                Assert.AreEqual(200, response.Status);
             }
             catch (Exception ex) when (ex is ArgumentNullException ||
                                 ex is InvalidOperationException ||

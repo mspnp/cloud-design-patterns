@@ -10,13 +10,12 @@ using Fabrikam.Choreography.ChoreographyService.Controllers;
 using Fabrikam.Choreography.ChoreographyService.Models;
 using Fabrikam.Choreography.ChoreographyService.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.EventGrid;
-using Microsoft.Azure.EventGrid.Models;
+using Azure.Messaging.EventGrid;
+using Azure.Messaging.EventGrid.SystemEvents;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-
 
 namespace Fabrikam.Choreography.ChoreographyService.Tests
 {
@@ -24,14 +23,19 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
     public class ChoreographyControllerFixture
     {
         private static Delivery delivery = new Delivery();
-        SubscriptionValidationEventData eventValidationData = new SubscriptionValidationEventData(Guid.NewGuid().ToString(), "http://url");
+        public static object obj = Activator.CreateInstance(typeof(SubscriptionValidationEventData));
+        SubscriptionValidationEventData eventValidationData = (SubscriptionValidationEventData) obj;
      
         [TestMethod]
         public async Task Post_Returns200_ForSubscriptionValidationData()
-        {          
-            var eventOp = new EventGridEvent();
-            eventOp.EventType = EventTypes.EventGridSubscriptionValidationEvent;
-            eventOp.Data = eventValidationData;
+        {
+            var eventOp = new EventGridEvent(
+                "EventSubject",
+                "EventType",
+                "1.0",
+                "This is the event data");
+            eventOp.EventType = "Microsoft.EventGrid.SubscriptionValidationEvent";
+            eventOp.Data = new BinaryData(eventValidationData);
             var target = new ChoreographyController(new Mock<IPackageServiceCaller>().Object,
                                                 new Mock<IDroneSchedulerServiceCaller>().Object,
                                                 new Mock<IDeliveryServiceCaller>().Object,
@@ -50,8 +54,12 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
         public async Task Post_Returns400_ForInvalidSubscriptionValidationData()
         {
             var loggerMock = new Mock<ILogger<ChoreographyController>>();
-            var eventOp = new EventGridEvent();
-            eventOp.EventType = EventTypes.EventGridSubscriptionValidationEvent;
+            var eventOp = new EventGridEvent(
+                "EventSubject",
+                "EventType",
+                "1.0",
+                "This is the event data");
+            eventOp.EventType = "Microsoft.EventGrid.SubscriptionValidationEvent";
             eventOp.Data = null;
             var target = new ChoreographyController(new Mock<IPackageServiceCaller>().Object,
                                                 new Mock<IDroneSchedulerServiceCaller>().Object,
@@ -76,9 +84,14 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             deliveryCallerMock.Setup(r => r.ScheduleDeliveryAsync(It.IsAny<Delivery>(), It.IsAny<string>()))
                   .ReturnsAsync(new DeliverySchedule { Id = "deliveryid" }).Verifiable();
 
-            var eventOp = new EventGridEvent();
+            var eventOp = new EventGridEvent(
+                "EventSubject",
+                "EventType",
+                "1.0",
+                "This is the event data");
             eventOp.EventType = "GetDrone";
-            eventOp.Data = new Delivery();
+            Delivery delivery = new Delivery();
+            eventOp.Data = new BinaryData(delivery);
             var target = new ChoreographyController(new Mock<IPackageServiceCaller>().Object,
                                                 new Mock<IDroneSchedulerServiceCaller>().Object,
                                                 deliveryCallerMock.Object,
@@ -103,10 +116,15 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             var eventRepositoryMock = new Mock<IEventRepository>();
             eventRepositoryMock.Setup(e => e.SendEventAsync(It.IsAny<List<EventGridEvent>>()))
                 .Returns(Task.CompletedTask).Verifiable();
-            
-            var eventOp = new EventGridEvent();
+
+            var eventOp = new EventGridEvent(
+                "EventSubject",
+                "EventType",
+                "1.0",
+                "This is the event data");
             eventOp.EventType = "ScheduleDelivery";
-            eventOp.Data = new Delivery();
+            Delivery delivery = new Delivery();
+            eventOp.Data = new BinaryData(delivery);
             var target = new ChoreographyController(packageServiceCallerMock.Object,
                                                 new Mock<IDroneSchedulerServiceCaller>().Object,
                                                 new Mock<IDeliveryServiceCaller>().Object,
@@ -134,9 +152,14 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             eventRepositoryMock.Setup(e => e.SendEventAsync(It.IsAny<List<EventGridEvent>>()))
                 .Returns(Task.CompletedTask).Verifiable();
 
-            var eventOp = new EventGridEvent();
+            var eventOp = new EventGridEvent(
+                "EventSubject",
+                "EventType",
+                "1.0",
+                "This is the event data");
             eventOp.EventType = "CreatePackage";
-            eventOp.Data = new Delivery();
+            Delivery delivery = new Delivery();
+            eventOp.Data = new BinaryData(delivery);
             var target = new ChoreographyController(new Mock<IPackageServiceCaller>().Object,
                                                 droneServiceCallerMock.Object,
                                                 new Mock<IDeliveryServiceCaller>().Object,
@@ -177,7 +200,11 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
         public async Task Post_Returns400_ForNullDelivery()
         {
             var loggerMock = new Mock<ILogger<ChoreographyController>>();
-            var eventOp = new EventGridEvent();
+            var eventOp = new EventGridEvent(
+                "EventSubject",
+                "EventType",
+                "1.0",
+                "This is the event data");
             eventOp.EventType = "GetDrone";
             eventOp.Data = null;
             var target = new ChoreographyController(new Mock<IPackageServiceCaller>().Object,
@@ -199,9 +226,14 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
         public async Task Post_Returns400_ForInvalidDelivery()
         {
             var loggerMock = new Mock<ILogger<ChoreographyController>>();
-            var eventOp = new EventGridEvent();
+            var eventOp = new EventGridEvent(
+                "EventSubject",
+                "EventType",
+                "1.0",
+                "This is the event data");
             eventOp.EventType = "GetDrone";
-            eventOp.Data = new { invalidId=10, InvalidName="invalid" };
+            var content = new { invalidId = 10, InvalidName = "invalid" };
+            eventOp.Data = new BinaryData(content);
 
             var target = new ChoreographyController(new Mock<IPackageServiceCaller>().Object,
                                                 new Mock<IDroneSchedulerServiceCaller>().Object,
@@ -231,9 +263,14 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             eventRepositoryMock.Setup(e => e.SendEventAsync(It.IsAny<List<EventGridEvent>>()))
                            .ThrowsAsync(new EventException()).Verifiable();
 
-            var eventOp = new EventGridEvent();
+            var eventOp = new EventGridEvent(
+                "EventSubject",
+                "EventType",
+                "1.0",
+                "This is the event data");
             eventOp.EventType = "ScheduleDelivery";
-            eventOp.Data = new Delivery();
+            Delivery delivery = new Delivery();
+            eventOp.Data = new BinaryData(delivery);
             var target = new ChoreographyController(packageServiceCallerMock.Object,
                                                 new Mock<IDroneSchedulerServiceCaller>().Object,
                                                 new Mock<IDeliveryServiceCaller>().Object,
@@ -263,9 +300,14 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             eventRepositoryMock.Setup(e => e.SendEventAsync(It.IsAny<List<EventGridEvent>>()))
                   .ThrowsAsync(new EventException()).Verifiable();
 
-            var eventOp = new EventGridEvent();
+            var eventOp = new EventGridEvent(
+                "EventSubject",
+                "EventType",
+                "1.0",
+                "This is the event data");
             eventOp.EventType = "CreatePackage";
-            eventOp.Data = new Delivery();
+            Delivery delivery = new Delivery();
+            eventOp.Data = new BinaryData(delivery);
             var target = new ChoreographyController(new Mock<IPackageServiceCaller>().Object,
                                                 droneServiceCallerMock.Object,
                                                 new Mock<IDeliveryServiceCaller>().Object,
