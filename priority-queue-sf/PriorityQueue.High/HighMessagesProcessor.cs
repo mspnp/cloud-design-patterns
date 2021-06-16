@@ -1,7 +1,7 @@
 ﻿using System.Fabric;
 using System.Threading.Tasks;
 using PriorityQueue.Shared;
-using Microsoft.ServiceBus.Messaging;
+using Azure.Messaging.ServiceBus;
 using System.Diagnostics;
 
 namespace PriorityQueue.High
@@ -15,7 +15,7 @@ namespace PriorityQueue.High
             : base(context)
         { }
 
-        protected override async Task ProcessMessageAsync(BrokeredMessage message)
+        protected override async Task ProcessMessageAsync(ServiceBusReceivedMessage message)
         {
             // simulate message processing for High priority messages
             await base.ProcessMessageAsync(message)
