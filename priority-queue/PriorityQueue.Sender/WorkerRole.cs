@@ -6,7 +6,7 @@ namespace PriorityQueue.Sender
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading;
-    using Microsoft.ServiceBus.Messaging;
+    using Azure.Messaging.ServiceBus;
     using Microsoft.Azure;
     using Microsoft.WindowsAzure.ServiceRuntime;
     using PriorityQueue.Shared;
@@ -25,26 +25,26 @@ namespace PriorityQueue.Sender
                 try
                 {
                     // Send a low priority batch
-                    var lowMessages = new List<BrokeredMessage>();
+                    var lowMessages = new Queue<ServiceBusMessage>();
 
                     for (int i = 0; i < 10; i++)
                     {
-                        var message = new BrokeredMessage() {MessageId = Guid.NewGuid().ToString()};
-                        message.Properties["Priority"] = Priority.Low;
-                        lowMessages.Add(message);
+                        var message = new ServiceBusMessage() {MessageId = Guid.NewGuid().ToString()};
+                        message.ApplicationProperties["Priority"] = Priority.Low;
+                        lowMessages.Enqueue(message);
                     }
 
                     this.queueManager.SendBatchAsync(lowMessages).Wait();
                     Trace.TraceInformation("Sent low priority message batch: " + RoleEnvironment.CurrentRoleInstance.Id);
 
                     // Send a high priority batch
-                    var highMessages = new List<BrokeredMessage>();
+                    var highMessages = new Queue<ServiceBusMessage>();
 
                     for (int i = 0; i < 10; i++)
                     {
-                        var message = new BrokeredMessage() {MessageId = Guid.NewGuid().ToString()};
-                        message.Properties["Priority"] = Priority.High;
-                        highMessages.Add(message);
+                        var message = new ServiceBusMessage() {MessageId = Guid.NewGuid().ToString()};
+                        message.ApplicationProperties["Priority"] = Priority.High;
+                        highMessages.Enqueue(message);
                     }
 
                     this.queueManager.SendBatchAsync(highMessages).Wait();

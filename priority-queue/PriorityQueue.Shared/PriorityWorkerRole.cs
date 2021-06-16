@@ -6,7 +6,7 @@ namespace PriorityQueue.Shared
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.ServiceBus.Messaging;
+    using Azure.Messaging.ServiceBus;
     using Microsoft.Azure;
     using Microsoft.WindowsAzure.ServiceRuntime;
 
@@ -19,7 +19,7 @@ namespace PriorityQueue.Shared
         {
             // Start listening for messages on the subscription.
             var subscriptionName = CloudConfigurationManager.GetSetting("SubscriptionName");
-            this.queueManager.ReceiveMessages(subscriptionName, this.ProcessMessage);
+            this.queueManager.ReceiveMessages(this.ProcessMessage);
 
             this.completedEvent.WaitOne();
         }
@@ -51,7 +51,7 @@ namespace PriorityQueue.Shared
             base.OnStop();
         }
 
-        protected virtual async Task ProcessMessage(BrokeredMessage message)
+        protected virtual async Task ProcessMessage(ServiceBusReceivedMessage message)
         {
             // simulating processing
             await Task.Delay(TimeSpan.FromSeconds(2));
