@@ -7,7 +7,7 @@ namespace InitialSender
     using System.Globalization;
     using System.Net;
     using System.Threading;
-    using Microsoft.ServiceBus.Messaging;
+    using Azure.Messaging.ServiceBus;
     using Microsoft.WindowsAzure.ServiceRuntime;
     using PipesAndFilters.Shared;
 
@@ -45,7 +45,7 @@ namespace InitialSender
                     };
 
                     // Create a brokered message, set the MessageId to the payloads Id
-                    var brokeredMessage = new BrokeredMessage(msg)
+                    var brokeredMessage = new ServiceBusMessage(msg.Text)
                     {
                         MessageId = msg.Id
                     };

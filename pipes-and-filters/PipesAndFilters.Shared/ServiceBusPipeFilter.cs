@@ -6,19 +6,20 @@ namespace PipesAndFilters.Shared
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.ServiceBus.Messaging;
+    using Azure.Messaging.ServiceBus;
 
     public class ServiceBusPipeFilter
     {
         private readonly string connectionString;
         private readonly string inQueuePath;
         private readonly string outQueuePath;
+        private ServiceBusProcessor processor;
 
         // Create a reset event to pause processing before shutting down and create the event signaled to allow processing
         private readonly ManualResetEvent pauseProcessingEvent = new ManualResetEvent(true);
 
-        private QueueClient inQueue;
-        private QueueClient outQueue;
+        private ServiceBusClient inQueue;
+        private ServiceBusClient outQueue;
 
         public ServiceBusPipeFilter(string connectionString, string inQueuePath, string outQueuePath = null)
         {
@@ -37,56 +38,60 @@ namespace PipesAndFilters.Shared
             {
                 ServiceBusUtilities.CreateQueueIfNotExistsAsync(this.connectionString, this.outQueuePath).Wait();
 
-                this.outQueue = QueueClient.CreateFromConnectionString(this.connectionString, this.outQueuePath);
+                this.outQueue = new ServiceBusClient(this.connectionString);
             }
 
             // Wait for queue creations to complete
             createInQueueTask.Wait();
 
             // Create inbound and outbound queue clients
-            this.inQueue = QueueClient.CreateFromConnectionString(this.connectionString, this.inQueuePath);
+            this.inQueue = new ServiceBusClient(this.connectionString);
         }
 
-        public void OnPipeFilterMessageAsync(Func<BrokeredMessage, Task<BrokeredMessage>> asyncFilterTask, int maxConcurrentCalls = 1)
+        public void OnPipeFilterMessageAsync(Func<ServiceBusReceivedMessage, Task<ServiceBusMessage>> asyncFilterTask, int maxConcurrentCalls = 1)
         {
-            var options = new OnMessageOptions()
+            var options = new ServiceBusProcessorOptions()
             {
-                AutoComplete = true,
+                AutoCompleteMessages = true,
                 MaxConcurrentCalls = maxConcurrentCalls
             };
 
-            options.ExceptionReceived += this.OptionsOnExceptionReceived;
+            this.processor = new ServiceBusClient(this.connectionString).CreateProcessor(this.inQueuePath, options);
 
-            this.inQueue.OnMessageAsync(
-                async (msg) =>
+            processor.ProcessMessageAsync +=
+                async args =>
             {
+                ServiceBusReceivedMessage message = args.Message;
                 pauseProcessingEvent.WaitOne();
 
                 // Perform a simple check to dead letter potential poison messages.
                 //  If we have dequeued the message more than the max count we can assume the message is poison and deadletter it.
-                if (msg.DeliveryCount > Constants.MaxServiceBusDeliveryCount)
+                if (message.DeliveryCount > Constants.MaxServiceBusDeliveryCount)
                 {
-                    await msg.DeadLetterAsync();
+                    ServiceBusReceiver receiver = new ServiceBusClient(this.connectionString).CreateReceiver(this.inQueuePath);
+                    await receiver.DeadLetterMessageAsync(message);
 
-                    Trace.TraceWarning("Maximum Message Count Exceeded: {0} for MessageID: {1} ", Constants.MaxServiceBusDeliveryCount, msg.MessageId);
+                    Trace.TraceWarning("Maximum Message Count Exceeded: {0} for MessageID: {1} ", Constants.MaxServiceBusDeliveryCount, message.MessageId);
 
                     return;
                 }
 
                 // Process the filter and send the output to the next queue in the pipeline
-                var outMessage = await asyncFilterTask(msg);
+                var outMessage = await asyncFilterTask(message);
 
                 // Send the message from the filter processor to the next queue in the pipeline
                 if (outQueue != null)
                 {
-                    await outQueue.SendAsync(outMessage);
+                    await outQueue.CreateSender(this.outQueuePath).SendMessageAsync(outMessage);
                 }
 
                 //// Note: There is a chance we could send the same message twice or that a message may be processed by an upstream or downstream filter at the same time.
                 ////       This would happen in a situation where we completed processing of a message, sent it to the next pipe/queue, and then failed to Complete it when using PeakLock
                 ////       Idempotent message processing and concurrency should be considered in the implementation.
-            },
-            options);
+            };
+            processor.ProcessErrorAsync += this.OptionsOnExceptionReceived;
+
+            processor.StartProcessingAsync();
         }
 
         public async Task Close(TimeSpan timespan)
@@ -98,19 +103,20 @@ namespace PipesAndFilters.Shared
             //  We simply stop any new processing, wait for existing thread to complete, then close the message pump and then return
             Thread.Sleep(timespan);
 
-            this.inQueue.Close();
+            await this.processor.CloseAsync();
 
             // Cleanup resources.
-            await ServiceBusUtilities.DeleteQueueIfExistsAsync(Settings.ServiceBusConnectionString, this.inQueue.Path);
+            await ServiceBusUtilities.DeleteQueueIfExistsAsync(Settings.ServiceBusConnectionString, this.inQueue.FullyQualifiedNamespace);
         }
 
-        private void OptionsOnExceptionReceived(object sender, ExceptionReceivedEventArgs exceptionReceivedEventArgs)
+        Task OptionsOnExceptionReceived(ProcessErrorEventArgs exceptionReceivedEventArgs)
         {
             //There is currently an issue in the Service Bus SDK that raises a null exception
             if (exceptionReceivedEventArgs.Exception != null)
             {
                 Trace.TraceError("Exception in QueueClient.ExceptionReceived: {0}", exceptionReceivedEventArgs.Exception.Message);
             }
+            return Task.FromResult<object>(null);
         }
     }
 }
