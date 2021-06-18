@@ -28,11 +28,12 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
         private readonly IDeliveryServiceCaller deliveryServiceCaller;
         private readonly IEventRepository eventRepository;
 
-        public ChoreographyController(IPackageServiceCaller packageServiceCaller,
-                             IDroneSchedulerServiceCaller droneSchedulerServiceCaller,
-                             IDeliveryServiceCaller deliveryServiceCaller,
-                             IEventRepository eventRepository,
-                             ILogger<ChoreographyController> logger)
+        public ChoreographyController(
+            IPackageServiceCaller packageServiceCaller,
+            IDroneSchedulerServiceCaller droneSchedulerServiceCaller,
+            IDeliveryServiceCaller deliveryServiceCaller,
+            IEventRepository eventRepository,
+            ILogger<ChoreographyController> logger)
         {
             this.packageServiceCaller = packageServiceCaller;
             this.droneSchedulerServiceCaller = droneSchedulerServiceCaller;
@@ -61,10 +62,7 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
                 try
                 {
                     var data = Operations.ConvertDataEventToType<SubscriptionValidationEventData>(events[0].Data);
-                    object[] parameters = new object[1];
-                    parameters[0] = data.ValidationCode;
-                    object obj = Activator.CreateInstance(typeof(SubscriptionValidationResponse), parameters);
-                    SubscriptionValidationResponse response = (SubscriptionValidationResponse) obj;
+                    var response = EventGridModelFactory.SubscriptionValidationResponse(data.ValidationCode);
                     return Ok(response);
                 }
                 catch (NullReferenceException ex)

@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Azure;
 using Azure.Messaging.EventGrid;
-using NUnit.Framework;
 using Microsoft.Extensions.Logging;
 
 namespace Fabrikam.Choreography.ChoreographyService.Services
@@ -14,14 +13,12 @@ namespace Fabrikam.Choreography.ChoreographyService.Services
     {
         private readonly AzureKeyCredential topicCredentials;
         private readonly EventGridPublisherClient eventGridClient;
-        private readonly string eventGridHost;
         private readonly string[] Topics;
         private readonly Random random;
 
         public EventRepository(string eventGridHost,string eventKey, string Topics)
         {       
             topicCredentials = new AzureKeyCredential(eventKey);
-            this.eventGridHost = eventGridHost;
             eventGridClient = new EventGridPublisherClient(new Uri(eventGridHost), topicCredentials);
             this.Topics = Topics.Split(",");
             random = new Random();
@@ -36,16 +33,12 @@ namespace Fabrikam.Choreography.ChoreographyService.Services
         {
 
             try
-            {             
-                var response = await eventGridClient.SendEventsAsync(listEvents);
-                Assert.AreEqual(200, response.Status);
-            }
-            catch (Exception ex) when (ex is ArgumentNullException ||
-                                ex is InvalidOperationException ||
-                                ex is HttpRequestException)
             {
-                throw new EventException("Exception sending event to eventGrid", ex);
-
+                await eventGridClient.SendEventsAsync(listEvents);
+            }
+            catch (Exception ex)
+            {
+                throw new RequestFailedException("Exception sending event to eventGrid", ex);
             }
 
 
