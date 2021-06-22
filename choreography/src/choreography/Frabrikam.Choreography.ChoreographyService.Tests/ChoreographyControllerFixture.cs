@@ -33,7 +33,7 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                 "EventType",
                 "1.0",
                 "This is the event data");
-            eventOp.EventType = "Microsoft.EventGrid.SubscriptionValidationEvent";
+            eventOp.EventType = SystemEventNames.EventGridSubscriptionValidation;
             eventOp.Data = new BinaryData(eventValidationData);
 
             var target = new ChoreographyController(
@@ -60,7 +60,7 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                 "EventType",
                 "1.0",
                 "This is the event data");
-            eventOp.EventType = "Microsoft.EventGrid.SubscriptionValidationEvent";
+            eventOp.EventType = SystemEventNames.EventGridSubscriptionValidation;
             eventOp.Data = null;
 
             var target = new ChoreographyController(

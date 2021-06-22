@@ -53,11 +53,11 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
 
             if (events == null)
             {
-                logger.LogError("event is  Null");
+                logger.LogError("event is Null");
                 return BadRequest("No Event for Choreography");
             }
                 
-            if (events[0].EventType is "Microsoft.EventGrid.SubscriptionValidationEvent")
+            if (events[0].EventType is SystemEventNames.EventGridSubscriptionValidation)
             {
                 try
                 {

@@ -13,20 +13,20 @@ namespace Fabrikam.Choreography.ChoreographyService.Services
     {
         private readonly AzureKeyCredential topicCredentials;
         private readonly EventGridPublisherClient eventGridClient;
-        private readonly string[] Topics;
+        private readonly string[] topics;
         private readonly Random random;
 
-        public EventRepository(string eventGridHost,string eventKey, string Topics)
+        public EventRepository(string eventGridHost,string eventKey, string topics)
         {       
             topicCredentials = new AzureKeyCredential(eventKey);
             eventGridClient = new EventGridPublisherClient(new Uri(eventGridHost), topicCredentials);
-            this.Topics = Topics.Split(",");
+            this.topics = topics.Split(",");
             random = new Random();
         }
 
         public string GetTopic()
         {
-            return Topics[random.Next(0, Topics.Length)];
+            return topics[random.Next(0, topics.Length)];
         }
 
         public async Task SendEventAsync(List<EventGridEvent> listEvents)
