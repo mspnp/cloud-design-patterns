@@ -8,6 +8,7 @@ namespace PipesAndFilters.Shared
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure;
     using Azure.Messaging.ServiceBus;
     using Azure.Messaging.ServiceBus.Administration;
 
@@ -62,8 +63,8 @@ namespace PipesAndFilters.Shared
         public async Task Start()
         {
             // Check queue existence.
-            var manager = new ServiceBusAdministrationClient(this.connectionString);
-            if (!await manager.QueueExistsAsync(this.queueName))
+            var adminClient = new ServiceBusAdministrationClient(this.connectionString);
+            if (!await adminClient.QueueExistsAsync(this.queueName))
             {
                 try
                 {
@@ -72,7 +73,7 @@ namespace PipesAndFilters.Shared
                     // Set the maximum delivery count for messages. A message is automatically deadlettered after this number of deliveries.  Default value is 10.
                     queueDescription.MaxDeliveryCount = 3;
 
-                    await manager.CreateQueueAsync(queueDescription);
+                    await adminClient.CreateQueueAsync(queueDescription);
                 }
                 catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists)
                 {
@@ -81,14 +82,14 @@ namespace PipesAndFilters.Shared
                 }
                 catch (ServiceBusException ex)
                 {
-                    var webException = ex.InnerException as WebException;
-                    if (webException != null)
+                    var requestFailedException = ex.InnerException as RequestFailedException;
+                    if (requestFailedException != null)
                     {
-                        var response = webException.Response as HttpWebResponse;
+                        var status = requestFailedException.Status;
 
                         // It's likely the conflicting operation being performed by the service bus is another queue create operation
                         // If we don't have a web response with status code 'Conflict' it's another exception
-                        if (response == null || response.StatusCode != HttpStatusCode.Conflict)
+                        if (status != 409)
                         {
                             throw;
                         }
@@ -125,14 +126,11 @@ namespace PipesAndFilters.Shared
             await this.Stop(null);
         }
 
-        Task OptionsOnExceptionReceived(ProcessErrorEventArgs exceptionReceivedEventArgs)
+        Task OptionsOnExceptionReceived(ProcessErrorEventArgs args)
         {
-            //There is currently an issue in the Service Bus SDK that raises a null exception
-            if (exceptionReceivedEventArgs.Exception != null)
-            {
-                Trace.TraceError("Exception in QueueClient.ExceptionReceived: {0}", exceptionReceivedEventArgs.Exception.Message);
-            }
-            return Task.FromResult<object>(null);
+            Trace.TraceError("An exception occurred during processing. Error source: {0}, Exception: {1}", args.ErrorSource, args.Exception.Message);
+
+            return Task.CompletedTask;
         }
     }
 }
