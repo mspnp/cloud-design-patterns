@@ -24,8 +24,6 @@ namespace Microsoft.PnP.Messaging
 
             EventGridEvent[] eventGridEvents = EventGridEvent.ParseMany(BinaryData.FromStream(req.Body));
 
-
-
             foreach (EventGridEvent eventGridEvent in eventGridEvents)
             {
                 eventGridEvent.TryGetSystemEventData(out object systemEvent);
