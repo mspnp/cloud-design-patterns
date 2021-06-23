@@ -14,26 +14,18 @@ namespace PipesAndFilters.Shared
         private readonly string inQueuePath;
         private readonly string outQueuePath;
         private ServiceBusProcessor processor;
-        private ServiceBusReceiver receiver;
         private ServiceBusSender sender;
 
         // Create a reset event to pause processing before shutting down and create the event signaled to allow processing
         private readonly ManualResetEvent pauseProcessingEvent = new ManualResetEvent(true);
 
-        private ServiceBusClient queue;
+        private ServiceBusClient client;
 
-        public ServiceBusPipeFilter(string connectionString, string inQueuePath, string outQueuePath = null, int maxConcurrentCalls = 1)
+        public ServiceBusPipeFilter(string connectionString, string inQueuePath, string outQueuePath = null)
         {
             this.connectionString = connectionString;
             this.inQueuePath = inQueuePath;
             this.outQueuePath = outQueuePath;
-            var options = new ServiceBusProcessorOptions()
-            {
-                AutoCompleteMessages = true,
-                MaxConcurrentCalls = maxConcurrentCalls
-            };
-            this.processor = new ServiceBusClient(this.connectionString).CreateProcessor(this.inQueuePath, options);
-            this.receiver = new ServiceBusClient(this.connectionString).CreateReceiver(this.inQueuePath);
         }
 
         public void Start()
@@ -46,15 +38,22 @@ namespace PipesAndFilters.Shared
             {
                 ServiceBusUtilities.CreateQueueIfNotExistsAsync(this.connectionString, this.outQueuePath).Wait();
 
-                this.queue = new ServiceBusClient(this.connectionString);
+                this.client = new ServiceBusClient(this.connectionString);
             }
 
             // Wait for queue creations to complete
             createInQueueTask.Wait();
 
+            var options = new ServiceBusProcessorOptions()
+            {
+                AutoCompleteMessages = true,
+                MaxConcurrentCalls = 1
+            };
+
             // Create inbound and outbound queue clients
-            this.queue = new ServiceBusClient(this.connectionString);
-            this.sender = this.queue.CreateSender(this.outQueuePath);
+            this.client = new ServiceBusClient(this.connectionString);
+            this.processor = this.client.CreateProcessor(this.inQueuePath, options);
+            this.sender = this.client.CreateSender(this.outQueuePath);
         }
 
         public void OnPipeFilterMessageAsync(Func<ServiceBusReceivedMessage, Task<ServiceBusMessage>> asyncFilterTask)
@@ -69,7 +68,7 @@ namespace PipesAndFilters.Shared
                 //  If we have dequeued the message more than the max count we can assume the message is poison and deadletter it.
                 if (message.DeliveryCount > Constants.MaxServiceBusDeliveryCount)
                 {
-                    await this.receiver.DeadLetterMessageAsync(message);
+                    await args.DeadLetterMessageAsync(message);
 
                     Trace.TraceWarning("Maximum Message Count Exceeded: {0} for MessageID: {1} ", Constants.MaxServiceBusDeliveryCount, message.MessageId);
 
@@ -80,7 +79,7 @@ namespace PipesAndFilters.Shared
                 var outMessage = await asyncFilterTask(message);
 
                 // Send the message from the filter processor to the next queue in the pipeline
-                if (queue != null)
+                if (sender != null)
                 {
                     await this.sender.SendMessageAsync(outMessage);
                 }
@@ -89,9 +88,9 @@ namespace PipesAndFilters.Shared
                 ////       This would happen in a situation where we completed processing of a message, sent it to the next pipe/queue, and then failed to Complete it when using PeakLock
                 ////       Idempotent message processing and concurrency should be considered in the implementation.
             };
-            processor.ProcessErrorAsync += this.OptionsOnExceptionReceived;
+            this.processor.ProcessErrorAsync += this.OptionsOnExceptionReceived;
 
-            processor.StartProcessingAsync();
+            this.processor.StartProcessingAsync();
         }
 
         public async Task Close(TimeSpan timespan)
@@ -104,6 +103,7 @@ namespace PipesAndFilters.Shared
             Thread.Sleep(timespan);
 
             await this.processor.CloseAsync();
+            await this.client.DisposeAsync();
 
             // Cleanup resources.
             await ServiceBusUtilities.DeleteQueueIfExistsAsync(Settings.ServiceBusConnectionString, this.inQueuePath);
