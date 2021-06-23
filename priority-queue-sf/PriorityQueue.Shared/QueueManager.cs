@@ -8,6 +8,7 @@ namespace PriorityQueue.Shared
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure;
     using Azure.Messaging.ServiceBus;
     using Azure.Messaging.ServiceBus.Administration;
 
@@ -17,7 +18,6 @@ namespace PriorityQueue.Shared
         private readonly string topicName;
         private ServiceBusSender sender;
         private ServiceBusProcessor processor;
-        private ServiceBusAdministrationClient subscriptionClient;
         private ServiceBusClient topicClient;
 
         public QueueManager(string serviceBusConnectionString, string topicName)
@@ -82,7 +82,7 @@ namespace PriorityQueue.Shared
                 {
                     Trace.TraceInformation($"Messaging entity already created: {this.topicName}");
                 }
-                catch (ServiceBusException ex) when (((ex.InnerException as WebException)?.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.Conflict)
+                catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == 409)
                 {
                     Trace.TraceWarning($"MessagingException HttpStatusCode.Conflict - Queue likely already exists or is being created or deleted for path: {this.topicName}");
                 }
@@ -114,13 +114,11 @@ namespace PriorityQueue.Shared
                     {
                         Trace.TraceInformation($"Messaging entity already created: {subscription}");
                     }
-                    catch (ServiceBusException ex) when (((ex.InnerException as WebException)?.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.Conflict)
+                    catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == 409)
                     {
                         Trace.TraceWarning($"MessagingException HttpStatusCode.Conflict - subscription likely already exists or is being created or deleted for path: {subscription}");
                     }
                 }
-
-                this.subscriptionClient = new ServiceBusAdministrationClient(this.serviceBusConnectionString);
             }
         }
 
@@ -128,6 +126,7 @@ namespace PriorityQueue.Shared
         {
             await this.processor.CloseAsync()
                 .ConfigureAwait(false);
+            await this.topicClient.DisposeAsync();
 
             var manager = new ServiceBusAdministrationClient(this.serviceBusConnectionString);
 
