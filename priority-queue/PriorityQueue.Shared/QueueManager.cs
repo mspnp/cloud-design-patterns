@@ -8,6 +8,7 @@ namespace PriorityQueue.Shared
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure;
     using Azure.Messaging.ServiceBus;
     using Azure.Messaging.ServiceBus.Administration;
 
@@ -17,7 +18,6 @@ namespace PriorityQueue.Shared
         private readonly string topicName;
         private ServiceBusSender sender;
         private ServiceBusProcessor processor;
-        private ServiceBusAdministrationClient subscriptionClient;
         private ServiceBusClient topicClient;
         private readonly ManualResetEvent pauseProcessingEvent;
 
@@ -33,32 +33,9 @@ namespace PriorityQueue.Shared
             await this.sender.SendMessageAsync(message);
         }
 
-        public async Task SendBatchAsync(Queue<ServiceBusMessage> messages)
+        public async Task SendBatchAsync(IEnumerable<ServiceBusMessage> messages)
         {
-            int messageCount = messages.Count;
-            while (messages.Count > 0)
-            {
-                ServiceBusMessageBatch messageBatch = await this.sender.CreateMessageBatchAsync();
-
-                if (messageBatch.TryAddMessage(messages.Peek()))
-                {
-                    // dequeue the message from the .NET queue once the message is added to the batch
-                    messages.Dequeue();
-                }
-                else
-                {
-                    // if the first message can't fit, then it is too large for the batch
-                    throw new Exception($"Message {messageCount - messages.Count} is too large and cannot be sent.");
-                }
-
-                while (messages.Count > 0 && messageBatch.TryAddMessage(messages.Peek()))
-                {
-                    // dequeue the message from the .NET queue as it has been added to the batch
-                    messages.Dequeue();
-                }
-
-                await this.sender.SendMessagesAsync(messages);
-            }     
+            await this.sender.SendMessagesAsync(messages);    
         }
 
         public void ReceiveMessages(Func<ServiceBusReceivedMessage, Task> processMessageTask)
@@ -102,7 +79,7 @@ namespace PriorityQueue.Shared
                 }
                 // It's likely the conflicting operation being performed by the service bus is another queue create operation
                 // If we don't have a web response with status code 'Conflict' it's another exception
-                catch (ServiceBusException ex) when (((ex.InnerException as WebException)?.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.Conflict)
+                catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == 409)
                 {
                     Trace.TraceWarning("MessagingException HttpStatusCode.Conflict - Queue likely already exists or is being created or deleted for path: {0}", this.topicName);
                 }
@@ -136,13 +113,11 @@ namespace PriorityQueue.Shared
                 }
                 // It's likely the conflicting operation being performed by the service bus is another queue create operation
                 // If we don't have a web response with status code 'Conflict' it's another exception
-                catch (ServiceBusException ex) when (((ex.InnerException as WebException)?.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.Conflict)
+                catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == 409)
                 {
                     Trace.TraceWarning("MessagingException HttpStatusCode.Conflict - subscription likely already exists or is being created or deleted for path: {0}", subscription);
                 }
             }
-
-            this.subscriptionClient = new ServiceBusAdministrationClient(this.serviceBusConnectionString);
         }
 
         public void SetupTopic()
@@ -160,6 +135,7 @@ namespace PriorityQueue.Shared
             Thread.Sleep(waitTime);
 
             await this.processor.CloseAsync();
+            await this.topicClient.DisposeAsync();
 
             var manager = new ServiceBusAdministrationClient(this.serviceBusConnectionString);
 

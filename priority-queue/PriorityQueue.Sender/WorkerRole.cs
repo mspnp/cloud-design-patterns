@@ -25,26 +25,26 @@ namespace PriorityQueue.Sender
                 try
                 {
                     // Send a low priority batch
-                    var lowMessages = new Queue<ServiceBusMessage>();
+                    var lowMessages = new List<ServiceBusMessage>();
 
                     for (int i = 0; i < 10; i++)
                     {
                         var message = new ServiceBusMessage() {MessageId = Guid.NewGuid().ToString()};
                         message.ApplicationProperties["Priority"] = Priority.Low;
-                        lowMessages.Enqueue(message);
+                        lowMessages.Add(message);
                     }
 
                     this.queueManager.SendBatchAsync(lowMessages).Wait();
                     Trace.TraceInformation("Sent low priority message batch: " + RoleEnvironment.CurrentRoleInstance.Id);
 
                     // Send a high priority batch
-                    var highMessages = new Queue<ServiceBusMessage>();
+                    var highMessages = new List<ServiceBusMessage>();
 
                     for (int i = 0; i < 10; i++)
                     {
                         var message = new ServiceBusMessage() {MessageId = Guid.NewGuid().ToString()};
                         message.ApplicationProperties["Priority"] = Priority.High;
-                        highMessages.Enqueue(message);
+                        highMessages.Add(message);
                     }
 
                     this.queueManager.SendBatchAsync(highMessages).Wait();
