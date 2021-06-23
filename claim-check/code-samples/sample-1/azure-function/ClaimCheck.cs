@@ -34,7 +34,10 @@ namespace Microsoft.PnP.Messaging
                         log.LogInformation($"Got SubscriptionValidation event data, validationCode: {subscriptionValidation.ValidationCode},  validationUrl: {subscriptionValidation.ValidationUrl}, topic: {eventGridEvent.Topic}");
                         // Do any additional validation (as required) such as validating that the Azure resource ID of the topic matches
                         // the expected topic and then return back the below response
-                        break;
+                        return new OkObjectResult(new SubscriptionValidationResponse()
+                        {
+                            ValidationResponse = subscriptionValidation.ValidationCode
+                        });
                     case StorageBlobCreatedEventData storageBlobCreated:
                         log.LogInformation($"Got BlobCreated event data, blob URI {storageBlobCreated.Url}");
                         break;
