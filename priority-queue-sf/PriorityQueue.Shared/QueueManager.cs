@@ -36,7 +36,7 @@ namespace PriorityQueue.Shared
         Task OptionsOnExceptionReceived(ProcessErrorEventArgs exceptionReceivedEventArgs)
         {
             Trace.TraceError($"Exception in QueueClient.ExceptionReceived: {exceptionReceivedEventArgs?.Exception?.Message}");
-            return Task.FromResult<object>(null);
+            return Task.CompletedTask;
         }
             
 
