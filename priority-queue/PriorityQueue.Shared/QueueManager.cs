@@ -62,16 +62,16 @@ namespace PriorityQueue.Shared
             processor.StartProcessingAsync();
         }
 
-        public async void Setup(string subscription, string priority)
+        public async Task SetupAsync(string subscription, string priority)
         {
-            var namespaceManager = new ServiceBusAdministrationClient(this.serviceBusConnectionString);
+            var adminClient = new ServiceBusAdministrationClient(this.serviceBusConnectionString);
 
             // Setup the topic.
-            if (!(await namespaceManager.TopicExistsAsync(this.topicName)))
+            if (!await adminClient.TopicExistsAsync(this.topicName))
             {
                 try
                 {
-                    await namespaceManager.CreateTopicAsync(this.topicName);
+                    await adminClient.CreateTopicAsync(this.topicName);
                 }
                 catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists)
                 {
@@ -92,7 +92,7 @@ namespace PriorityQueue.Shared
             if (string.IsNullOrEmpty(subscription))
                 return;
 
-            if (!(await namespaceManager.SubscriptionExistsAsync(this.topicName, subscription)))
+            if (!await adminClient.SubscriptionExistsAsync(this.topicName, subscription))
             {
                 // Setup the filter for the subscription based on the priority.
                 var filter = new SqlRuleFilter("Priority = '" + priority + "'");
@@ -105,7 +105,7 @@ namespace PriorityQueue.Shared
 
                 try
                 {
-                    await namespaceManager.CreateSubscriptionAsync(options, ruleDescription);
+                    await adminClient.CreateSubscriptionAsync(options, ruleDescription);
                 }
                 catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists)
                 {
@@ -120,9 +120,9 @@ namespace PriorityQueue.Shared
             }
         }
 
-        public void SetupTopic()
+        public async Task SetupTopic()
         {
-            this.Setup(subscription: null, priority: null);
+            await this.SetupAsync(subscription: null, priority: null);
         }
 
         public async Task StopReceiver(TimeSpan waitTime)
@@ -137,13 +137,13 @@ namespace PriorityQueue.Shared
             await this.processor.CloseAsync();
             await this.topicClient.DisposeAsync();
 
-            var manager = new ServiceBusAdministrationClient(this.serviceBusConnectionString);
+            var adminClient = new ServiceBusAdministrationClient(this.serviceBusConnectionString);
 
-            if (await manager.TopicExistsAsync(this.topicName))
+            if (await adminClient.TopicExistsAsync(this.topicName))
             {
                 try
                 {
-                    await manager.DeleteTopicAsync(this.topicName);
+                    await adminClient.DeleteTopicAsync(this.topicName);
                 }
                 catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityNotFound)
                 {
@@ -162,7 +162,7 @@ namespace PriorityQueue.Shared
         {
             var exceptionMessage = exceptionReceivedEventArgs.Exception.Message;
             Trace.TraceError("Exception in QueueClient.ExceptionReceived: {0}", exceptionMessage);
-            return Task.FromResult<object>(null);
+            return Task.CompletedTask;
         }
     }
 }
