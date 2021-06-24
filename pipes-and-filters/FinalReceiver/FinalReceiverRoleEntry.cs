@@ -42,8 +42,8 @@ namespace FinalReceiver
                     // The pipeline message was received.
                     Trace.TraceInformation(
                         "Pipeline Message Complete - FilterA:{0} FilterB:{1}",
-                        msg.Properties[Constants.FilterAMessageKey],
-                        msg.Properties[Constants.FilterBMessageKey]);
+                        msg.ApplicationProperties[Constants.FilterAMessageKey],
+                        msg.ApplicationProperties[Constants.FilterBMessageKey]);
 
                     return null;
                 });

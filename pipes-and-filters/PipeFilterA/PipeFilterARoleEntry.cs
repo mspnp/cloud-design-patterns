@@ -7,6 +7,7 @@ namespace PipeFilterA
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
     using Microsoft.WindowsAzure.ServiceRuntime;
     using PipesAndFilters.Shared;
 
@@ -38,14 +39,14 @@ namespace PipeFilterA
             {
                 // Clone the message and update it
                 // Properties set by the broker (Deliver count, enqueue time, etc...) are not cloned and will need to be copied over if important.
-                var newMsg = msg.Clone();
+                var newMsg = new ServiceBusMessage(msg);
 
                 // DOING WORK
                 await Task.Delay(500); 
 
                 Trace.TraceInformation("Fitler A processed message:{0} at {1}", msg.MessageId, DateTime.UtcNow);
 
-                newMsg.Properties.Add(Constants.FilterAMessageKey, "Complete");
+                newMsg.ApplicationProperties.Add(Constants.FilterAMessageKey, "Complete");
 
                 return newMsg;
             });
