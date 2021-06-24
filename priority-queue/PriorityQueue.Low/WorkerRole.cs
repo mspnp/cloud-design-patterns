@@ -4,13 +4,13 @@ namespace PriorityQueue.Low
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Microsoft.ServiceBus.Messaging;
+    using Azure.Messaging.ServiceBus;
     using Microsoft.WindowsAzure.ServiceRuntime;
     using PriorityQueue.Shared;
 
     public class WorkerRole : PriorityWorkerRole
     {
-        protected override async Task ProcessMessage(BrokeredMessage message)
+        protected override async Task ProcessMessage(ServiceBusReceivedMessage message)
         {
             // simulate message processing for Low priority messages
             await base.ProcessMessage(message);
