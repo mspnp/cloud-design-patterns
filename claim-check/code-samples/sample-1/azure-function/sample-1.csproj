@@ -5,7 +5,7 @@
     <RootNamespace>sample_1</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.EventGrid" Version="3.0.0" />
+    <PackageReference Include="Azure.Messaging.EventGrid" Version="4.4.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.24" />
   </ItemGroup>
   <ItemGroup>
