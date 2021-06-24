@@ -116,7 +116,7 @@ namespace PipesAndFilters.Shared
                 Thread.Sleep(waitTime.Value);
             }
 
-            await this.processor.CloseAsync();
+            await this.processor.StopProcessingAsync();
 
             await ServiceBusUtilities.DeleteQueueIfExistsAsync(this.connectionString, this.queueName);
         }
