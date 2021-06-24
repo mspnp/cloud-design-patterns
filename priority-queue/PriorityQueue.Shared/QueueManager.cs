@@ -35,7 +35,7 @@ namespace PriorityQueue.Shared
 
         public async Task SendBatchAsync(IEnumerable<ServiceBusMessage> messages)
         {
-            await this.sender.SendMessagesAsync(messages);    
+            await this.sender.SendMessagesAsync(messages);
         }
 
         public void ReceiveMessages(Func<ServiceBusReceivedMessage, Task> processMessageTask)

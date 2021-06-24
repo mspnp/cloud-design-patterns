@@ -37,7 +37,7 @@ namespace PriorityQueue.Shared
             this.queueManager = new QueueManager(connectionString, topicName);
 
             // create the subscriptions, one for each priority.
-            this.queueManager.SetupAsync(subscriptionName, priority: subscriptionName).Wait();
+            this.queueManager.SetupAsync(subscriptionName, priority: subscriptionName).GetAwaiter().GetResult();
 
             return base.OnStart();
         }
