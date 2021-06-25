@@ -1,4 +1,4 @@
-﻿using Microsoft.Azure.EventGrid.Models;
+﻿using Azure.Messaging.EventGrid;
 using System;
 using System.Collections.Generic;
 using System.Linq;

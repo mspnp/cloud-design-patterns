@@ -10,8 +10,8 @@ using Fabrikam.Choreography.ChoreographyService.Models;
 using Fabrikam.Choreography.ChoreographyService.Services;
 using Fabrikam.Communicator.Service.Operations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.EventGrid;
-using Microsoft.Azure.EventGrid.Models;
+using Azure.Messaging.EventGrid;
+using Azure.Messaging.EventGrid.SystemEvents;
 using Microsoft.Extensions.Logging;
 
 
@@ -28,11 +28,12 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
         private readonly IDeliveryServiceCaller deliveryServiceCaller;
         private readonly IEventRepository eventRepository;
 
-        public ChoreographyController(IPackageServiceCaller packageServiceCaller,
-                             IDroneSchedulerServiceCaller droneSchedulerServiceCaller,
-                             IDeliveryServiceCaller deliveryServiceCaller,
-                             IEventRepository eventRepository,
-                             ILogger<ChoreographyController> logger)
+        public ChoreographyController(
+            IPackageServiceCaller packageServiceCaller,
+            IDroneSchedulerServiceCaller droneSchedulerServiceCaller,
+            IDeliveryServiceCaller deliveryServiceCaller,
+            IEventRepository eventRepository,
+            ILogger<ChoreographyController> logger)
         {
             this.packageServiceCaller = packageServiceCaller;
             this.droneSchedulerServiceCaller = droneSchedulerServiceCaller;
@@ -52,17 +53,25 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
 
             if (events == null)
             {
-                logger.LogError("event is  Null");
+                logger.LogError("event is Null");
                 return BadRequest("No Event for Choreography");
             }
                 
-            if (events[0].EventType is EventTypes.EventGridSubscriptionValidationEvent)
+            if (events[0].EventType is SystemEventNames.EventGridSubscriptionValidation)
             {
                 try
                 {
-                    var data = Operations.ConvertDataEventToType<SubscriptionValidationEventData>(events[0].Data);
-                    var response = new SubscriptionValidationResponse(data.ValidationCode);
-                    return Ok(response);
+                    events[0].TryGetSystemEventData(out object systemEvent);
+                    switch (systemEvent)
+                    {
+                        case SubscriptionValidationEventData subscriptionValidation:
+                            return new OkObjectResult(new SubscriptionValidationResponse()
+                            {
+                                ValidationResponse = subscriptionValidation.ValidationCode
+                            });
+                        default:
+                            break;
+                    }
                 }
                 catch (NullReferenceException ex)
                 {
