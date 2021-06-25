@@ -61,9 +61,17 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
             {
                 try
                 {
-                    var data = Operations.ConvertDataEventToType<SubscriptionValidationEventData>(events[0].Data);
-                    var response = EventGridModelFactory.SubscriptionValidationResponse(data.ValidationCode);
-                    return Ok(response);
+                    events[0].TryGetSystemEventData(out object systemEvent);
+                    switch (systemEvent)
+                    {
+                        case SubscriptionValidationEventData subscriptionValidation:
+                            return new OkObjectResult(new SubscriptionValidationResponse()
+                            {
+                                ValidationResponse = subscriptionValidation.ValidationCode
+                            });
+                        default:
+                            break;
+                    }
                 }
                 catch (NullReferenceException ex)
                 {

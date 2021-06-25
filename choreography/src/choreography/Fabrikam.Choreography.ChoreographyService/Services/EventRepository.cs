@@ -36,7 +36,9 @@ namespace Fabrikam.Choreography.ChoreographyService.Services
             {
                 await eventGridClient.SendEventsAsync(listEvents);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is ArgumentNullException ||
+                                ex is InvalidOperationException ||
+                                ex is HttpRequestException)
             {
                 throw new RequestFailedException("Exception sending event to eventGrid", ex);
             }
