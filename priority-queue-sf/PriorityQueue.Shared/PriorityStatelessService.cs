@@ -1,4 +1,4 @@
-﻿using Microsoft.ServiceBus.Messaging;
+﻿using Azure.Messaging.ServiceBus;
 using Microsoft.ServiceFabric.Services.Runtime;
 using System;
 using System.Collections.ObjectModel;
@@ -18,7 +18,7 @@ namespace PriorityQueue.Shared
             : base(context)
         { }
 
-        protected virtual async Task ProcessMessageAsync(BrokeredMessage message) =>
+        protected virtual async Task ProcessMessageAsync(ServiceBusReceivedMessage message) =>
             await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace PriorityQueue.Shared
             await this.queueManager.SetupAsync(subscriptionName, priority: subscriptionName)
                 .ConfigureAwait(false);
 
-            this.queueManager.ReceiveMessages(subscriptionName, this.ProcessMessageAsync, cancellationToken);
+            this.queueManager.ReceiveMessages(this.ProcessMessageAsync, cancellationToken);
 
             if (cancellationToken.WaitHandle.WaitOne())
             {
