@@ -82,7 +82,7 @@ namespace PriorityQueue.Shared
                 {
                     Trace.TraceInformation($"Messaging entity already created: {this.topicName}");
                 }
-                catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == 409)
+                catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == (int)HttpStatusCode.Conflict)
                 {
                     Trace.TraceWarning($"MessagingException HttpStatusCode.Conflict - Queue likely already exists or is being created or deleted for path: {this.topicName}");
                 }
@@ -114,7 +114,7 @@ namespace PriorityQueue.Shared
                     {
                         Trace.TraceInformation($"Messaging entity already created: {subscription}");
                     }
-                    catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == 409)
+                    catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == (int)HttpStatusCode.Conflict)
                     {
                         Trace.TraceWarning($"MessagingException HttpStatusCode.Conflict - subscription likely already exists or is being created or deleted for path: {subscription}");
                     }
