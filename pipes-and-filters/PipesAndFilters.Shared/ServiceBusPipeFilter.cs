@@ -15,6 +15,7 @@ namespace PipesAndFilters.Shared
         private readonly string outQueuePath;
         private ServiceBusProcessor processor;
         private ServiceBusSender sender;
+        private const int maxConcurrentCalls = 1;
 
         // Create a reset event to pause processing before shutting down and create the event signaled to allow processing
         private readonly ManualResetEvent pauseProcessingEvent = new ManualResetEvent(true);
@@ -47,7 +48,7 @@ namespace PipesAndFilters.Shared
             var options = new ServiceBusProcessorOptions()
             {
                 AutoCompleteMessages = true,
-                MaxConcurrentCalls = 1
+                MaxConcurrentCalls = maxConcurrentCalls
             };
 
             // Create inbound and outbound queue clients

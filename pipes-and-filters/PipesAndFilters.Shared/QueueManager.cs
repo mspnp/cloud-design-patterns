@@ -20,6 +20,8 @@ namespace PipesAndFilters.Shared
         private ServiceBusSender sender;
         private ServiceBusProcessor processor;
         private ManualResetEvent pauseProcessingEvent;
+        private const int maxConcurrentCalls = 10;
+        private const int maxDeliveryCount = 3;
 
         public QueueManager(string queueName, string connectionString)
         {
@@ -40,7 +42,7 @@ namespace PipesAndFilters.Shared
 
             // When AutoComplete is disabled, you have to manually complete/abandon the messages and handle errors, if any.
             options.AutoCompleteMessages = false;
-            options.MaxConcurrentCalls = 10;
+            options.MaxConcurrentCalls = maxConcurrentCalls;
 
             this.processor = this.client.CreateProcessor(this.queueName, options);
             // Use of Service Bus OnMessage message pump. The OnMessage method must be called once, otherwise an exception will occur.
@@ -71,7 +73,7 @@ namespace PipesAndFilters.Shared
                     var queueDescription = new CreateQueueOptions(this.queueName);
 
                     // Set the maximum delivery count for messages. A message is automatically deadlettered after this number of deliveries.  Default value is 10.
-                    queueDescription.MaxDeliveryCount = 3;
+                    queueDescription.MaxDeliveryCount = maxDeliveryCount;
 
                     await adminClient.CreateQueueAsync(queueDescription);
                 }
@@ -89,7 +91,7 @@ namespace PipesAndFilters.Shared
 
                         // It's likely the conflicting operation being performed by the service bus is another queue create operation
                         // If we don't have a web response with status code 'Conflict' it's another exception
-                        if (status != 409)
+                        if (status != (int)HttpStatusCode.Conflict)
                         {
                             throw;
                         }
