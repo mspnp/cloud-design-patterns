@@ -79,7 +79,7 @@ namespace PriorityQueue.Shared
                 }
                 // It's likely the conflicting operation being performed by the service bus is another queue create operation
                 // If we don't have a web response with status code 'Conflict' it's another exception
-                catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == 409)
+                catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == (int)HttpStatusCode.Conflict)
                 {
                     Trace.TraceWarning("MessagingException HttpStatusCode.Conflict - Queue likely already exists or is being created or deleted for path: {0}", this.topicName);
                 }
@@ -113,7 +113,7 @@ namespace PriorityQueue.Shared
                 }
                 // It's likely the conflicting operation being performed by the service bus is another queue create operation
                 // If we don't have a web response with status code 'Conflict' it's another exception
-                catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == 409)
+                catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == (int)HttpStatusCode.Conflict)
                 {
                     Trace.TraceWarning("MessagingException HttpStatusCode.Conflict - subscription likely already exists or is being created or deleted for path: {0}", subscription);
                 }
