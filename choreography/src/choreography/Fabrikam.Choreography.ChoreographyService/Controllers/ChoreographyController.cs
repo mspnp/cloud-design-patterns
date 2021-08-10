@@ -123,12 +123,21 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
                                 await eventRepository.SendEventAsync(listEvents);
                                 return Ok("Created Package Completed");
                             }
-                            catch (Exception ex) when (ex is BackendServiceCallFailedException ||
-                                                     ex is EventException || ex is Exception)
+                            catch (EventException ex)
                             {
                                 logger.LogError(ex.Message, ex);
                                 return BadRequest(ex);
 
+                            }
+                            catch (BackendServiceCallFailedException ex)
+                            {
+                                logger.LogError(ex.Message, ex);
+                                return StatusCode(500);
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.LogError(ex.Message, ex);
+                                return BadRequest(ex);
                             }
 
                         }
@@ -149,11 +158,15 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
                                 return Ok("Drone Completed");
 
                             }
-                            catch (Exception ex) when (ex is BackendServiceCallFailedException ||
-                                                       ex is EventException)
+                            catch (EventException ex)
                             {
                                 logger.LogError(ex.Message, ex);
                                 return BadRequest(ex);
+                            }
+                            catch (BackendServiceCallFailedException ex)
+                            {
+                                logger.LogError(ex.Message, ex);
+                                return StatusCode(500);
                             }
                         }
                     case Operations.ChoreographyOperation.GetDrone:
@@ -163,7 +176,7 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
                                 var deliverySchedule = await deliveryServiceCaller.ScheduleDeliveryAsync(delivery, e.Subject);
                                 return Ok("Delivery Completed");
                             }
-                            catch (Exception ex) when (ex is BackendServiceCallFailedException)
+                            catch (BackendServiceCallFailedException ex)
                             {
                                 logger.LogError(ex.Message, ex);
                                 return BadRequest(ex);
