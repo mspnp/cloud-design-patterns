@@ -6,7 +6,7 @@ using Microsoft.ServiceFabric.Services.Runtime;
 using PriorityQueue.Shared;
 using System.Collections.ObjectModel;
 using System.Fabric.Description;
-using Microsoft.ServiceBus.Messaging;
+using Azure.Messaging.ServiceBus;
 using System.Diagnostics;
 using System.Linq;
 
@@ -53,11 +53,11 @@ namespace PriorityQueue.Sender
                     var lowMessages = Enumerable.Range(0, 10)
                         .Select(i =>
                         {
-                            var message = new BrokeredMessage()
+                            var message = new ServiceBusMessage()
                             {
                                 MessageId = Guid.NewGuid().ToString()
                             };
-                            message.Properties["Priority"] = Priority.Low;
+                            message.ApplicationProperties["Priority"] = Priority.Low;
                             return message;
                         }).ToList();
                     await this.queueManager.SendBatchAsync(lowMessages)
@@ -68,11 +68,11 @@ namespace PriorityQueue.Sender
                     var highMessages = Enumerable.Range(0, 10)
                         .Select(i =>
                         {
-                            var message = new BrokeredMessage()
+                            var message = new ServiceBusMessage()
                             {
                                 MessageId = Guid.NewGuid().ToString()
                             };
-                            message.Properties["Priority"] = Priority.High;
+                            message.ApplicationProperties["Priority"] = Priority.High;
                             return message;
                         }).ToList();
 
