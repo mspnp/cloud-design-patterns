@@ -8,15 +8,17 @@ namespace PriorityQueue.Shared
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.ServiceBus;
-    using Microsoft.ServiceBus.Messaging;
+    using Azure;
+    using Azure.Messaging.ServiceBus;
+    using Azure.Messaging.ServiceBus.Administration;
 
     public class QueueManager
     {
         private readonly string serviceBusConnectionString;
         private readonly string topicName;
-        private SubscriptionClient subscriptionClient;
-        private TopicClient topicClient;
+        private ServiceBusSender sender;
+        private ServiceBusProcessor processor;
+        private ServiceBusClient topicClient;
         private readonly ManualResetEvent pauseProcessingEvent;
 
         public QueueManager(string serviceBusConnectionString, string topicName)
@@ -26,70 +28,76 @@ namespace PriorityQueue.Shared
             this.pauseProcessingEvent = new ManualResetEvent(true);
         }
 
-        public async Task SendMessageAsync(BrokeredMessage message)
+        public async Task SendMessageAsync(ServiceBusMessage message)
         {
-            await this.topicClient.SendAsync(message);
+            await this.sender.SendMessageAsync(message);
         }
 
-        public async Task SendBatchAsync(IEnumerable<BrokeredMessage> messages)
+        public async Task SendBatchAsync(IEnumerable<ServiceBusMessage> messages)
         {
-            await this.topicClient.SendBatchAsync(messages);
+            await this.sender.SendMessagesAsync(messages);
         }
 
-        public void ReceiveMessages(string subscription, Func<BrokeredMessage, Task> processMessageTask)
+        public void ReceiveMessages(Func<ServiceBusReceivedMessage, Task> processMessageTask)
         {
-            var options = new OnMessageOptions();
-            options.AutoComplete = true;
+            var options = new ServiceBusProcessorOptions();
+            options.AutoCompleteMessages = true;
             options.MaxConcurrentCalls = 10;
-            options.ExceptionReceived += this.OptionsOnExceptionReceived;
 
-            this.subscriptionClient.OnMessageAsync(
-                 async msg =>
+            this.processor = this.topicClient.CreateProcessor(this.topicName, options);
+
+            processor.ProcessMessageAsync +=
+                 async args =>
                  {
+                     ServiceBusReceivedMessage message = args.Message;
+
                      // Will block the current thread if Stop is called.
                      this.pauseProcessingEvent.WaitOne();
 
                      // Execute processing task here
-                     await processMessageTask(msg);
-                 },
-                 options);
+                     await processMessageTask(message);
+                 };
+            processor.ProcessErrorAsync += this.OptionsOnExceptionReceived;
+
+            processor.StartProcessingAsync();
         }
 
-        public void Setup(string subscription, string priority)
+        public async Task SetupAsync(string subscription, string priority)
         {
-            var namespaceManager = NamespaceManager.CreateFromConnectionString(this.serviceBusConnectionString);
+            var adminClient = new ServiceBusAdministrationClient(this.serviceBusConnectionString);
 
             // Setup the topic.
-            if (!namespaceManager.TopicExists(this.topicName))
+            if (!await adminClient.TopicExistsAsync(this.topicName))
             {
                 try
                 {
-                    namespaceManager.CreateTopic(this.topicName);
+                    await adminClient.CreateTopicAsync(this.topicName);
                 }
-                catch (MessagingEntityAlreadyExistsException)
+                catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists)
                 {
                     Trace.TraceInformation("Messaging entity already created: " + this.topicName);
                 }
                 // It's likely the conflicting operation being performed by the service bus is another queue create operation
                 // If we don't have a web response with status code 'Conflict' it's another exception
-                catch (MessagingException ex) when (((ex.InnerException as WebException)?.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.Conflict)
+                catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == (int)HttpStatusCode.Conflict)
                 {
                     Trace.TraceWarning("MessagingException HttpStatusCode.Conflict - Queue likely already exists or is being created or deleted for path: {0}", this.topicName);
                 }
             }
 
-            this.topicClient = TopicClient.CreateFromConnectionString(this.serviceBusConnectionString, this.topicName);
-            this.topicClient.RetryPolicy = RetryPolicy.Default;
+            this.topicClient = new ServiceBusClient(this.serviceBusConnectionString);
+            this.sender = topicClient.CreateSender(this.topicName);
 
             // Setup the subscription.
             if (string.IsNullOrEmpty(subscription))
                 return;
 
-            if (!namespaceManager.SubscriptionExists(this.topicName, subscription))
+            if (!await adminClient.SubscriptionExistsAsync(this.topicName, subscription))
             {
                 // Setup the filter for the subscription based on the priority.
-                var filter = new SqlFilter("Priority = '" + priority + "'");
-                var ruleDescription = new RuleDescription
+                var filter = new SqlRuleFilter("Priority = '" + priority + "'");
+                var options = new CreateSubscriptionOptions(this.topicName, subscription);
+                var ruleDescription = new CreateRuleOptions
                 {
                     Name = "PriorityFilter",
                     Filter = filter
@@ -97,27 +105,24 @@ namespace PriorityQueue.Shared
 
                 try
                 {
-                    namespaceManager.CreateSubscription(this.topicName, subscription, ruleDescription);
+                    await adminClient.CreateSubscriptionAsync(options, ruleDescription);
                 }
-                catch (MessagingEntityAlreadyExistsException)
+                catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists)
                 {
                     Trace.TraceInformation("Messaging entity already created: " + subscription);
                 }
                 // It's likely the conflicting operation being performed by the service bus is another queue create operation
                 // If we don't have a web response with status code 'Conflict' it's another exception
-                catch (MessagingException ex) when (((ex.InnerException as WebException)?.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.Conflict)
+                catch (ServiceBusException ex) when (((ex.InnerException as RequestFailedException)?.Status) == (int)HttpStatusCode.Conflict)
                 {
                     Trace.TraceWarning("MessagingException HttpStatusCode.Conflict - subscription likely already exists or is being created or deleted for path: {0}", subscription);
                 }
             }
-
-            this.subscriptionClient = SubscriptionClient.CreateFromConnectionString(this.serviceBusConnectionString, this.topicName, subscription);
-            this.subscriptionClient.RetryPolicy = RetryPolicy.Default;
         }
 
-        public void SetupTopic()
+        public async Task SetupTopic()
         {
-            this.Setup(subscription: null, priority: null);
+            await this.SetupAsync(subscription: null, priority: null);
         }
 
         public async Task StopReceiver(TimeSpan waitTime)
@@ -129,17 +134,18 @@ namespace PriorityQueue.Shared
             // We simply stop any new processing, wait for existing thread to complete, then close the message pump and then return
             Thread.Sleep(waitTime);
 
-            await this.subscriptionClient.CloseAsync();
+            await this.processor.CloseAsync();
+            await this.topicClient.DisposeAsync();
 
-            var manager = NamespaceManager.CreateFromConnectionString(this.serviceBusConnectionString);
+            var adminClient = new ServiceBusAdministrationClient(this.serviceBusConnectionString);
 
-            if (await manager.TopicExistsAsync(this.topicName))
+            if (await adminClient.TopicExistsAsync(this.topicName))
             {
                 try
                 {
-                    await manager.DeleteTopicAsync(this.topicName);
+                    await adminClient.DeleteTopicAsync(this.topicName);
                 }
-                catch (MessagingEntityNotFoundException)
+                catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityNotFound)
                 {
                     Trace.TraceWarning(
                         "MessagingEntityNotFoundException Deleting Topic - Topic does not exist at path: {0}", this.topicName);
@@ -149,16 +155,14 @@ namespace PriorityQueue.Shared
 
         public async Task StopSender()
         {
-            await this.topicClient.CloseAsync();
+            await this.sender.CloseAsync();
         }
 
-        private void OptionsOnExceptionReceived(object sender, ExceptionReceivedEventArgs exceptionReceivedEventArgs)
+        Task OptionsOnExceptionReceived(ProcessErrorEventArgs exceptionReceivedEventArgs)
         {
-            if (exceptionReceivedEventArgs?.Exception == null)
-                return;
-
             var exceptionMessage = exceptionReceivedEventArgs.Exception.Message;
             Trace.TraceError("Exception in QueueClient.ExceptionReceived: {0}", exceptionMessage);
+            return Task.CompletedTask;
         }
     }
 }
