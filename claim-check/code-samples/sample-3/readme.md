@@ -12,11 +12,11 @@ If you don't have an Azure subscription, create a [free account](https://azure.m
 
 In addition:
 
-* [Visual Studio 2017](https://visualstudio.microsoft.com/downloads/) or  [Visual Studio Code](https://code.visualstudio.com/)
+* [Visual Studio](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/)
 * [.NET Core SDK](https://dotnet.microsoft.com/download)
 * [Git](https://www.git-scm.com/downloads)
-* [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
-* [Azure Storage Explorer](https://azure.microsoft.com/en-us/features/storage-explorer/)
+* [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli)
+* [Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/)
 
 ## Getting Started
 
@@ -51,7 +51,7 @@ Run the azure setup script to get the resources deployed and everything set up
 ./sample-3-azure-setup.sh <unique-name>
 ```
 
-"unique-name" should be something that is unlikely to be used by someone else. This is needed to make sure that no conflict with other people running the same sample at the same time will arise. The name should only contains numbers and letters should not be longer than 12 characters (as additional text will be added by the script itself to identify each created resource) If you're not sure about what to use here, you can just generate a random string using the following bash command:
+_unique-name_ should be something that is unlikely to be used by someone else. This is needed to make sure that no conflict with other people running the same sample at the same time will arise. The name should only contains numbers and letters should not be longer than 12 characters (as additional text will be added by the script itself to identify each created resource) If you're not sure about what to use here, you can just generate a random string using the following bash command:
 
 ```bash
 echo `openssl rand 5 -base64 | cut -c1-7 | tr '[:upper:]' '[:lower:]' | tr -cd '[[:alnum:]]._-'`
