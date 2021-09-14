@@ -81,8 +81,8 @@ The Kafka message will contain something like this:
 
 ```json
 {
-  "ContainerName":"heavypayload0fc21425-5df3-4c0d-930c-9261ee83ad53",
-  "BlobName":"HeavyPayload_82db7213-ca94-4aa0-9e65-fb668e51ccc9.txt"
+  "ContainerName": "heavypayload0fc21425-5df3-4c0d-930c-9261ee83ad53",
+  "BlobName": "HeavyPayload_82db7213-ca94-4aa0-9e65-fb668e51ccc9.txt"
 }
 ```
 
