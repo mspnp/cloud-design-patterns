@@ -1,22 +1,27 @@
-﻿using Microsoft.Azure.Storage.Blob;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Sas;
 using System;
 
 namespace asyncpattern
 {
     public static class CloudBlockBlobExtensions
     {
-        public static string GenerateSASURI(this CloudBlockBlob blob)
+        public static string GenerateSASURI(this BlobClient blobClient)
         {
-            SharedAccessBlobPolicy sasConstraints = new SharedAccessBlobPolicy();
-            sasConstraints.SharedAccessStartTime = DateTimeOffset.UtcNow.AddMinutes(-5);
-            sasConstraints.SharedAccessExpiryTime = DateTimeOffset.UtcNow.AddMinutes(10);
-            sasConstraints.Permissions = SharedAccessBlobPermissions.Read;
+            BlobSasBuilder sasBuilder = new BlobSasBuilder()
+            {
+                BlobContainerName = blobClient.BlobContainerName,
+                BlobName = blobClient.Name,
+                Resource = "b"
+            };
 
-            //Generate the shared access signature on the blob, setting the constraints directly on the signature.
-            string sasBlobToken = blob.GetSharedAccessSignature(sasConstraints);
+            sasBuilder.ExpiresOn = DateTimeOffset.UtcNow.AddHours(1);
+            sasBuilder.SetPermissions(BlobSasPermissions.Read |
+                BlobSasPermissions.Write);
 
-            //Return the URI string for the container, including the SAS token.
-            return blob.Uri + sasBlobToken;
+            Uri sasUri = blobClient.GenerateSasUri(sasBuilder);
+
+            return sasUri.AbsoluteUri;
         }
     }
 }

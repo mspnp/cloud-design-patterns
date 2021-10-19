@@ -7,7 +7,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Linq;
-using Microsoft.Azure.Storage.Blob;
+using Azure.Storage.Blobs;
 
 namespace asyncpattern
 {
@@ -16,16 +16,16 @@ namespace asyncpattern
         [FunctionName("AsyncOperationStatusChecker")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "RequestStatus/{thisGUID}")] HttpRequest req,
-            [Blob("data/{thisGuid}.blobdata", FileAccess.Read, Connection = "StorageConnectionAppSetting")] CloudBlockBlob inputBlob, string thisGUID,
+            [Blob("data/{thisGuid}.blobdata", FileAccess.Read, Connection = "StorageConnectionAppSetting")] BlobClient inputBlob, 
+            string thisGUID,
             ILogger log)
         {
-
             OnCompleteEnum OnComplete = Enum.Parse<OnCompleteEnum>(req.Query["OnComplete"].FirstOrDefault() ?? "Redirect");
             OnPendingEnum OnPending = Enum.Parse<OnPendingEnum>(req.Query["OnPending"].FirstOrDefault() ?? "Accepted");
 
             log.LogInformation($"C# HTTP trigger function processed a request for status on {thisGUID} - OnComplete {OnComplete} - OnPending {OnPending}");
 
-            // ** Check to see if the blob is present **
+            //// ** Check to see if the blob is present **
             if (await inputBlob.ExistsAsync())
             {
                 // ** If it's present, depending on the value of the optional "OnComplete" parameter choose what to do. **
@@ -76,7 +76,7 @@ namespace asyncpattern
             }
         }
 
-        private static async Task<IActionResult> OnCompleted(OnCompleteEnum OnComplete, CloudBlockBlob inputBlob, string thisGUID)
+        private static async Task<IActionResult> OnCompleted(OnCompleteEnum OnComplete, BlobClient inputBlob, string thisGUID)
         {
             switch (OnComplete)
             {
@@ -91,7 +91,8 @@ namespace asyncpattern
                     {
                         // Download the file and return it directly to the caller.
                         // For larger files, use a stream to minimize RAM usage.
-                        return (ActionResult)new OkObjectResult(await inputBlob.DownloadTextAsync());
+                        var content = await inputBlob.DownloadContentAsync();
+                        return (ActionResult)new OkObjectResult(content.Value.Content);
                     }
 
                 default:
