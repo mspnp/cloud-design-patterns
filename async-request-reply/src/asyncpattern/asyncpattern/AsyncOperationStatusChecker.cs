@@ -6,10 +6,10 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Blob;
 using System.Linq;
+using Microsoft.Azure.Storage.Blob;
 
-namespace Contoso
+namespace asyncpattern
 {
     public static class AsyncOperationStatusChecker
     {
@@ -83,7 +83,7 @@ namespace Contoso
                 case OnCompleteEnum.Redirect:
                     {
                         // Redirect to the SAS URI to blob storage
-                       
+
                         return (ActionResult)new RedirectResult(inputBlob.GenerateSASURI());
                     }
 
@@ -102,13 +102,15 @@ namespace Contoso
         }
     }
 
-    public enum OnCompleteEnum {
+    public enum OnCompleteEnum
+    {
 
         Redirect,
         Stream
     }
 
-    public enum OnPendingEnum {
+    public enum OnPendingEnum
+    {
 
         Accepted,
         Synchronous

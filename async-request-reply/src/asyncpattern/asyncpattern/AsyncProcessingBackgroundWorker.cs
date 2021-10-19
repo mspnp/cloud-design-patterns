@@ -4,13 +4,13 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Blob;
 
-namespace Contoso
+namespace asyncpattern
 {
     public static class AsyncProcessingBackgroundWorker
     {
         [FunctionName("AsyncProcessingBackgroundWorker")]
         public static void Run(
-            [ServiceBusTrigger("outqueue", Connection = "ServiceBusConnectionAppSetting")]Message myQueueItem, 
+            [ServiceBusTrigger("outqueue", Connection = "ServiceBusConnectionAppSetting")] Message myQueueItem,
             [Blob("data", FileAccess.ReadWrite, Connection = "StorageConnectionAppSetting")] CloudBlobContainer inputBlob,
             ILogger log)
         {

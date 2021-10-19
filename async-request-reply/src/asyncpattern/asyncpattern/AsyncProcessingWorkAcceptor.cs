@@ -8,7 +8,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace Contoso
+namespace asyncpattern
 {
     public static class AsyncProcessingWorkAcceptor
     {
@@ -24,7 +24,7 @@ namespace Contoso
             }
 
             string reqid = Guid.NewGuid().ToString();
-            
+
             string rqs = $"http://{Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME")}/api/RequestStatus/{reqid}";
 
             var messagePayload = JsonConvert.SerializeObject(customer);
@@ -32,10 +32,10 @@ namespace Contoso
             m.UserProperties["RequestGUID"] = reqid;
             m.UserProperties["RequestSubmittedAt"] = DateTime.Now;
             m.UserProperties["RequestStatusURL"] = rqs;
-                
-            await OutMessage.AddAsync(m);  
 
-            return (ActionResult) new AcceptedResult(rqs, $"Request Accepted for Processing{Environment.NewLine}ProxyStatus: {rqs}");  
+            await OutMessage.AddAsync(m);
+
+            return (ActionResult)new AcceptedResult(rqs, $"Request Accepted for Processing{Environment.NewLine}ProxyStatus: {rqs}");
         }
     }
 }
