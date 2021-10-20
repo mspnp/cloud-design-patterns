@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
@@ -22,7 +21,7 @@ namespace asyncpattern
 
             var id = myQueueItem.UserProperties["RequestGUID"] as string;
 
-            var cbb = blobContainer.GetBlobClient($"{id}.blobdata");
+            var blobClient = blobContainer.GetBlobClient($"{id}.blobdata");
 
             // Now write away the process 
             MemoryStream stream = new MemoryStream();
@@ -30,7 +29,8 @@ namespace asyncpattern
             stream.Position = 0;
             BlobHttpHeaders blobHttpHeaders = new BlobHttpHeaders();
             blobHttpHeaders.ContentType = "application/json";
-            await cbb.UploadAsync(stream, blobHttpHeaders);
+            await blobClient.UploadAsync(stream, blobHttpHeaders);
+            log.LogInformation($"AsyncProcessingBackgroundWorker: Created resource: {blobClient.BlobContainerName}/{blobClient.Name}");
         }
     }
 }
