@@ -9,11 +9,12 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Azure.Messaging.EventGrid;
 using Azure.Messaging.EventGrid.SystemEvents;
+using System.Net;
 
 namespace Microsoft.PnP.Messaging
 {
     public static class ClaimCheck
-    {    
+    {
         [FunctionName("ClaimCheck")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
@@ -21,6 +22,11 @@ namespace Microsoft.PnP.Messaging
         {
             string requestContent = await new StreamReader(req.Body).ReadToEndAsync();
             log.LogInformation($"Received events: {requestContent}");
+
+            if (requestContent.Length == 0)
+            {
+                return new BadRequestObjectResult("HttpRequest is empty");
+            }
 
             EventGridEvent[] eventGridEvents = EventGridEvent.ParseMany(BinaryData.FromStream(req.Body));
 
@@ -45,7 +51,7 @@ namespace Microsoft.PnP.Messaging
                         return new BadRequestResult();
                 }
             }
-            
+
             return new OkResult();
         }
     }
