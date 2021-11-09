@@ -6,25 +6,6 @@ if ! command az >/dev/null; then
     exit 1
 fi
 
-export curVer=`printf "%03d%03d%03d" $(az --version | grep 'eventgrid' | awk '{gsub(/[()]/, "", $2); print $2}' | tail -1 | tr '.' ' ')`
-export reqVer=`printf "%03d%03d%03d" $(echo '0.4.0' | tr '.' ' ')`
-if [[ curVer -lt reqVer ]] ; then
-    echo "Version 0.4.0 at least required for the evengrid module" >&2    
-    echo 'You can add it by doing this:' >&2
-    echo 'sudo az extension add --name "eventgrid"' >&2
-    exit 1
-fi
-
-on_error() {
-    set +e
-    echo "There was an error, execution halted" >&2
-    exit 1
-}
-
-trap on_error ERR
-
-rm -f azcli-execution.log 
-
 if [[ -z $1 ]]; then
     export RG="pnp1"
 else    
@@ -32,7 +13,7 @@ else
 fi
 
 export PREFIX="${RG}cc"
-export LOCATION="eastus"
+export LOCATION="centralus"
 
 echo "create: group ${RG}"
 az group create --name "${RG}" --location "${LOCATION}" -o json >> azcli-execution.log

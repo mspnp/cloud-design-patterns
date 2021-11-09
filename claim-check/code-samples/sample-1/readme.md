@@ -17,7 +17,7 @@ In addition:
 * [.NET Core SDK](https://dotnet.microsoft.com/download)
 * [Git](https://www.git-scm.com/downloads)
 * [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
-* [Azure Storage Explorer](https://azure.microsoft.com/en-us/features/storage-explorer/)
+* [Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/)
 
 ## Getting Started
 
