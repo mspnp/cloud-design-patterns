@@ -22,7 +22,7 @@ else
     export RG="${1}"
 fi
 export PREFIX="${RG}cc"
-export LOCATION="eastus"
+export LOCATION="centralus"
 
 echo "create: group ${RG}"
 az group create --name "${RG}" --location "${LOCATION}" -o json >> azcli-execution.log
