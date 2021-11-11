@@ -1,6 +1,6 @@
 # Sample 3: Plugin support, Service Bus as Message Bus
 
-## Technologies used: Azure Blob Storage, Azure Service Bus, .NET Core 2.1
+## Technologies used: Azure Blob Storage, Azure Service Bus, .NET Core 3.1, .NET 5.0
 
 This sample takes advantage of the [ServiceBus.AttachmentPlugin](https://www.nuget.org/packages/ServiceBus.AttachmentPlugin) which brings the claim check pattern implementation to Service Bus. The plugin is used to convert any message body into an attachment which gets stored in Azure Blob Storage on message send. Internally, service bus message is used to act as a notification queue which can subscribed on to read the message. On message receive, the plugin makes it possible to directly read the message data from blob storage in the consumer. You can then chose how you want to process the message further. The good thing about this approach is, it hides the actual claim check workflow from the end user.
 
