@@ -1,6 +1,6 @@
 # Sample 4: Manual Tagging
 
-## Technologies used: Azure Blob Storage, Azure Event Hubs with Kafka, .NET Core 2.1
+## Technologies used: Azure Blob Storage, Azure Event Hubs with Kafka, .NET Core 3.1, .NET 5.0
 
 The reason this example uses Event Hubs with Kafka is to demonstrate the ease of using other Azure services like Azure Blob Storage, Azure functions etc. with a different messaging protocol like Kafka from your existing Kafka clients to implement the claim check messaging pattern. This sample consists of a Kafka client which drops the payload in the designated Azure Blob Storage and creates a notification message with location details to be sent to the consumer. The notification message is sent using [Event Hubs with Kafka enabled](https://docs.microsoft.com/azure/event-hubs/event-hubs-create-kafka-enabled). The consumer is notified each time these is a message in the Event Hub and can access the payload using the location information in the message received.
 

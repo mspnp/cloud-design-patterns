@@ -6,15 +6,6 @@ if ! command az >/dev/null; then
     exit 1
 fi
 
-export curVer=`printf "%03d%03d%03d" $(az --version | grep 'azure-cli ' | awk '{gsub(/[()]/, "", $2); print $2}' | tail -1 | tr '.' ' ')`
-export reqVer=`printf "%03d%03d%03d" $(echo '2.0.50' | tr '.' ' ')`
-if [ ${curVer} -lt ${reqVer} ] ; then
-    echo "Version 2.0.50 at least required for eventhubs with kafka" >&2    
-    echo 'You can add it by following instructions given here' >&2
-    echo 'https://docs.microsoft.com/en-us/cli/azure/install-azure-cli' >&2
-    exit 1
-fi
-
 on_error() {
     set +e
     echo "There was an error, execution halted" >&2
@@ -31,7 +22,7 @@ else
     export RG="${1}"
 fi
 export PREFIX="${RG}cc"
-export LOCATION="eastus"
+export LOCATION="centralus"
 
 echo "create: group ${RG}"
 az group create --name "${RG}" --location "${LOCATION}" -o json >> azcli-execution.log
