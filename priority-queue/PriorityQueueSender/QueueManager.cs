@@ -126,34 +126,6 @@ namespace PriorityQueueSender
             await this.SetupAsync(subscription: "LowPrioritySubscription", priority: Priority.Low);
         }
 
-        public async Task StopReceiver(TimeSpan waitTime)
-        {
-            // Pause the processing threads
-            this.pauseProcessingEvent.Reset();
-
-            // There is no clean approach to wait for the threads to complete processing.
-            // We simply stop any new processing, wait for existing thread to complete, then close the message pump and then return
-            Thread.Sleep(waitTime);
-
-            await this.processor.CloseAsync();
-            await this.topicClient.DisposeAsync();
-
-            var adminClient = new ServiceBusAdministrationClient(this.serviceBusConnectionString);
-
-            if (await adminClient.TopicExistsAsync(this.topicName))
-            {
-                try
-                {
-                    await adminClient.DeleteTopicAsync(this.topicName);
-                }
-                catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityNotFound)
-                {
-                    Trace.TraceWarning(
-                        "MessagingEntityNotFoundException Deleting Topic - Topic does not exist at path: {0}", this.topicName);
-                }
-            }
-        }
-
         public async Task StopSender()
         {
             await this.sender.CloseAsync();
