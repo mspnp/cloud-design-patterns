@@ -1,9 +1,10 @@
 {
-    "IsEncrypted": false,
+  "IsEncrypted": false,
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "WEBSITE_MAX_DYNAMIC_APPLICATION_SCALE_OUT": 200,
     "TopicName": "topic_1",
-    "ServiceBusConnectionString": "Endpoint=sb://[your namespace].servicebus.windows.net;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=[your secret]"
+    "ServiceBusConnectionString": "Endpoint=sb://mgransb1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=oDJmLeOLWFI9SgTCLW72WTN+CNV2ZL3tsCN+vEUdw/Q="
   }
 }
