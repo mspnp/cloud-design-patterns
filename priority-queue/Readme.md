@@ -43,7 +43,7 @@ You can either run this example locally in the Visual Studio Windows Azure emula
 	* You can select an existing resource group and storage account or create new ones.
 	* In "Hosting" section, click on the the three dots (...) in the upper right corner.
 	* Select "Manage Azure App Service Settings".
-	* You need to add this two settings:
+	* You need to add these two settings:
 
 	  - ServiceBusConnection__fullyQualifiedNamespace:
 
