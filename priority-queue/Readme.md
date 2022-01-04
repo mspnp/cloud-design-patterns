@@ -16,7 +16,7 @@ The example demonstrates operational aspects of applications running in Windows 
 
 ## About the Example
 
-This example shows how you can implement priority queues by using Service Bus Topics and Subscriptions. A timer triggered Azure Function is responsible for sending messages to a topic. It assigns a priority to each message. The receiving Azure Functions read messages from subscriptions that have the corresponding priority. In the example, The PriorityQueueConsumerHigh Azure function can scale out to 200 instances, whereas the PriorityQueueConsumerLow worker runs only with one instance. This ensures that high priority messages are read from the queue more quickly than low priority messages.
+This example shows how you can implement priority queues by using Service Bus Topics and Subscriptions. A timer triggered Azure Function is responsible for sending messages to a topic. It assigns a priority to each message. The receiving Azure Functions read messages from subscriptions that have the corresponding priority. In the example, the PriorityQueueConsumerHigh Azure function can scale out to 200 instances, whereas the PriorityQueueConsumerLow worker runs only with one instance. This simulates high priority messages being read from the queue more urgently than low priority messages.
 
 ## Running the Example
 
