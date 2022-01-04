@@ -3,8 +3,6 @@
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-    "WEBSITE_MAX_DYNAMIC_APPLICATION_SCALE_OUT": 200,
-    "TopicName": "topic_1",
-    "ServiceBusConnectionString": "Endpoint=sb://mgransb1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=oDJmLeOLWFI9SgTCLW72WTN+CNV2ZL3tsCN+vEUdw/Q="
+    "ServiceBusConnection__fullyQualifiedNamespace": "mgransb1.servicebus.windows.net"
   }
 }

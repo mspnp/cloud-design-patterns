@@ -6,9 +6,9 @@ namespace PriorityQueueConsumerLow
     public static class PriorityQueueConsumerLowFn
     {
         [FunctionName("LowPriorityQueueConsumerFunction")]
-        public static void Run([ServiceBusTrigger("topic_1", "LowPrioritySubscription", Connection = "ServiceBusConnectionString")]string mySbMsg, ILogger log)
+        public static void Run([ServiceBusTrigger("topic_1", "LowPrioritySubscription", Connection = "ServiceBusConnection")]string lowPriorityMessage, ILogger log)
         {
-            log.LogInformation($"C# ServiceBus topic trigger function processed message: {mySbMsg}");
+            log.LogInformation($"C# ServiceBus topic trigger function processed message: {lowPriorityMessage}");
         }
     }
 }

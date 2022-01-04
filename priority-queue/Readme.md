@@ -4,9 +4,9 @@ This document describes the Priority Queue Pattern example from the guide [Cloud
 
 ## System Requirements
 
-* Microsoft .NET Core 3.1
-* Microsoft Visual Studio 2019
-* Windows Azure SDK for .NET version 3.1
+* Microsoft .NET 6
+* Microsoft Visual Studio 2019 or later version
+* Azure Functions Core Tools version 4x
 
 ## Before you start
 
@@ -20,12 +20,12 @@ This example shows how you can implement priority queues by using Service Bus To
 
 ## Running the Example
 
-You can run this example locally in the Visual Studio Windows Azure emulator. You can also run this example by deploying it to a Function App Service.
+You can either run this example locally in the Visual Studio Windows Azure emulator or you can run it by deploying it to Function App Services.
 
-* Provision a Windows Azure Service Bus Namespace
-* Start Visual Studio using an account that has Administrator privileges ("Run as Administrator").
+* Provision an Azure Service Bus Namespace.
+* Start Visual Studio.
 * Open the solution you want to explore from the subfolders where you downloaded the examples.
-* Edit the local.settings.json file in all the projects and change the ServiceBusConnectionString setting by changing the placeholders "[your namespace]" and "[your secret]" to your own values.
+* Edit the local.settings.json file in all the projects and change the ServiceBusConnection__fullyQualifiedNamespace setting by changing the placeholder "<service_bus_namespace>"  to your Azure Service Bus Namespace name.
 
 * If you want to run the example in the local Windows Azure emulator:
 	* Set the PriorityQueueSender project as startup.
@@ -43,21 +43,37 @@ You can run this example locally in the Visual Studio Windows Azure emulator. Yo
 	* You can select an existing resource group and storage account or create new ones.
 	* In "Hosting" section, click on the the three dots (...) in the upper right corner.
 	* Select "Manage Azure App Service Settings".
-	* You need to add this three settings:
-	  - ServiceBusConnectionString:
+	* You need to add this two settings:
 
-	  		You can get this value from the Azure Portal. Go to the Service Bus Namespace in your resource group in find the primary 
-			connection under "Shared Access Policies", set the app setting's remote value to the value you copied from the portal.
+	  - ServiceBusConnection__fullyQualifiedNamespace:
 
-	  - TopincName:
+			Set the value to:
 
-	  		Set the remote value to "topic_1"
+	  		<service_bus_namespace>.servicebus.windows.net
+
+			Replacing the placeholder with you Azure Service Bus Namespace name.
 
 	  - WEBSITE_MAX_DYNAMIC_APPLICATION_SCALE_OUT:
 
-	  		This setting sepcifies how many instances the functions on your app service consumption can scale out to.
+	  		This setting specifies how many instances the functions on your app service consumption can scale out to.
 			For the "PriorityQueueConsumerLow" function set the remote value to 1
 			For the other functions set it explicitly to the default: 200 (This ensures that high priority messages are read from the queue more quickly than low priority messages).
+
+	* Once the Functions are deployed you can configure the managed identities role assignments:
+
+			In the Azure portal, navigate to the Azure Service Bus Namespace that was provisioned in the first step.
+			Select Access Control (IAM). This is where you can view and configure who has access to the resource.
+			Click Add and select add role assignment.
+			From the list, select "Azure Service Bus Data Sender", click Next
+			In "Assign access to", radio button list, select "Managed identity"
+			Click on "Select members", the "Select Manage identities" dialog will show up
+			In the Managed Identity  dropdown list select "Function App"
+			Find the PriorityQueueSender function app click on it
+			Click "Select"
+			On the main dialog, click "Review + Assign"
+
+			For the Azure Conumer Function Apps, repeat the process but in this case use the role
+			"Azure Service Bus Data Reader"
 
 	* Once the Functions are deployed you can configure monitoring by following these steps:
 
