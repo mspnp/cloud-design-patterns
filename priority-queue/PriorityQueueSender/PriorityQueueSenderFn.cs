@@ -10,7 +10,7 @@ namespace PriorityQueueSender
         [FunctionName("PriorityQueueSenderFunction")]
         public static async Task Run(
             [TimerTrigger("0,30 * * * * *")] TimerInfo myTimer,
-            [ServiceBus("topic_1", Connection = "ServiceBusConnection")] IAsyncCollector<ServiceBusMessage> collector )
+            [ServiceBus("messages", Connection = "ServiceBusConnection")] IAsyncCollector<ServiceBusMessage> collector )
         {
             for (int i = 0; i < 10; i++)
             {

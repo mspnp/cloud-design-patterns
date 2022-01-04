@@ -22,7 +22,17 @@ This example shows how you can implement priority queues by using Service Bus To
 
 You can either run this example locally from Visual Studio or you can run it by deploying it to Azure.
 
-* Provision an Azure Service Bus Namespace.
+* From the Azure Portal, provision an Azure Service Bus Namespace.
+* Once the Service Bus Namespace is created, add a new topic to it, name it "messages" (leave all the properties default).
+* Once the topic is created, add a new subscription to it, name it "highPriority", set "10" as Max delivery count.
+* Add a new filter of type "SqlFilter" to the subscription, name it "priorityFilter".
+* Set the expression __Priority = 'highpriority'__ in the filter body.
+* Click on "Save changes".
+* Add another subscription to the topic, name it "lowPriority", set "10" as Max delivery count.
+* Add a new filter of type "SqlFilter" to the subscription, name it "priorityFilter".
+* Set the expression __Priority = 'lowpriority'__ in the filter body.
+* Click on "Save changes".
+
 * Start Visual Studio.
 * Open the solution you want to explore from the subfolders where you downloaded the examples.
 * Edit the local.settings.json file in all the projects and change the ServiceBusConnection__fullyQualifiedNamespace setting by changing the placeholder "<service_bus_namespace>"  to your Azure Service Bus Namespace name.
