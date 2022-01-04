@@ -16,19 +16,16 @@ namespace PriorityQueueSender
             for (int i = 0; i < 10; i++)
             {
                 var messageId = Guid.NewGuid().ToString();
-                var message = new ServiceBusMessage() { MessageId = messageId };
-                message.ApplicationProperties["Priority"] = Priority.Low;
-                message.Body = BinaryData.FromString($"Low priority message with Id: {messageId}");
-                await collector.AddAsync(message);
-            }
+                var lpMessage = new ServiceBusMessage() { MessageId = messageId };
+                lpMessage.ApplicationProperties["Priority"] = Priority.Low;
+                lpMessage.Body = BinaryData.FromString($"Low priority message with Id: {messageId}");
+                await collector.AddAsync(lpMessage);
 
-            for (int i = 0; i < 10; i++)
-            {
-                var messageId = Guid.NewGuid().ToString();
-                var message = new ServiceBusMessage() { MessageId = messageId };
-                message.ApplicationProperties["Priority"] = Priority.High;
-                message.Body = BinaryData.FromString($"High priority message with Id: {messageId}");
-                await collector.AddAsync(message);
+                messageId = Guid.NewGuid().ToString();
+                var hpMessage = new ServiceBusMessage() { MessageId = messageId };
+                hpMessage.ApplicationProperties["Priority"] = Priority.High;
+                hpMessage.Body = BinaryData.FromString($"High priority message with Id: {messageId}");
+                await collector.AddAsync(hpMessage);
             }
         }
     }
