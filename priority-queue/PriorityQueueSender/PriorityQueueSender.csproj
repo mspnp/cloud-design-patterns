@@ -9,7 +9,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.2.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.0.1" />
-    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.5.1" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
