@@ -20,7 +20,7 @@ This example shows how you can implement priority queues by using Service Bus To
 
 ## Running the Example
 
-You can either run this example locally in the Visual Studio Windows Azure emulator or you can run it by deploying it to Function App Services.
+You can either run this example locally from Visual Studio or you can run it by deploying it to Azure.
 
 * Provision an Azure Service Bus Namespace.
 * Start Visual Studio.
