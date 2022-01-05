@@ -72,7 +72,7 @@ You can either run this example locally from Visual Studio or you can run it by 
         
         You don't need to modify these settings for the Function App containing the "PriorityQueueConsumerHigh" Azure Function since the default setting is 200; this ensures that high priority messages are read from the queue more quickly than low priority messages.
 
-	* Now you need configure the managed identities role assignments:
+	* Now you need to configure the managed identities role assignments:
 
 			In the Azure portal, navigate to the Azure Service Bus Namespace that was provisioned in the first step.
 			Select Access Control (IAM). This is where you can view and configure who has access to the resource.
