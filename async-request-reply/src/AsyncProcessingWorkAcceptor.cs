@@ -24,7 +24,7 @@ namespace Contoso
             }
 
             string reqid = Guid.NewGuid().ToString();
-
+            
             string rqs = $"http://{Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME")}/api/RequestStatus/{reqid}";
 
             var messagePayload = JsonConvert.SerializeObject(customer);
