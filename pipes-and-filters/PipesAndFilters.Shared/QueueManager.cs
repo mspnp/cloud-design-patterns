@@ -8,15 +8,20 @@ namespace PipesAndFilters.Shared
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.ServiceBus;
-    using Microsoft.ServiceBus.Messaging;
+    using Azure;
+    using Azure.Messaging.ServiceBus;
+    using Azure.Messaging.ServiceBus.Administration;
 
     public class QueueManager
     {
         private readonly string queueName;
         private readonly string connectionString;
-        private QueueClient client;
+        private ServiceBusClient client;
+        private ServiceBusSender sender;
+        private ServiceBusProcessor processor;
         private ManualResetEvent pauseProcessingEvent;
+        private const int maxConcurrentCalls = 10;
+        private const int maxDeliveryCount = 3;
 
         public QueueManager(string queueName, string connectionString)
         {
@@ -25,64 +30,68 @@ namespace PipesAndFilters.Shared
             this.pauseProcessingEvent = new ManualResetEvent(true);
         }
 
-        public async Task SendMessageAsync(BrokeredMessage message)
+        public async Task SendMessageAsync(ServiceBusMessage message)
         {
-            await this.client.SendAsync(message);
+            await this.sender.SendMessageAsync(message);
         }
 
-        public void ReceiveMessages(Func<BrokeredMessage, Task> processMessageTask)
+        public void ReceiveMessages(Func<ServiceBusReceivedMessage, Task> processMessageTask)
         {
             // Setup the options for the message pump.
-            var options = new OnMessageOptions();
+            var options = new ServiceBusProcessorOptions();
 
             // When AutoComplete is disabled, you have to manually complete/abandon the messages and handle errors, if any.
-            options.AutoComplete = false;
-            options.MaxConcurrentCalls = 10;
-            options.ExceptionReceived += this.OptionsOnExceptionReceived;
+            options.AutoCompleteMessages = false;
+            options.MaxConcurrentCalls = maxConcurrentCalls;
 
+            this.processor = this.client.CreateProcessor(this.queueName, options);
             // Use of Service Bus OnMessage message pump. The OnMessage method must be called once, otherwise an exception will occur.
-            this.client.OnMessageAsync(
-                async (msg) =>
+            processor.ProcessMessageAsync +=
+                async args =>
                 {
+                    ServiceBusReceivedMessage message = args.Message;
+
                     // Will block the current thread if Stop is called.
                     this.pauseProcessingEvent.WaitOne();
 
                     // Execute processing task here
-                    await processMessageTask(msg);
-                },
-                options);
+                    await processMessageTask(message);
+                };
+            processor.ProcessErrorAsync += this.OptionsOnExceptionReceived;
+
+            processor.StartProcessingAsync();
         }
 
         public async Task Start()
         {
             // Check queue existence.
-            var manager = NamespaceManager.CreateFromConnectionString(this.connectionString);
-            if (!manager.QueueExists(this.queueName))
+            var adminClient = new ServiceBusAdministrationClient(this.connectionString);
+            if (!await adminClient.QueueExistsAsync(this.queueName))
             {
                 try
                 {
-                    var queueDescription = new QueueDescription(this.queueName);
+                    var queueDescription = new CreateQueueOptions(this.queueName);
 
                     // Set the maximum delivery count for messages. A message is automatically deadlettered after this number of deliveries.  Default value is 10.
-                    queueDescription.MaxDeliveryCount = 3;
+                    queueDescription.MaxDeliveryCount = maxDeliveryCount;
 
-                    await manager.CreateQueueAsync(queueDescription);
+                    await adminClient.CreateQueueAsync(queueDescription);
                 }
-                catch (MessagingEntityAlreadyExistsException)
+                catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists)
                 {
                     Trace.TraceWarning(
                         "MessagingEntityAlreadyExistsException Creating Queue - Queue likely already exists for path: {0}", this.queueName);
                 }
-                catch (MessagingException ex)
+                catch (ServiceBusException ex)
                 {
-                    var webException = ex.InnerException as WebException;
-                    if (webException != null)
+                    var requestFailedException = ex.InnerException as RequestFailedException;
+                    if (requestFailedException != null)
                     {
-                        var response = webException.Response as HttpWebResponse;
+                        var status = requestFailedException.Status;
 
                         // It's likely the conflicting operation being performed by the service bus is another queue create operation
                         // If we don't have a web response with status code 'Conflict' it's another exception
-                        if (response == null || response.StatusCode != HttpStatusCode.Conflict)
+                        if (status != (int)HttpStatusCode.Conflict)
                         {
                             throw;
                         }
@@ -93,7 +102,8 @@ namespace PipesAndFilters.Shared
             }
 
             // Create the queue client. By default, the PeekLock method is used.
-            this.client = QueueClient.CreateFromConnectionString(this.connectionString, this.queueName);
+            this.client = new ServiceBusClient(this.connectionString);
+            this.sender = client.CreateSender(this.queueName);
         }
         
         public async Task Stop(TimeSpan? waitTime)
@@ -108,7 +118,7 @@ namespace PipesAndFilters.Shared
                 Thread.Sleep(waitTime.Value);
             }
 
-            await this.client.CloseAsync();
+            await this.processor.StopProcessingAsync();
 
             await ServiceBusUtilities.DeleteQueueIfExistsAsync(this.connectionString, this.queueName);
         }
@@ -118,13 +128,11 @@ namespace PipesAndFilters.Shared
             await this.Stop(null);
         }
 
-        private void OptionsOnExceptionReceived(object sender, ExceptionReceivedEventArgs exceptionReceivedEventArgs)
+        Task OptionsOnExceptionReceived(ProcessErrorEventArgs args)
         {
-            //There is currently an issue in the Service Bus SDK that raises a null exception
-            if (exceptionReceivedEventArgs.Exception != null)
-            {
-                Trace.TraceError("Exception in QueueClient.ExceptionReceived: {0}", exceptionReceivedEventArgs.Exception.Message);
-            }
+            Trace.TraceError("An exception occurred during processing. Error source: {0}, Exception: {1}", args.ErrorSource, args.Exception.Message);
+
+            return Task.CompletedTask;
         }
     }
 }

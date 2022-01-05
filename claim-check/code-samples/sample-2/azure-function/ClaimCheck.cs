@@ -7,13 +7,14 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Microsoft.Azure.EventGrid;
-using Microsoft.Azure.EventGrid.Models;
+using Azure.Messaging.EventGrid;
+using Azure.Messaging.EventGrid.SystemEvents;
+using System.Net;
 
 namespace Microsoft.PnP.Messaging
 {
     public static class ClaimCheck
-    {    
+    {
         [FunctionName("ClaimCheck")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
@@ -22,12 +23,18 @@ namespace Microsoft.PnP.Messaging
             string requestContent = await new StreamReader(req.Body).ReadToEndAsync();
             log.LogInformation($"Received events: {requestContent}");
 
-            EventGridSubscriber eventGridSubscriber = new EventGridSubscriber();
-            EventGridEvent[] eventGridEvents = eventGridSubscriber.DeserializeEventGridEvents(requestContent);
+            if (requestContent.Length == 0)
+            {
+                return new BadRequestObjectResult("HttpRequest is empty");
+            }
+
+            EventGridEvent[] eventGridEvents = EventGridEvent.ParseMany(BinaryData.FromStream(req.Body));
 
             foreach (EventGridEvent eventGridEvent in eventGridEvents)
             {
-                switch (eventGridEvent.Data) {
+                eventGridEvent.TryGetSystemEventData(out object systemEvent);
+                switch (systemEvent)
+                {
                     case SubscriptionValidationEventData subscriptionValidation:
                         log.LogInformation($"Got SubscriptionValidation event data, validationCode: {subscriptionValidation.ValidationCode},  validationUrl: {subscriptionValidation.ValidationUrl}, topic: {eventGridEvent.Topic}");
                         // Do any additional validation (as required) such as validating that the Azure resource ID of the topic matches
@@ -44,7 +51,7 @@ namespace Microsoft.PnP.Messaging
                         return new BadRequestResult();
                 }
             }
-            
+
             return new OkResult();
         }
     }

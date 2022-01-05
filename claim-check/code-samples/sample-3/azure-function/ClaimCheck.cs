@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Microsoft.Azure.ServiceBus.Core;
-using ServiceBus.AttachmentPlugin;
 using System.Text;
 using Microsoft.Azure.ServiceBus;
 

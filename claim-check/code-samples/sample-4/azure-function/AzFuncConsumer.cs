@@ -1,15 +1,12 @@
+using Azure;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
-using System.Configuration;
 using System.IO;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using System.Text;
-using Azure.Storage.Blobs;
-using Azure;
-using Azure.Storage.Blobs.Models;
 
 namespace azure_function
 {
