@@ -63,13 +63,16 @@ You can either run this example locally from Visual Studio or you can run it by 
 
 			Replacing the placeholder with you Azure Service Bus Namespace name.
 
-	  - WEBSITE_MAX_DYNAMIC_APPLICATION_SCALE_OUT:
+	* Once the Functions are deployed you need to restrict the maximum number of instances your app service consumption can scale out to:
 
-	  		This setting specifies how many instances the functions on your app service consumption can scale out to.
-			For the "PriorityQueueConsumerLow" function set the remote value to 1
-			For the other functions set it explicitly to the default: 200 (This ensures that high priority messages are read from the queue more quickly than low priority messages).
+        * From the portal go to the Function App that contains the "PriorityQueueConsumerLow" Azure Function
+        * Navigate to Scale Out on the left menu
+        * On the App Scale Out dialog set the "Enforce Scale Out Limit" to "Yes"
+        * Set the Maximum Scale Out Limit to 1 instance
+        
+        You don't need to modify these settings for the Function App containing the "PriorityQueueConsumerHigh" Azure Function since the default setting is 200; this ensures that high priority messages are read from the queue more quickly than low priority messages.
 
-	* Once the Functions are deployed you can configure the managed identities role assignments:
+	* Now you need to configure the managed identities role assignments:
 
 			In the Azure portal, navigate to the Azure Service Bus Namespace that was provisioned in the first step.
 			Select Access Control (IAM). This is where you can view and configure who has access to the resource.
@@ -82,7 +85,7 @@ You can either run this example locally from Visual Studio or you can run it by 
 			Click "Select"
 			On the main dialog, click "Review + Assign"
 
-			For the Azure Conumer Function Apps, repeat the process but in this case use the role
+			For the Azure Consumer Function Apps, repeat the process but in this case use the role
 			"Azure Service Bus Data Reader"
 
 	* Once the Functions are deployed you can configure monitoring by following these steps:
@@ -95,7 +98,3 @@ You can either run this example locally from Visual Studio or you can run it by 
 		- Once refreshed you will see two tabs, "invocation" and "logs"
 		- From the invocations tab you can see the twenty most recent function invocation traces. For more advanced analysis, run the query in Application Insights. 
 		- From the logs tab you can see the logging information that your functions are sending.
-
-
-
-
