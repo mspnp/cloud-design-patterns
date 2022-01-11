@@ -28,7 +28,7 @@ namespace Contoso
             string rqs = $"http://{Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME")}/api/RequestStatus/{reqid}";
 
             var messagePayload = JsonConvert.SerializeObject(customer);
-            ServiceBusMessage m = new ServiceBusMessage(Encoding.UTF8.GetBytes(messagePayload));
+            ServiceBusMessage m = new ServiceBusMessage(messagePayload);
             m.ApplicationProperties["RequestGUID"] = reqid;
             m.ApplicationProperties["RequestSubmittedAt"] = DateTime.Now;
             m.ApplicationProperties["RequestStatusURL"] = rqs;

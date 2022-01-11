@@ -6,7 +6,8 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Blob;
+using Azure.Storage.Blobs.Specialized;
+using Azure.Storage.Sas;
 using System.Linq;
 
 namespace Contoso
@@ -16,7 +17,7 @@ namespace Contoso
         [FunctionName("AsyncOperationStatusChecker")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "RequestStatus/{thisGUID}")] HttpRequest req,
-            [Blob("data/{thisGuid}.blobdata", FileAccess.Read, Connection = "StorageConnectionAppSetting")] CloudBlockBlob inputBlob, string thisGUID,
+            [Blob("data/{thisGuid}.blobdata", FileAccess.Read, Connection = "StorageConnectionAppSetting")] BlockBlobClient inputBlob, string thisGUID,
             ILogger log)
         {
 
@@ -76,7 +77,7 @@ namespace Contoso
             }
         }
 
-        private static async Task<IActionResult> OnCompleted(OnCompleteEnum OnComplete, CloudBlockBlob inputBlob, string thisGUID)
+        private static async Task<IActionResult> OnCompleted(OnCompleteEnum OnComplete, BlockBlobClient inputBlob, string thisGUID)
         {
             switch (OnComplete)
             {
@@ -84,14 +85,14 @@ namespace Contoso
                     {
                         // Redirect to the SAS URI to blob storage
                        
-                        return (ActionResult)new RedirectResult(inputBlob.GenerateSASURI());
+                        return (ActionResult)new RedirectResult(inputBlob.GenerateSasUri(new BlobSasBuilder()).ToString());
                     }
 
                 case OnCompleteEnum.Stream:
                     {
                         // Download the file and return it directly to the caller.
                         // For larger files, use a stream to minimize RAM usage.
-                        return (ActionResult)new OkObjectResult(await inputBlob.DownloadTextAsync());
+                        return (ActionResult)new OkObjectResult(await inputBlob.DownloadContentAsync());
                     }
 
                 default:
