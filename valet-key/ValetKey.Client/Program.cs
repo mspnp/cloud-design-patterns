@@ -1,10 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.===
-namespace ValetKey.Client
+﻿namespace ValetKey.Client
 {
     using Azure.Storage.Blobs;
+    using Microsoft.Extensions.Configuration;
     using System;
-    using System.Configuration;
     using System.IO;
     using System.Net;
     using System.Runtime.Serialization.Json;
@@ -17,8 +15,11 @@ namespace ValetKey.Client
             Console.WriteLine("Press any key to run sample...");
             Console.ReadKey();
 
-            // Make sure the endpoint matches with the web role's endpoint.
-            var tokenServiceEndpoint = ConfigurationManager.AppSettings["serviceEndpointUrl"];
+            IConfiguration configuration = new ConfigurationBuilder()
+                                    .AddJsonFile("appsettings.json").Build();
+
+            // Make sure the endpoint matches with the web apis's endpoint.
+            var tokenServiceEndpoint = configuration.GetSection("AppSettings:ServiceEndpointUrl").Value;
 
             try
             {
@@ -39,7 +40,7 @@ namespace ValetKey.Client
             {
                 Console.WriteLine(ex.Message);
             }
-            
+
             Console.WriteLine();
             Console.WriteLine("Done. Press any key to exit...");
             Console.ReadKey();
@@ -49,7 +50,6 @@ namespace ValetKey.Client
         {
             var request = HttpWebRequest.Create(blobUri);
             var response = await request.GetResponseAsync();
-            var responseString = string.Empty;
 
             var serializer = new DataContractJsonSerializer(typeof(StorageEntitySas));
             var blobSas = (StorageEntitySas)serializer.ReadObject(response.GetResponseStream());

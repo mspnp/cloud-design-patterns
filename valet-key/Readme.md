@@ -4,9 +4,9 @@ This document describes the Valet Key Pattern example from the guide [Cloud Desi
 
 ## System Requirements
 
-* Microsoft .NET Framework version 4.5
-* Microsoft Visual Studio 2015 Community, Enterprise, or Professional
-* Windows Azure SDK for .NET version 2.9
+* Microsoft .NET Framework 5
+* Microsoft Visual Studio 2019 or Later
+* Windows Azure SDK for .NET 2020 or later
 
 ## Before you start
 

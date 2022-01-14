@@ -1,32 +1,33 @@
-﻿
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-namespace ValetKey.Api.Controllers
-{
-    using System;
-    using System.Configuration;
-    using System.Diagnostics;
-    using System.Net;
-    using System.Net.Http;
-    using System.Web.Http;
-    using Azure.Storage;
-    using Azure.Storage.Blobs;
-    using Azure.Storage.Sas;
-    using Microsoft.Azure;
+﻿using Azure.Storage;
+using Azure.Storage.Blobs;
+using Azure.Storage.Sas;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using System;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Http;
 
-    public class ValuesController : ApiController
+namespace WebApplication1.Controllers
+{
+    [ApiController]
+    public class ValuesController : ControllerBase
     {
         private readonly BlobServiceClient blobServiceClient;
         private readonly string blobContainer;
+        private IConfiguration configuration;
 
-        public ValuesController()
+
+        public ValuesController(IConfiguration configuration)
         {
-            this.blobServiceClient = new BlobServiceClient(CloudConfigurationManager.GetSetting("Storage"));
-            this.blobContainer = ConfigurationManager.AppSettings["ContainerName"];
+            this.configuration = configuration;
+            this.blobServiceClient = new BlobServiceClient(configuration.GetSection("AppSettings:StorageConnectionString").Value);
+            this.blobContainer = configuration.GetSection("AppSettings:ContainerName").Value;
         }
 
-        // GET api/Values
-        public StorageEntitySas Get()
+        [HttpGet("Api/Values")]
+        public string Get()
         {
             try
             {
@@ -36,12 +37,12 @@ namespace ValetKey.Api.Controllers
                 var blobSas = this.GetSharedAccessReferenceForUpload(blobName.ToString());
                 Trace.WriteLine(string.Format("Blob Uri: {0} - Shared Access Signature: {1}", blobSas.BlobUri, blobSas.Credentials));
 
-                return blobSas;
+                return JsonConvert.SerializeObject(blobSas);
             }
             catch (Exception ex)
             {
                 Trace.TraceError(ex.Message);
-                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                throw new System.Web.Http.HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError)
                 {
                     Content = new StringContent("An error has ocurred"),
                     ReasonPhrase = "Critical Exception"
@@ -56,7 +57,7 @@ namespace ValetKey.Api.Controllers
         {
             var blob = blobServiceClient.GetBlobContainerClient(this.blobContainer).GetBlobClient(blobName);
 
-            var storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, ConfigurationManager.AppSettings["AzureStorageEmulatorAccountKey"]);
+            var storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, this.configuration.GetSection("AppSettings:StorageKey").Value);
 
             var blobSasBuilder = new BlobSasBuilder
 
@@ -81,5 +82,6 @@ namespace ValetKey.Api.Controllers
             public string Credentials;
             public Uri BlobUri;
         }
+
     }
 }
