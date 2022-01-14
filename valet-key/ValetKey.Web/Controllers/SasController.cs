@@ -9,24 +9,24 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 
-namespace WebApplication1.Controllers
+namespace ValetKey.Web.Controllers
 {
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class SasController : ControllerBase
     {
         private readonly BlobServiceClient blobServiceClient;
         private readonly string blobContainer;
         private IConfiguration configuration;
 
 
-        public ValuesController(IConfiguration configuration)
+        public SasController(IConfiguration configuration)
         {
             this.configuration = configuration;
             this.blobServiceClient = new BlobServiceClient(configuration.GetSection("AppSettings:StorageConnectionString").Value);
             this.blobContainer = configuration.GetSection("AppSettings:ContainerName").Value;
         }
 
-        [HttpGet("Api/Values")]
+        [HttpGet("Api/Sas")]
         public string Get()
         {
             try

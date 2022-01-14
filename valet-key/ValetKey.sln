@@ -8,9 +8,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Readme.md = Readme.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValetKey.Web", "WebApplication1\ValetKey.Web.csproj", "{F63293C3-A51B-49BB-89A2-1C261EEA7673}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValetKey.Client", "ValetKey.Client\ValetKey.Client.csproj", "{B6C84A81-B6DB-4A17-AEFA-ADCD52AFFE07}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValetKey.Web", "ValetKey.Web\ValetKey.Web.csproj", "{849EBFD2-001F-4F59-9DE9-1429499ADACD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,14 +18,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F63293C3-A51B-49BB-89A2-1C261EEA7673}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F63293C3-A51B-49BB-89A2-1C261EEA7673}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F63293C3-A51B-49BB-89A2-1C261EEA7673}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F63293C3-A51B-49BB-89A2-1C261EEA7673}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B6C84A81-B6DB-4A17-AEFA-ADCD52AFFE07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B6C84A81-B6DB-4A17-AEFA-ADCD52AFFE07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6C84A81-B6DB-4A17-AEFA-ADCD52AFFE07}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6C84A81-B6DB-4A17-AEFA-ADCD52AFFE07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{849EBFD2-001F-4F59-9DE9-1429499ADACD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{849EBFD2-001F-4F59-9DE9-1429499ADACD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{849EBFD2-001F-4F59-9DE9-1429499ADACD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{849EBFD2-001F-4F59-9DE9-1429499ADACD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
