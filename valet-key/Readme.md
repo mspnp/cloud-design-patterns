@@ -6,7 +6,7 @@ This document describes the Valet Key Pattern example from the guide [Cloud Desi
 
 * Microsoft .NET Framework 5
 * Microsoft Visual Studio 2019 or Later
-* Windows Azure SDK for .NET release 2021
+* Azure SDK for .NET release 2021
 
 ## Before you start
 
@@ -20,24 +20,31 @@ This example shows how a client application can obtain a shared access signature
 
 ## Running the Example
 
-You can run this example locally in the Visual Studio Windows Azure emulator. You can also run this example by deploying it to a Windows Azure App Service.
+You can run this locally or deploy it to Azure.
 
 If you want to run this example locally
 
-* Start Visual Studio, set the ValetKet.Web project as startup
+* Start Visual Studio
+* Set the ValetKet.Web project as startup
 * Edit the appsettings.json and provide values for these settings:
 
-	1 - StorageConnectionString
-	2 - StorageKey
+	1 - ContainerEndpoint
 
-	You should be able to get these values from the Azure Portal; go to the storage account, and from the
-	left menu, in the Security + networking section, select the option "Access Keys".
-	In the "Access Keys" dialog, click on "show keys"; you will be able to see and copy the key and the connection string.
+		The Blob container endpoint URL; it should be composed this way (being 'valetkeysample' your container name):
+		
+		https://<AStorageccountName>.blob.core.windows.net/valetkeysample
 
-* Hit F5 to run the Web Api
-* Start a new instance of the ValetKey.Client project to upload the blob. Right-click the project, select Debug, and click Start new instance.
+	2 - ClientId
 
-* If you want to run the example on Windows Azure, provision a Windows Azure App Service and deploy the application to it from Visual Studio.
+		In this sample you use a user-assigned managed identity, this is the managed ideentity's clientId to be specified when creating the ManagedIdentityCredential in cdoe
+		
+
+* Start a new instance of the Web API project, ValetKey.Web.
+* Once the Web API is running start a new instance of the ValetKey.Client project, the client.
+
+If you want to run the example on Azure
+
+* provision an Azure App Service and deploy the application to it from Visual Studio.
 * Right click on the ValetKey.Web project, select publish.
 * Select Azure as target and Azure App Service as specific target.
 * Select an app service instance or create a new one.
@@ -46,13 +53,19 @@ If you want to run this example locally
 * Select "Manage Azure App Service Settings"
 * Add these three settings:
 
-	1 - ContainerName (set the remote value to 'valetkeysample')
-	2 - StorageConnectionString
-	3 - StorageKey
+	1 - ContainerName
 
-	You should be able to get thes Azure Storage connection string and key values from the Azure Portal; go to the storage account, and from the
-	left menu, in the Security + networking section, select the option "Access Keys".
-	In the "Access Keys" dialog, click on "show keys"; you will be able to see and copy the key and the connection string.
+		Set the remote value to 'valetkeysample'
+
+	2 - ContainerEndpoint
+
+		This is the Blob container endpoint URL; it should be composed this way (being 'valetkeysample' your container name):
+
+		https://<AStorageccountName>.blob.core.windows.net/valetkeysample
+
+	3 - ClientId
+
+		In this sample you use a user-assigned managed identity, this is the managed ideentity's clientId to be specified when creating the ManagedIdentityCredential in cdoe
 
 * Run the App Service instance and note the base URL of the web api shown in the browser address bar.
 * Open the file appsettings.json from the ValetKey.Client project and change the setting for ServiceEndpointUrl to   [your-URL]**/api/sas/**
