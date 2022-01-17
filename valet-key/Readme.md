@@ -22,56 +22,57 @@ This example shows how a client application can obtain a shared access signature
 
 You can run this locally or deploy it to Azure.
 
-If you want to run this example locally
+If you want to run this example locally, follow these steps:
 
-* Start Visual Studio
-* Set the ValetKet.Web project as startup
-* Edit the appsettings.json and provide values for these settings:
+1 - Start Visual Studio
+2 - Set the ValetKet.Web project as startup
+3 - Edit the appsettings.json and provide values for these settings:
 
-	1 - ContainerEndpoint
+	ContainerEndpoint
 
 		The Blob container endpoint URL; it should be composed this way (being 'valetkeysample' your container name):
 		
 		https://<AStorageccountName>.blob.core.windows.net/valetkeysample
 
-	2 - ClientId
+	ClientId
 
 		In this sample you use a user-assigned managed identity, this is the managed ideentity's clientId to be specified when creating the ManagedIdentityCredential in cdoe
 		
 
-* Start a new instance of the Web API project, ValetKey.Web.
-* Once the Web API is running start a new instance of the ValetKey.Client project, the client.
+4 - Start a new instance of the Web API project, ValetKey.Web.
+5 - Once the Web API is running start a new instance of the ValetKey.Client project, the client.
 
-If you want to run the example on Azure
+If you want to run the example on Azure, follow these steps:
 
-* provision an Azure App Service and deploy the application to it from Visual Studio.
-* Right click on the ValetKey.Web project, select publish.
-* Select Azure as target and Azure App Service as specific target.
-* Select an app service instance or create a new one.
-* Skip the Api Management step.
-* Once the publish profile is created, in the Hosting section click on the "..." button in the upper right corner.
-* Select "Manage Azure App Service Settings"
-* Add these three settings:
+1 - provision an Azure App Service and deploy the application to it from Visual Studio.
+2 - Right click on the ValetKey.Web project, select publish.
+3 - Select Azure as target and Azure App Service as specific target.
+4 - Select an app service instance or create a new one.
+5 - Skip the Api Management step.
+6 - Once the publish profile is created, in the Hosting section click on the "..." button in the upper right corner.
+7 - Select "Manage Azure App Service Settings"
+8 - Add these three settings:
 
-	1 - ContainerName
+	ContainerName
 
 		Set the remote value to 'valetkeysample'
 
-	2 - ContainerEndpoint
+	ContainerEndpoint
 
 		This is the Blob container endpoint URL; it should be composed this way (being 'valetkeysample' your container name):
 
 		https://<AStorageccountName>.blob.core.windows.net/valetkeysample
 
-	3 - ClientId
+	ClientId
 
 		In this sample you use a user-assigned managed identity, this is the managed ideentity's clientId to be specified when creating the ManagedIdentityCredential in cdoe
 
-* Run the App Service instance and note the base URL of the web api shown in the browser address bar.
-* Open the file appsettings.json from the ValetKey.Client project and change the setting for ServiceEndpointUrl to   [your-URL]**/api/sas/**
+9 - Run the App Service instance and note the base URL of the web api shown in the browser address bar.
+10 - Open the file appsettings.json from the ValetKey.Client project and change the setting for ServiceEndpointUrl to   [your-URL]**/api/sas/**
 	* By default this is set to **http://localhost:10194/api/sas** which set up to run locally.
 
-* You can verify that the blob has been sucessfully uploaded by using the Azure Portal.
-* Go to your Storage Account, from left menu select "container"
-* Click on the container named "valetkeysample"
-* You should be able to see the list of uploaded blobs.
+You can verify that the blob has been sucessfully uploaded by using the Azure Portal:
+
+1 - Go to your Storage Account, from left menu select "container"
+2 - Click on the container named "valetkeysample"
+3 - You should be able to see the list of uploaded blobs.
