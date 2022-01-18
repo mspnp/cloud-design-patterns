@@ -68,16 +68,8 @@ namespace ValetKey.Web.Controllers
         /// </summary>
         private async Task<StorageEntitySas> GetSharedAccessReferenceForUpload(string blobName)
         {
-
-            var x = new DefaultAzureCredentialOptions();
-            x.ExcludeSharedTokenCacheCredential = true;
-            x.ExcludeVisualStudioCodeCredential = true;
-            x.ExcludeEnvironmentCredential = true;
-            x.ExcludeInteractiveBrowserCredential = true;
-            x.ExcludeVisualStudioCredential = true;
-    
             BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobEndpoint),
-                                                    new DefaultAzureCredential(x));
+                                                    new DefaultAzureCredential());
 
             var blobContainerClient = blobServiceClient.GetBlobContainerClient(this.blobContainer);
             var blobClient = blobContainerClient.GetBlobClient(blobName);
