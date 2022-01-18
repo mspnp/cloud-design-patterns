@@ -2,6 +2,7 @@
 using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -19,7 +20,7 @@ namespace ValetKey.Web.Controllers
     {
         private readonly string blobContainer;
         private readonly string blobContainerEndpoint;
-        private readonly string managedIdentityId;
+        private readonly string blobEndpoint;
         private IConfiguration configuration;
 
 
@@ -28,7 +29,7 @@ namespace ValetKey.Web.Controllers
             this.configuration = configuration;
             this.blobContainer = configuration.GetSection("AppSettings:ContainerName").Value;
             this.blobContainerEndpoint = configuration.GetSection("AppSettings:ContainerEndpoint").Value;
-            this.managedIdentityId = configuration.GetSection("AppSettings:ClientId").Value;
+            this.blobEndpoint = configuration.GetSection("AppSettings:BlobEndpoint").Value;
         }
 
         [HttpGet("Api/Sas")]
@@ -60,33 +61,49 @@ namespace ValetKey.Web.Controllers
         /// </summary>
         private async Task<StorageEntitySas> GetSharedAccessReferenceForUpload(string blobName)
         {
-            BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobContainerEndpoint),
-                                                new ManagedIdentityCredential(this.managedIdentityId));
+            BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobEndpoint),
+                                                    new DefaultAzureCredential());
 
-            var blobContainerClient = blobServiceClient.GetBlobContainerClient(this.blobContainer).GetBlobClient(blobName);
+            var blobContainerClient = blobServiceClient.GetBlobContainerClient(this.blobContainer);
+            var blobClient = blobContainerClient.GetBlobClient(blobName);
 
-            UserDelegationKey key = await blobServiceClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow,
+            BlobServiceClient blobServiceClient2 = blobContainerClient.GetParentBlobServiceClient();
+
+            try
+            {
+                UserDelegationKey key = await blobServiceClient2.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow,
                                                                                DateTimeOffset.UtcNow.AddDays(7));
 
-            var blobSasBuilder = new BlobSasBuilder
+                var blobSasBuilder = new BlobSasBuilder
+                {
+                    BlobContainerName = this.blobContainer,
+                    BlobName = blobName,
+                    Resource = "b",
+                    StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
+                    ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(5)
+                };
+                blobSasBuilder.SetPermissions(BlobSasPermissions.Write);
+
+                StorageSharedKeyCredential storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, key.Value);
+
+                string sas = blobSasBuilder.ToSasQueryParameters(storageSharedKeyCredential).ToString();
+
+                return new StorageEntitySas
+                {
+                    BlobUri = blobContainerClient.Uri,
+                    Credentials = sas
+                };
+
+            }
+            catch (Exception exc)
             {
-                BlobContainerName = this.blobContainer,
-                BlobName = blobName,
-                Resource = "b",
-                StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
-                ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(5)
-            };
-            blobSasBuilder.SetPermissions(BlobSasPermissions.Write);
-
-            StorageSharedKeyCredential storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, key.Value);
-
-            string sas = blobSasBuilder.ToSasQueryParameters(storageSharedKeyCredential).ToString();
-
-            return new StorageEntitySas
-            {
-                BlobUri = blobContainerClient.Uri,
-                Credentials = sas
-            };
+                exc.ToString();
+                return new StorageEntitySas
+                {
+                    BlobUri = blobContainerClient.Uri,
+                    Credentials = ""
+                };
+            }
         }
         public struct StorageEntitySas
         {
