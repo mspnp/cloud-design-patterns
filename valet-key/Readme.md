@@ -26,19 +26,7 @@ If you want to run this example locally, follow these steps:
 
 1 - Start Visual Studio
 2 - Set the ValetKet.Web project as startup
-3 - Edit the appsettings.json and provide values for these settings:
-
-	ContainerEndpoint
-
-		The Blob container endpoint URL; it should be composed this way (being 'valetkeysample' your container name):
-		
-		https://<AStorageccountName>.blob.core.windows.net/valetkeysample
-
-	ClientId
-
-		In this sample you use a user-assigned managed identity, this is the managed ideentity's clientId to be specified when creating the ManagedIdentityCredential in cdoe
-		
-
+3 - Edit the appsettings.json and replace the placeholder "<StorageccountName>" with the name of your sorage account; in the settings "ContainerEndpoint" and "BlobEndpoint".
 4 - Start a new instance of the Web API project, ValetKey.Web.
 5 - Once the Web API is running start a new instance of the ValetKey.Client project, the client.
 
@@ -61,11 +49,13 @@ If you want to run the example on Azure, follow these steps:
 
 		This is the Blob container endpoint URL; it should be composed this way (being 'valetkeysample' your container name):
 
-		https://<AStorageccountName>.blob.core.windows.net/valetkeysample
+		https://<Your Storage Account Name>.blob.core.windows.net/valetkeysample
 
-	ClientId
+	BlobEndpoint
 
-		In this sample you use a user-assigned managed identity, this is the managed ideentity's clientId to be specified when creating the ManagedIdentityCredential in cdoe
+		This is the Blob endpoint URL; it should be composed this way (being 'valetkeysample' your container name):
+
+		https://<Your Storage Account Name>.blob.core.windows.net
 
 9 - Run the App Service instance and note the base URL of the web api shown in the browser address bar.
 10 - Open the file appsettings.json from the ValetKey.Client project and change the setting for ServiceEndpointUrl to   [your-URL]**/api/sas/**

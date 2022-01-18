@@ -1,5 +1,6 @@
 ﻿namespace ValetKey.Client
 {
+    using Azure;
     using Azure.Storage.Blobs;
     using Microsoft.Extensions.Configuration;
     using System;
@@ -21,14 +22,13 @@
             // Make sure the endpoint matches with the web apis's endpoint.
             var tokenServiceEndpoint = configuration.GetSection("AppSettings:ServiceEndpointUrl").Value;
 
+            var blobSas = GetBlobSas(new Uri(tokenServiceEndpoint)).Result;
+            UriBuilder sasUri = new UriBuilder(blobSas.BlobUri);
+            sasUri.Query = blobSas.Credentials;
+
+            var blob = new BlobClient(sasUri.Uri);
             try
             {
-                var blobSas = GetBlobSas(new Uri(tokenServiceEndpoint)).Result;
-                UriBuilder sasUri = new UriBuilder(blobSas.BlobUri);
-                sasUri.Query = blobSas.Credentials;
-
-                var blob = new BlobClient(sasUri.Uri);
-
                 using (var stream = GetFileToUpload(10))
                 {
                     blob.Upload(stream);
@@ -36,9 +36,21 @@
 
                 Console.WriteLine("Blob uploaded successful: {0}", blob.Name);
             }
-            catch (Exception ex)
+            catch (RequestFailedException e)
             {
-                Console.WriteLine(ex.Message);
+                // Check for a 403 (Forbidden) error. If the SAS is invalid, 
+                // Azure Storage returns this error.
+                if (e.Status == 403)
+                {
+                    Console.WriteLine("Read operation failed for SAS {0}", sasUri);
+                    Console.WriteLine("Additional error information: " + e.Message);
+                    Console.WriteLine();
+                }
+                else
+                {
+                    Console.WriteLine(e.Message);
+                    throw;
+                }
             }
 
             Console.WriteLine();
