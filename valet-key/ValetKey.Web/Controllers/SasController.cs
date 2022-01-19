@@ -30,9 +30,8 @@ namespace ValetKey.Web.Controllers
         public SasController(IConfiguration configuration)
         {
             this.configuration = configuration;
-            this.blobContainer = configuration.GetSection("AppSettings:ContainerName").Value;
             this.blobEndpoint = configuration.GetSection("AppSettings:BlobEndpoint").Value;
-            this.blobContainerEndpoint = $"https://{this.blobEndpoint}/{this.blobContainer}";
+            this.blobContainerEndpoint = $"{this.blobEndpoint}/{this.blobContainer}";
         }
 
         // This route would typically require authorization

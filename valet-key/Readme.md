@@ -61,7 +61,7 @@ If you want to run the example on Azure, follow these steps:
 10 - Open the file appsettings.json from the ValetKey.Client project and change the setting for ServiceEndpointUrl to   [your-URL]**/api/sas/**
 	* By default this is set to **http://localhost:10194/api/sas** which set up to run locally.
 
-You can verify that the blob has been sucessfully uploaded by using the Azure Portal:
+You can verify that the blob has been successfully uploaded by using the Azure portal or Azure Storage Explorer:
 
 1 - Go to your Storage Account, from left menu select "container"
 2 - Click on the container named "valetkeysample"
