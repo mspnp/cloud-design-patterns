@@ -1,10 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.===
-namespace ValetKey.Client
+﻿namespace ValetKey.Client
 {
+    using Azure;
     using Azure.Storage.Blobs;
+    using Microsoft.Extensions.Configuration;
     using System;
-    using System.Configuration;
     using System.IO;
     using System.Net;
     using System.Runtime.Serialization.Json;
@@ -17,17 +16,19 @@ namespace ValetKey.Client
             Console.WriteLine("Press any key to run sample...");
             Console.ReadKey();
 
-            // Make sure the endpoint matches with the web role's endpoint.
-            var tokenServiceEndpoint = ConfigurationManager.AppSettings["serviceEndpointUrl"];
+            IConfiguration configuration = new ConfigurationBuilder()
+                                    .AddJsonFile("appsettings.json").Build();
 
+            // Make sure the endpoint matches with the web apis's endpoint.
+            var tokenServiceEndpoint = configuration.GetSection("AppSettings:ServiceEndpointUrl").Value;
+
+            var blobSas = GetBlobSas(new Uri(tokenServiceEndpoint)).Result;
+            UriBuilder sasUri = new UriBuilder(blobSas.BlobUri);
+            sasUri.Query = blobSas.Credentials;
+
+            var blob = new BlobClient(sasUri.Uri);
             try
             {
-                var blobSas = GetBlobSas(new Uri(tokenServiceEndpoint)).Result;
-                UriBuilder sasUri = new UriBuilder(blobSas.BlobUri);
-                sasUri.Query = blobSas.Credentials;
-
-                var blob = new BlobClient(sasUri.Uri);
-
                 using (var stream = GetFileToUpload(10))
                 {
                     blob.Upload(stream);
@@ -35,11 +36,23 @@ namespace ValetKey.Client
 
                 Console.WriteLine("Blob uploaded successful: {0}", blob.Name);
             }
-            catch (Exception ex)
+            catch (RequestFailedException e)
             {
-                Console.WriteLine(ex.Message);
+                // Check for a 403 (Forbidden) error. If the SAS is invalid, 
+                // Azure Storage returns this error.
+                if (e.Status == 403)
+                {
+                    Console.WriteLine("Read operation failed for SAS {0}", sasUri);
+                    Console.WriteLine("Additional error information: " + e.Message);
+                    Console.WriteLine();
+                }
+                else
+                {
+                    Console.WriteLine(e.Message);
+                    throw;
+                }
             }
-            
+
             Console.WriteLine();
             Console.WriteLine("Done. Press any key to exit...");
             Console.ReadKey();
@@ -49,7 +62,6 @@ namespace ValetKey.Client
         {
             var request = HttpWebRequest.Create(blobUri);
             var response = await request.GetResponseAsync();
-            var responseString = string.Empty;
 
             var serializer = new DataContractJsonSerializer(typeof(StorageEntitySas));
             var blobSas = (StorageEntitySas)serializer.ReadObject(response.GetResponseStream());
