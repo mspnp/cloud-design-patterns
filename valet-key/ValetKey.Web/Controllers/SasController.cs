@@ -30,7 +30,7 @@ namespace ValetKey.Web.Controllers
         public SasController(IConfiguration configuration)
         {
             this.configuration = configuration;
-            this.blobEndpoint = configuration.GetSection("AppSettings:BlobEndpoint").Value;
+            this.blobEndpoint = this.configuration.GetSection("AppSettings:BlobEndpoint").Value;
             this.blobContainerEndpoint = $"{this.blobEndpoint}/{this.blobContainer}";
         }
 
