@@ -21,7 +21,7 @@ namespace ValetKey.Web.Controllers
     [ApiController]
     public class SasController : ControllerBase
     {
-        private readonly string blobContainer;
+        private readonly string blobContainer = "valetkeysample";
         private readonly string blobContainerEndpoint;
         private readonly string blobEndpoint;
         private IConfiguration configuration;
@@ -31,8 +31,8 @@ namespace ValetKey.Web.Controllers
         {
             this.configuration = configuration;
             this.blobContainer = configuration.GetSection("AppSettings:ContainerName").Value;
-            this.blobContainerEndpoint = configuration.GetSection("AppSettings:ContainerEndpoint").Value;
             this.blobEndpoint = configuration.GetSection("AppSettings:BlobEndpoint").Value;
+            this.blobContainerEndpoint = $"https://{this.blobEndpoint}/{this.blobContainer}";
         }
 
         [HttpGet("Api/Sas")]
