@@ -35,7 +35,8 @@ namespace ValetKey.Web.Controllers
             this.blobEndpoint = configuration.GetSection("AppSettings:BlobEndpoint").Value;
         }
 
-        [HttpGet("Api/Sas")]
+        // This route would typically require authorization
+        [HttpGet("api/sas")]
         public async Task<string> Get()
         {
             try
