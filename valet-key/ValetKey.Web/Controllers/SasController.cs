@@ -22,16 +22,13 @@ namespace ValetKey.Web.Controllers
     public class SasController : ControllerBase
     {
         private readonly string blobContainer = "valetkeysample";
-        private readonly string blobContainerEndpoint;
         private readonly string blobEndpoint;
-        private IConfiguration configuration;
-
+        private readonly IConfiguration configuration;
 
         public SasController(IConfiguration configuration)
         {
             this.configuration = configuration;
             this.blobEndpoint = this.configuration.GetSection("AppSettings:BlobEndpoint").Value;
-            this.blobContainerEndpoint = $"{this.blobEndpoint}/{this.blobContainer}";
         }
 
         // This route would typically require authorization
@@ -68,16 +65,16 @@ namespace ValetKey.Web.Controllers
         /// </summary>
         private async Task<StorageEntitySas> GetSharedAccessReferenceForUpload(string blobName)
         {
-            BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobEndpoint),
+            var blobServiceClient = new BlobServiceClient(new Uri(blobEndpoint),
                                                     new DefaultAzureCredential());
 
             var blobContainerClient = blobServiceClient.GetBlobContainerClient(this.blobContainer);
             var blobClient = blobContainerClient.GetBlobClient(blobName);
 
-            BlobServiceClient parentBlobServiceClient = blobContainerClient.GetParentBlobServiceClient();
+            var parentBlobServiceClient = blobContainerClient.GetParentBlobServiceClient();
 
-                UserDelegationKey key = await parentBlobServiceClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow,
-                                                                               DateTimeOffset.UtcNow.AddDays(7));
+            UserDelegationKey key = await parentBlobServiceClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow,
+                                                                           DateTimeOffset.UtcNow.AddDays(7));
 
             var blobSasBuilder = new BlobSasBuilder
             {
@@ -89,17 +86,17 @@ namespace ValetKey.Web.Controllers
             };
             blobSasBuilder.SetPermissions(BlobSasPermissions.Write);
 
-            StorageSharedKeyCredential storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, key.Value);
+            var storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, key.Value);
 
-            string sas = blobSasBuilder.ToSasQueryParameters(storageSharedKeyCredential).ToString();
+            var sas = blobSasBuilder.ToSasQueryParameters(storageSharedKeyCredential).ToString();
 
             return new StorageEntitySas
             {
                 BlobUri = blobClient.Uri,
                 Credentials = sas
             };
-
         }
+
         public struct StorageEntitySas
         {
             public string Credentials;
