@@ -20,7 +20,7 @@ This example shows how a client application can obtain a shared access signature
 
 ## Running the Example
 
-You can run this locally or deploy it to Azure.
+You can either run this example locally or deploy it to Azure.
 
 If you want to run this example locally, follow these steps:
 
@@ -32,32 +32,22 @@ If you want to run this example locally, follow these steps:
 
 If you want to run the example on Azure, follow these steps:
 
-1 - provision an Azure App Service and deploy the application to it from Visual Studio.
-2 - Right click on the ValetKey.Web project, select publish.
-3 - Select Azure as target and Azure App Service as specific target.
-4 - Select an app service instance or create a new one.
-5 - Skip the Api Management step.
-6 - Once the publish profile is created, in the Hosting section click on the "..." button in the upper right corner.
-7 - Select "Manage Azure App Service Settings"
-8 - Add these three settings:
-
-	ContainerName
-
-		Set the remote value to 'valetkeysample'
-
-	ContainerEndpoint
-
-		This is the Blob container endpoint URL; it should be composed this way (being 'valetkeysample' your container name):
-
-		https://<Your Storage Account Name>.blob.core.windows.net/valetkeysample
+1  - provision an Azure App Service and deploy the application to it from Visual Studio.
+2  - Right click on the ValetKey.Web project, select publish.
+3  - Select Azure as target and Azure App Service as specific target.
+4  - Select an app service instance or create a new one.
+5  - Skip the Api Management step.
+6  - Once the publish profile is created, in the Hosting section click on the "..." button in the upper right corner.
+7  - Select "Manage Azure App Service Settings"
+8  - Add this application setting and set its remote value:
 
 	BlobEndpoint
 
-		This is the Blob endpoint URL; it should be composed this way (being 'valetkeysample' your container name):
+		This is the Blob endpoint URL; replace the placeholder with your storage account:
 
 		https://<Your Storage Account Name>.blob.core.windows.net
 
-9 - Run the App Service instance and note the base URL of the web api shown in the browser address bar.
+9  - Run the App Service instance and note the base URL of the web api shown in the browser address bar.
 10 - Open the file appsettings.json from the ValetKey.Client project and change the setting for ServiceEndpointUrl to   [your-URL]**/api/sas/**
 	* By default this is set to **http://localhost:10194/api/sas** which set up to run locally.
 
