@@ -85,7 +85,7 @@ namespace Contoso
                     {
                         // Redirect to the SAS URI to blob storage
                        
-                        return (ActionResult)new RedirectResult(inputBlob.GenerateSasUri(new BlobSasBuilder()).ToString());
+                        return (ActionResult)new RedirectResult(inputBlob.GenerateSASURI());
                     }
 
                 case OnCompleteEnum.Stream:
