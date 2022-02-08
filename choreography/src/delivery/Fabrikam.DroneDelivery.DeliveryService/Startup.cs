@@ -3,6 +3,9 @@
 //  Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
 // ------------------------------------------------------------
 
+using Fabrikam.DroneDelivery.DeliveryService.Middlewares.Builder;
+using Fabrikam.DroneDelivery.DeliveryService.Models;
+using Fabrikam.DroneDelivery.DeliveryService.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -10,10 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Swashbuckle.AspNetCore.Swagger;
-using Fabrikam.DroneDelivery.DeliveryService.Models;
-using Fabrikam.DroneDelivery.DeliveryService.Services;
-using Fabrikam.DroneDelivery.DeliveryService.Middlewares.Builder;
 using Serilog;
 using Serilog.Formatting.Compact;
 
@@ -52,12 +51,6 @@ namespace Fabrikam.DroneDelivery.DeliveryService
 
             // Add framework services.
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
-            // Register the Swagger generator, defining one or more Swagger documents
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "Fabrikam DroneDelivery DeliveryService API", Version = "v1" });
-            });
 
             services.AddSingleton<IDeliveryRepository, DeliveryRepository>();
             services.AddSingleton<INotifyMeRequestRepository, NotifyMeRequestRepository>();
