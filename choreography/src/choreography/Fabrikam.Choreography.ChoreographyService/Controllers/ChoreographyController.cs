@@ -13,7 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 using Azure.Messaging.EventGrid;
 using Azure.Messaging.EventGrid.SystemEvents;
 using Microsoft.Extensions.Logging;
-
+using Newtonsoft.Json.Schema.Generation;
+using Newtonsoft.Json.Schema;
+using Newtonsoft.Json.Linq;
 
 namespace Fabrikam.Choreography.ChoreographyService.Controllers
 {
@@ -40,7 +42,7 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
             this.deliveryServiceCaller = deliveryServiceCaller;
             this.eventRepository = eventRepository;
             this.logger = logger;
-           
+
         }
 
         [HttpPost]
@@ -56,46 +58,46 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
                 logger.LogError("event is Null");
                 return BadRequest("No Event for Choreography");
             }
-                
+
             if (events[0].EventType is SystemEventNames.EventGridSubscriptionValidation)
             {
-                try
+
+                events[0].TryGetSystemEventData(out object systemEvent);
+
+                if (systemEvent == null)
                 {
-                    events[0].TryGetSystemEventData(out object systemEvent);
-                    switch (systemEvent)
-                    {
-                        case SubscriptionValidationEventData subscriptionValidation:
-                            return new OkObjectResult(new SubscriptionValidationResponse()
-                            {
-                                ValidationResponse = subscriptionValidation.ValidationCode
-                            });
-                        default:
-                            break;
-                    }
-                }
-                catch (NullReferenceException ex)
-                {
+                    var ex = new NullReferenceException("systemEvent is not set");
                     logger.LogError("Event Grid Subscription validation error", ex);
                     return BadRequest(ex);
                 }
 
+                switch (systemEvent)
+                {
+                    case SubscriptionValidationEventData subscriptionValidation:
+                        return new OkObjectResult(new SubscriptionValidationResponse()
+                        {
+                            ValidationResponse = subscriptionValidation.ValidationCode
+                        });
+                    default:
+                        break;
+                }
             }
 
-            foreach(var e in events)
+            foreach (var e in events)
             {
                 Delivery delivery;
 
                 try
                 {
-                    delivery = Operations.ConvertDataEventToType<Delivery>(e.Data);
-                }
-                catch (InvalidCastException ex)
-                {
-                    logger.LogError("Invalid delivery Object for delivery payload", ex);
-                    return BadRequest(ex);
-                }
+                    delivery = e.Data.ToObjectFromJson<Delivery>();
 
-                if (delivery is null)
+                    if (!IsDeliveryObjectValid(e.Data))
+                    {
+                        logger.LogError("Invalid delivery Object for delivery payload");
+                        return BadRequest("Invalid delivery");
+                    }
+                }
+                catch (NullReferenceException ex)
                 {
                     logger.LogError("null delivery in delivery data");
                     return BadRequest("Invalid delivery");
@@ -183,22 +185,20 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
                             }
                         }
                 }
-
-
-
             }
-
-
             return BadRequest();
         }
 
+        private bool IsDeliveryObjectValid(BinaryData bdata)
+        {
+            JSchemaGenerator generator = new JSchemaGenerator();
+            JSchema schema = generator.Generate(typeof(Delivery));
+            schema.AllowAdditionalPropertiesSpecified = false;
+            schema.AllowAdditionalProperties = false;
+
+            JObject parsedDelivery = JObject.Parse(bdata.ToString());
+
+            return parsedDelivery.IsValid(schema);
+        }
     }
 }
-
-
-   
-
-     
-
-
-    

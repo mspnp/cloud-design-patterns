@@ -6,6 +6,8 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Fabrikam.Choreography.ChoreographyService.Models;
 
@@ -27,7 +29,7 @@ namespace Fabrikam.Choreography.ChoreographyService.Services
                 var response = await _httpClient.PutAsJsonAsync($"{packageInfo.PackageId}", packageInfo);
                 if (response.StatusCode == HttpStatusCode.Created)
                 {
-                    return await response.Content.ReadAsAsync<PackageGen>();
+                    return await JsonSerializer.DeserializeAsync<PackageGen>(await response.Content.ReadAsStreamAsync());
                 }
                 else if (response.StatusCode == HttpStatusCode.NoContent)
                 {
@@ -53,7 +55,7 @@ namespace Fabrikam.Choreography.ChoreographyService.Services
                 var response = await _httpClient.GetAsync($"{packageId}");
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    return await response.Content.ReadAsAsync<PackageGen>();
+                    return await JsonSerializer.DeserializeAsync<PackageGen>(await response.Content.ReadAsStreamAsync());
                 }
 
                 throw new BackendServiceCallFailedException(response.ReasonPhrase);
