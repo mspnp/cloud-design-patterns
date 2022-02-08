@@ -89,7 +89,7 @@ namespace Fabrikam.DroneDelivery.DeliveryService.Controllers
                 return NotFound();
             }
 
-            var status = new DeliveryStatus(DeliveryStage.HeadedToDropoff, new Location(0,0,0), DateTime.Now.AddMinutes(10).ToString(), DateTime.Now.AddHours(1).ToString());
+            var status = new DeliveryStatus(DeliveryStage.HeadedToDropoff, new Location(0,0,0), DateTime.UtcNow.AddMinutes(10).ToString(), DateTime.UtcNow.AddHours(1).ToString());
             return Ok(status);
         }
 

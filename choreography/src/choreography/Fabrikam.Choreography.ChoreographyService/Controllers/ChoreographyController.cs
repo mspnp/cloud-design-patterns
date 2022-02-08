@@ -89,13 +89,13 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
 
                 try
                 {
-                    delivery = e.Data.ToObjectFromJson<Delivery>();
-
                     if (!IsDeliveryObjectValid(e.Data))
                     {
                         logger.LogError("Invalid delivery Object for delivery payload");
                         return BadRequest("Invalid delivery");
                     }
+
+                    delivery = e.Data.ToObjectFromJson<Delivery>();
                 }
                 catch (NullReferenceException ex)
                 {
@@ -105,7 +105,8 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
 
                 List<EventGridEvent> listEvents = new List<EventGridEvent>();
                 e.Topic = eventRepository.GetTopic();
-                e.EventTime = DateTime.Now;
+                e.EventTime = DateTime.UtcNow;
+
                 switch (e.EventType)
                 {
                     case Operations.ChoreographyOperation.ScheduleDelivery:
