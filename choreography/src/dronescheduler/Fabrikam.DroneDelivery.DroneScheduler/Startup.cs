@@ -6,11 +6,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.FeatureManagement;
 using Serilog;
 using Serilog.Formatting.Compact;
 
@@ -18,6 +18,8 @@ namespace MockDroneScheduler
 {
     public class Startup
     {
+        private const string HealCheckName = "ReadinessLiveness";
+
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -43,18 +45,19 @@ namespace MockDroneScheduler
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
+            services.AddFeatureManagement();
+
             // Configure AppInsights
             services.AddApplicationInsightsKubernetesEnricher();
             services.AddApplicationInsightsTelemetry(Configuration);
 
             // Add framework services.
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddControllers();
 
-            // Register the Swagger generator, defining one or more Swagger documents
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "Mock DroneScheduler API", Version = "v1" });
-            });
+            // Add health check
+            services.AddHealthChecks().AddCheck(
+                    HealCheckName,
+                    () => HealthCheckResult.Healthy("OK"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -65,15 +68,16 @@ namespace MockDroneScheduler
               .ReadFrom.Configuration(Configuration)
               .CreateLogger();
 
-            app.UseMvc();
-
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
-
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS etc.), specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Mock DroneScheduler API V1");
+                endpoints.MapHealthChecks("/healthz");
+                endpoints.MapControllers();
+            });
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
             });
         }
     }
