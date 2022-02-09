@@ -70,12 +70,9 @@ namespace Fabrikam.DroneDelivery.DeliveryService.Tests
             await logRequestMiddleware.Invoke(contextMock.Object);
 
             // Assert
-            loggerMock.Verify(l => l.Log<object>(
-                                    LogLevel.Error,
-                                    It.IsAny<EventId>(),
-                                    It.Is<object>(fV => fV.ToString().Equals(($"An internal handled exception has occurred: {exMessage}"))),
-                                    It.IsAny<Exception>(),
-                                    It.IsAny<Func<object, Exception, string>>()));
+            Assert.AreEqual(1, loggerMock.Invocations.Count);
+            StringAssert.Contains(loggerMock.Invocations[0].ToString(), $"An internal handled exception has occurred: {exMessage}");
+            StringAssert.Contains(loggerMock.Invocations[0].ToString(), "LogLevel.Error");
         }
 
         [TestMethod]
@@ -117,12 +114,9 @@ namespace Fabrikam.DroneDelivery.DeliveryService.Tests
             await logRequestMiddleware.Invoke(contextMock.Object);
 
             // Assert
-            loggerMock.Verify(l => l.Log<object>(
-                                    LogLevel.Error,
-                                    It.IsAny<EventId>(),
-                                    It.Is<object>(fV => fV.ToString().Equals(($"An error has occurred: 499"))),
-                                    null,
-                                    It.IsAny<Func<object, Exception, string>>()));
+            Assert.AreEqual(1, loggerMock.Invocations.Count);
+            StringAssert.Contains(loggerMock.Invocations[0].ToString(), "An error has occurred: 499");
+            StringAssert.Contains(loggerMock.Invocations[0].ToString(), "LogLevel.Error");
         }
 
         [TestMethod]
@@ -164,12 +158,9 @@ namespace Fabrikam.DroneDelivery.DeliveryService.Tests
             await logRequestMiddleware.Invoke(contextMock.Object);
 
             // Assert
-            loggerMock.Verify(l => l.Log<object>(
-                                    LogLevel.Error,
-                                    It.IsAny<EventId>(),
-                                    It.Is<object>(fV => fV.ToString().Equals(($"An error has occurred: 429"))),
-                                    null,
-                                    It.IsAny<Func<object, Exception, string>>()));
+            Assert.AreEqual(1, loggerMock.Invocations.Count);
+            StringAssert.Contains(loggerMock.Invocations[0].ToString(), "An error has occurred: 429");
+            StringAssert.Contains(loggerMock.Invocations[0].ToString(), "LogLevel.Error");
         }
 
         [TestMethod]
@@ -213,25 +204,17 @@ namespace Fabrikam.DroneDelivery.DeliveryService.Tests
             try
             {
                 await logRequestMiddleware.Invoke(contextMock.Object);
-
             }
             // Assert
             catch (Exception)
             {
-                loggerMock.Verify(l => l.Log<object>(
-                                        LogLevel.Error,
-                                        It.IsAny<EventId>(),
-                                        It.Is<object>(fV => fV.ToString().Equals(($"An exception was thrown attempting to execute the global internal server error handler: {exMessage}"))),
-                                        It.IsAny<Exception>(),
-                                        It.IsAny<Func<object, Exception, string>>()));
+                Assert.AreEqual(2, loggerMock.Invocations.Count);
+                StringAssert.Contains(loggerMock.Invocations[0].ToString(), $"An exception was thrown attempting to execute the global internal server error handler: {exMessage}");
+                StringAssert.Contains(loggerMock.Invocations[0].ToString(), "LogLevel.Error");
 
-                loggerMock.Verify(l => l.Log<object>(
-                        LogLevel.Warning,
-                        It.IsAny<EventId>(),
-                        It.Is<object>(fV => fV.ToString().Equals(("The response has already started, the error handler will not be executed."))),
-                        null,
-                        It.IsAny<Func<object, Exception, string>>()));
-                // re-throw the actual re-throw 
+                StringAssert.Contains(loggerMock.Invocations[1].ToString(), "The response has already started, the error handler will not be executed.");
+                StringAssert.Contains(loggerMock.Invocations[1].ToString(), "LogLevel.Warning");
+
                 throw;
             }
         }

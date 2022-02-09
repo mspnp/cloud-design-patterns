@@ -6,6 +6,8 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Fabrikam.Choreography.ChoreographyService.Models;
 using Fabrikam.Communicator.Service.Utils;
@@ -30,7 +32,8 @@ namespace Fabrikam.Choreography.ChoreographyService.Services
                 var response = await _httpClient.PutAsJsonAsync(schedule.Id, schedule);
                 if (response.StatusCode == HttpStatusCode.Created)
                 {
-                    return await response.Content.ReadAsAsync<DeliverySchedule>();
+
+                    return await JsonSerializer.DeserializeAsync<DeliverySchedule>(await response.Content.ReadAsStreamAsync());
                 }
 
                 throw new BackendServiceCallFailedException(response.ReasonPhrase);

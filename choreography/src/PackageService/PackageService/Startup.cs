@@ -1,28 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Fabrikam.DroneDelivery.PackageService.Middlewares.Builder;
+﻿using Fabrikam.DroneDelivery.PackageService.Middlewares.Builder;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using PackageService.Services;
 using Serilog;
 using Serilog.Formatting.Compact;
-using Swashbuckle.AspNetCore.Swagger;
+using System;
 
 namespace PackageService
 {
     public class Startup
     {
+        private const string HealCheckName = "ReadinessLiveness";
+
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -62,22 +58,21 @@ namespace PackageService
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
+            // Add health check
+            services.AddHealthChecks().AddCheck(
+                    HealCheckName,
+                    () => HealthCheckResult.Healthy("OK"));
+
             // Configure AppInsights
             services.AddApplicationInsightsKubernetesEnricher();
             services.AddApplicationInsightsTelemetry(Configuration);
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddControllers();
             services.AddSingleton<IPackageRepository, PackageRepository>();
             services.AddSingleton<IDocumentClient>(new DocumentClient(new Uri(Configuration["CosmosDB:Endpoint"]),
                                                         Configuration["CosmosDB:AuthKey"]));
 
             DocumentConfig.DatabaseId = Configuration["CosmosDB:Database"];
             DocumentConfig.CollectionId = Configuration["CosmosDB:Collection"];
-
-            // Register the Swagger generator, defining one or more Swagger documents
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "Fabrikam DroneDelivery PackageService API", Version = "v1" });
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -97,16 +92,13 @@ namespace PackageService
 
             // TODO: Add middleware AuthZ here
 
-            app.UseMvc();
-
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
-
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS etc.), specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Fabrikam DroneDelivery DeliveryService API V1");
+                endpoints.MapHealthChecks("/healthz");
+                endpoints.MapControllers();
             });
+
         }
     }
 }

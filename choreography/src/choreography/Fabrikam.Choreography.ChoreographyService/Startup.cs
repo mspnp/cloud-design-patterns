@@ -5,25 +5,26 @@
 //
 
 
-using System;
 using Fabrikam.Choreography.ChoreographyService.Services;
 using Fabrikam.Communicator.Middlewares.Builder;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using Serilog.Formatting.Compact;
-using Swashbuckle.AspNetCore.Swagger;
+using System;
 
 
 namespace Fabrikam.Choreography.ChoreographyService
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        private const string HealCheckName = "ReadinessLiveness";
+
+        public Startup(IWebHostEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                .SetBasePath(env.ContentRootPath)
@@ -59,7 +60,13 @@ namespace Fabrikam.Choreography.ChoreographyService
             // Configure AppInsights
             services.AddApplicationInsightsKubernetesEnricher();
             services.AddApplicationInsightsTelemetry(Configuration);
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            // Add health check
+            services.AddHealthChecks().AddCheck(
+                    HealCheckName,
+                    () => HealthCheckResult.Healthy("OK"));
+
+            services.AddControllers();
 
             services
             .AddHttpClient<IPackageServiceCaller, PackageServiceCaller>(c =>
@@ -78,16 +85,10 @@ namespace Fabrikam.Choreography.ChoreographyService
                 {
                     c.BaseAddress = new Uri(Configuration["SERVICE_URI_DELIVERY"]);
                 });
-                
-            // Register the Swagger generator, defining one or more Swagger documents
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "Fabrikam DroneDelivery PackageService API", Version = "v1" });
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 
             Log.Logger = new LoggerConfiguration()
@@ -103,15 +104,11 @@ namespace Fabrikam.Choreography.ChoreographyService
 
             // TODO: Add middleware AuthZ here
 
-            app.UseMvc();
-
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
-
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS etc.), specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Fabrikam DroneDelivery DeliveryService API V1");
+                endpoints.MapHealthChecks("/healthz");
+                endpoints.MapControllers();
             });
         }
     }

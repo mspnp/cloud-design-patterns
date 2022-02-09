@@ -5,15 +5,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
+using Azure.Messaging.EventGrid;
+using Azure.Messaging.EventGrid.SystemEvents;
 using Fabrikam.Choreography.ChoreographyService.Controllers;
 using Fabrikam.Choreography.ChoreographyService.Models;
 using Fabrikam.Choreography.ChoreographyService.Services;
 using Microsoft.AspNetCore.Mvc;
-using Azure.Messaging.EventGrid;
-using Azure.Messaging.EventGrid.SystemEvents;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -22,7 +22,15 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
     [TestClass]
     public class ChoreographyControllerFixture
     {
-        private static Delivery delivery = new Delivery();
+        private static Delivery delivery = new Delivery()
+        {
+            ConfirmationRequired = ConfirmationRequired.None,
+            DeliveryId = Guid.NewGuid().ToString(),
+            PickupLocation = "local",
+            PickupTime = DateTime.UtcNow.AddDays(1),
+            OwnerId = Guid.NewGuid().ToString()
+        };
+
         SubscriptionValidationEventData eventValidationData = EventGridModelFactory.SubscriptionValidationEventData(Guid.NewGuid().ToString(), "http://url");
 
         [TestMethod]
@@ -34,7 +42,10 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                 "1.0",
                 "This is the event data");
             eventOp.EventType = SystemEventNames.EventGridSubscriptionValidation;
-            eventOp.Data = new BinaryData(eventValidationData);
+
+            var eventValidationDataAsJson = Newtonsoft.Json.JsonConvert.SerializeObject(eventValidationData);
+
+            eventOp.Data = new BinaryData(Encoding.UTF8.GetBytes(eventValidationDataAsJson));
 
             var target = new ChoreographyController(
                 new Mock<IPackageServiceCaller>().Object,
@@ -75,7 +86,8 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             var result = await target.Operation(events) as BadRequestObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(400, result.StatusCode);
-            loggerMock.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<FormattedLogValues>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()), Times.Once);
+            Assert.AreEqual(1, loggerMock.Invocations.Count);
+            StringAssert.Contains(loggerMock.Invocations[0].ToString(), "Event Grid Subscription validation error");
         }
 
         [TestMethod]
@@ -92,8 +104,9 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                 "This is the event data");
             eventOp.EventType = "GetDrone";
 
-            Delivery delivery = new Delivery();
-            eventOp.Data = new BinaryData(delivery);
+            var deliveryEventDataAsJson = Newtonsoft.Json.JsonConvert.SerializeObject(delivery);
+
+            eventOp.Data = new BinaryData(Encoding.UTF8.GetBytes(deliveryEventDataAsJson));
 
             var target = new ChoreographyController(
                 new Mock<IPackageServiceCaller>().Object,
@@ -109,6 +122,7 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             Assert.AreEqual(200, result.StatusCode);
             deliveryCallerMock.Verify();
         }
+
         [TestMethod]
         public async Task Post_Returns200_ForValidPackageService()
         {
@@ -128,7 +142,9 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             eventOp.EventType = "ScheduleDelivery";
 
             Delivery delivery = new Delivery();
-            eventOp.Data = new BinaryData(delivery);
+            var deliveryEventDataAsJson = Newtonsoft.Json.JsonConvert.SerializeObject(delivery);
+
+            eventOp.Data = new BinaryData(Encoding.UTF8.GetBytes(deliveryEventDataAsJson));
 
             var target = new ChoreographyController(
                 packageServiceCallerMock.Object,
@@ -165,7 +181,9 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             eventOp.EventType = "CreatePackage";
 
             Delivery delivery = new Delivery();
-            eventOp.Data = new BinaryData(delivery);
+            var deliveryEventDataAsJson = Newtonsoft.Json.JsonConvert.SerializeObject(delivery);
+
+            eventOp.Data = new BinaryData(Encoding.UTF8.GetBytes(deliveryEventDataAsJson));
 
             var target = new ChoreographyController(
                 new Mock<IPackageServiceCaller>().Object,
@@ -199,7 +217,8 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             var result = await target.Operation(null) as BadRequestObjectResult; 
             Assert.IsNotNull(result);
             Assert.AreEqual(400, result.StatusCode);
-            loggerMock.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<FormattedLogValues>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()), Times.Once);
+            Assert.AreEqual(1, loggerMock.Invocations.Count);
+            StringAssert.Contains(loggerMock.Invocations[0].ToString(), "event is Null");
         }
 
         [TestMethod]
@@ -227,7 +246,8 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             var result = await target.Operation(events) as BadRequestObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(400, result.StatusCode);
-            loggerMock.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<FormattedLogValues>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()), Times.Once);
+            Assert.AreEqual(1, loggerMock.Invocations.Count);
+            StringAssert.Contains(loggerMock.Invocations[0].ToString(), "null delivery in delivery data");
         }
 
         [TestMethod]
@@ -242,7 +262,10 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                 "This is the event data");
             eventOp.EventType = "GetDrone";
             var content = new { invalidId = 10, InvalidName = "invalid" };
-            eventOp.Data = new BinaryData(content);
+
+            var contentEventDataAsJson = Newtonsoft.Json.JsonConvert.SerializeObject(content);
+
+            eventOp.Data = new BinaryData(Encoding.UTF8.GetBytes(contentEventDataAsJson));
 
             var target = new ChoreographyController(
                 new Mock<IPackageServiceCaller>().Object,
@@ -256,7 +279,8 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             var result = await target.Operation(events) as BadRequestObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(400, result.StatusCode);
-            loggerMock.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<FormattedLogValues>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()), Times.Once);
+            Assert.AreEqual(1, loggerMock.Invocations.Count);
+            StringAssert.Contains(loggerMock.Invocations[0].ToString(), "Invalid delivery Object for delivery payload");
         }
 
         [TestMethod]
@@ -280,8 +304,9 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                 "This is the event data");
             eventOp.EventType = "ScheduleDelivery";
 
-            Delivery delivery = new Delivery();
-            eventOp.Data = new BinaryData(delivery);
+            var deliveryEventDataAsJson = Newtonsoft.Json.JsonConvert.SerializeObject(delivery);
+
+            eventOp.Data = new BinaryData(Encoding.UTF8.GetBytes(deliveryEventDataAsJson));
 
             var target = new ChoreographyController(
                 packageServiceCallerMock.Object,
@@ -297,7 +322,8 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             Assert.AreEqual(400, result.StatusCode);
             packageServiceCallerMock.Verify();
             eventRepositoryMock.Verify();
-            loggerMock.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<FormattedLogValues>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()), Times.Once);
+            Assert.AreEqual(1, loggerMock.Invocations.Count);
+            StringAssert.Contains(loggerMock.Invocations[0].ToString(), "ChoreographyService.Services.EventException");
         }
 
         [TestMethod]
@@ -321,8 +347,9 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
                 "This is the event data");
             eventOp.EventType = "CreatePackage";
 
-            Delivery delivery = new Delivery();
-            eventOp.Data = new BinaryData(delivery);
+            var deliveryEventDataAsJson = Newtonsoft.Json.JsonConvert.SerializeObject(delivery);
+
+            eventOp.Data = new BinaryData(Encoding.UTF8.GetBytes(deliveryEventDataAsJson));
 
             var target = new ChoreographyController(
                 new Mock<IPackageServiceCaller>().Object,
@@ -338,7 +365,8 @@ namespace Fabrikam.Choreography.ChoreographyService.Tests
             Assert.AreEqual(400, result.StatusCode);
             droneServiceCallerMock.Verify();
             eventRepositoryMock.Verify();
-            loggerMock.Verify(x => x.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<FormattedLogValues>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()), Times.Once);
+            Assert.AreEqual(1, loggerMock.Invocations.Count);
+            StringAssert.Contains(loggerMock.Invocations[0].ToString(), "ChoreographyService.Services.EventException");
         }
     }
 }
