@@ -21,7 +21,7 @@ This service implements the application flow by receiving a list of [EventGrid](
             - GetDrone
             - CreatePackage
 
-Depending on the operation, the choreography service makes calls to the associated business services and, if the call is successful, it sets the EvenType to the next choreography step (the next operation). This workflow continues until the entire request has been processed.
+Depending on the operation, the choreography service makes calls to the associated business services and, if the call is successful, it sets the EventType to the next choreography step (the next operation). This workflow continues until the entire request has been processed.
 
 [Learn more about the application design](https://docs.microsoft.com/azure/architecture/patterns/choreography#design)
 
