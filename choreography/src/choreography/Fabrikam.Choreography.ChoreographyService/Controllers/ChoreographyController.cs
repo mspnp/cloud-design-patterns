@@ -83,13 +83,15 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
                 }
             }
 
+            var schema = GenerateDeliverySchema();
+
             foreach (var e in events)
             {
                 Delivery delivery;
 
                 try
                 {
-                    if (!IsDeliveryObjectValid(e.Data))
+                    if (!IsDeliveryObjectValid(e.Data, schema))
                     {
                         logger.LogError("Invalid delivery Object for delivery payload");
                         return BadRequest("Invalid delivery");
@@ -99,7 +101,7 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
                 }
                 catch (NullReferenceException ex)
                 {
-                    logger.LogError("null delivery in delivery data");
+                    logger.LogError("null delivery in delivery data. " + ex.ToString());
                     return BadRequest("Invalid delivery");
                 }
 
@@ -190,15 +192,18 @@ namespace Fabrikam.Choreography.ChoreographyService.Controllers
             return BadRequest();
         }
 
-        private bool IsDeliveryObjectValid(BinaryData bdata)
+        private JSchema GenerateDeliverySchema()
         {
             JSchemaGenerator generator = new JSchemaGenerator();
             JSchema schema = generator.Generate(typeof(Delivery));
             schema.AllowAdditionalPropertiesSpecified = false;
             schema.AllowAdditionalProperties = false;
+            return schema;
+        }
 
+        private bool IsDeliveryObjectValid(BinaryData bdata, JSchema schema)
+        {
             JObject parsedDelivery = JObject.Parse(bdata.ToString());
-
             return parsedDelivery.IsValid(schema);
         }
     }

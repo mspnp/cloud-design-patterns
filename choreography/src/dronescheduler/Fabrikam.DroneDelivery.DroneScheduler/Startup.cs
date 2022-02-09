@@ -10,7 +10,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using Microsoft.FeatureManagement;
 using Serilog;
 using Serilog.Formatting.Compact;
 
@@ -44,8 +43,6 @@ namespace MockDroneScheduler
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
-            services.AddFeatureManagement();
 
             // Configure AppInsights
             services.AddApplicationInsightsKubernetesEnricher();
