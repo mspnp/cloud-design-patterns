@@ -9,9 +9,9 @@ namespace Contoso
     public static class AsyncProcessingBackgroundWorker
     {
         [FunctionName("AsyncProcessingBackgroundWorker")]
-        public static void Run(
+        public static async Task RunAsync(
             [ServiceBusTrigger("outqueue", Connection = "ServiceBusConnectionAppSetting")] ServiceBusMessage myQueueItem,
-            [Blob("data", FileAccess.ReadWrite, Connection = "StorageConnectionAppSetting")] BlobContainerClient inputBlob,
+            [Blob("data", FileAccess.ReadWrite, Connection = "StorageConnectionAppSetting")] BlobContainerClient inputContainer,
             ILogger log)
         {
             // Perform an actual action against the blob data source for the async readers to be able to check against.
@@ -19,10 +19,10 @@ namespace Contoso
 
             var id = myQueueItem.ApplicationProperties["RequestGUID"] as string;
 
-            BlobClient cbb = inputBlob.GetBlobClient($"{id}.blobdata");
+            BlobClient blob = inputContainer.GetBlobClient($"{id}.blobdata");
 
             // Now write away the process 
-            cbb.UploadAsync(myQueueItem.Body);
+            await blob.UploadAsync(myQueueItem.Body);
         }
     }
 }

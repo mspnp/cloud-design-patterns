@@ -15,7 +15,7 @@ namespace Contoso
         [FunctionName("AsyncProcessingWorkAcceptor")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] CustomerPOCO customer,
-            [ServiceBus("outqueue", Connection = "ServiceBusConnectionAppSetting")] IAsyncCollector<ServiceBusMessage> OutMessage,
+            [ServiceBus("outqueue", Connection = "ServiceBusConnectionAppSetting")] IAsyncCollector<ServiceBusMessage> OutMessages,
             ILogger log)
         {
             if (String.IsNullOrEmpty(customer.id) || String.IsNullOrEmpty(customer.customername))
@@ -28,12 +28,12 @@ namespace Contoso
             string rqs = $"http://{Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME")}/api/RequestStatus/{reqid}";
 
             var messagePayload = JsonConvert.SerializeObject(customer);
-            ServiceBusMessage m = new ServiceBusMessage(messagePayload);
+            var message = new ServiceBusMessage(messagePayload);
             m.ApplicationProperties["RequestGUID"] = reqid;
             m.ApplicationProperties["RequestSubmittedAt"] = DateTime.Now;
             m.ApplicationProperties["RequestStatusURL"] = rqs;
                 
-            await OutMessage.AddAsync(m);  
+            await OutMessages.AddAsync(message);
 
             return (ActionResult) new AcceptedResult(rqs, $"Request Accepted for Processing{Environment.NewLine}ProxyStatus: {rqs}");
         }
