@@ -29,9 +29,9 @@ namespace Contoso
 
             var messagePayload = JsonConvert.SerializeObject(customer);
             var message = new ServiceBusMessage(messagePayload);
-            m.ApplicationProperties["RequestGUID"] = reqid;
-            m.ApplicationProperties["RequestSubmittedAt"] = DateTime.Now;
-            m.ApplicationProperties["RequestStatusURL"] = rqs;
+            message.ApplicationProperties["RequestGUID"] = reqid;
+            message.ApplicationProperties["RequestSubmittedAt"] = DateTime.Now;
+            message.ApplicationProperties["RequestStatusURL"] = rqs;
                 
             await OutMessages.AddAsync(message);
 
