@@ -1,19 +1,27 @@
 using System;
-using Microsoft.WindowsAzure.Storage.Blob;
+using Azure.Storage;
+using Azure.Storage.Blobs.Specialized;
+using Azure.Storage.Sas;
 
 namespace Contoso
 {
     public static class CloudBlockBlobExtensions
     {
-        public static string GenerateSASURI(this CloudBlockBlob blob)
+        public static string GenerateSASURI(this BlockBlobClient blob)
         {
-            SharedAccessBlobPolicy sasConstraints = new SharedAccessBlobPolicy();
-            sasConstraints.SharedAccessStartTime = DateTimeOffset.UtcNow.AddMinutes(-5);
-            sasConstraints.SharedAccessExpiryTime = DateTimeOffset.UtcNow.AddMinutes(10);
-            sasConstraints.Permissions = SharedAccessBlobPermissions.Read;
+            BlobSasBuilder blobSasBuilder = new BlobSasBuilder()
+            {
+                BlobContainerName = blob.BlobContainerName,
+                BlobName = blob.Name,
+                Resource = "b",
+                StartsOn = DateTimeOffset.UtcNow,
+                ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(10)
+            };
+            blobSasBuilder.SetPermissions(BlobSasPermissions.Read);
 
             //Generate the shared access signature on the blob, setting the constraints directly on the signature.
-            string sasBlobToken = blob.GetSharedAccessSignature(sasConstraints);
+            StorageSharedKeyCredential credential = new StorageSharedKeyCredential(blob.AccountName, "AccountKey");
+            string sasBlobToken = blobSasBuilder.ToSasQueryParameters(credential).ToString();
 
             //Return the URI string for the container, including the SAS token.
             return blob.Uri + sasBlobToken;

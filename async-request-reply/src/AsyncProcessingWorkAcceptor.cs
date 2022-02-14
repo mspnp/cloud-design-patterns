@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.ServiceBus;
+using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
@@ -15,7 +15,7 @@ namespace Contoso
         [FunctionName("AsyncProcessingWorkAcceptor")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] CustomerPOCO customer,
-            [ServiceBus("outqueue", Connection = "ServiceBusConnectionAppSetting")] IAsyncCollector<Message> OutMessage,
+            [ServiceBus("outqueue", Connection = "ServiceBusConnectionAppSetting")] IAsyncCollector<ServiceBusMessage> OutMessages,
             ILogger log)
         {
             if (String.IsNullOrEmpty(customer.id) || String.IsNullOrEmpty(customer.customername))
@@ -28,14 +28,14 @@ namespace Contoso
             string rqs = $"http://{Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME")}/api/RequestStatus/{reqid}";
 
             var messagePayload = JsonConvert.SerializeObject(customer);
-            Message m = new Message(Encoding.UTF8.GetBytes(messagePayload));
-            m.UserProperties["RequestGUID"] = reqid;
-            m.UserProperties["RequestSubmittedAt"] = DateTime.Now;
-            m.UserProperties["RequestStatusURL"] = rqs;
+            var message = new ServiceBusMessage(messagePayload);
+            message.ApplicationProperties["RequestGUID"] = reqid;
+            message.ApplicationProperties["RequestSubmittedAt"] = DateTime.Now;
+            message.ApplicationProperties["RequestStatusURL"] = rqs;
                 
-            await OutMessage.AddAsync(m);  
+            await OutMessages.AddAsync(message);
 
-            return (ActionResult) new AcceptedResult(rqs, $"Request Accepted for Processing{Environment.NewLine}ProxyStatus: {rqs}");  
+            return (ActionResult) new AcceptedResult(rqs, $"Request Accepted for Processing{Environment.NewLine}ProxyStatus: {rqs}");
         }
     }
 }
