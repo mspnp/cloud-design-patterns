@@ -1,14 +1,13 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs.Specialized;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Azure.Storage.Blobs.Specialized;
-using Azure.Storage.Sas;
-using System.Linq;
 
 namespace Contoso
 {
