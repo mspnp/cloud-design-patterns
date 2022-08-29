@@ -11,8 +11,8 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
 ### Prerequisites
 
 - [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest)
-- [.NET Core SDK version 2.1](https://microsoft.com/net)
-- [Azure Functions Core Tools](https://docs.microsoft.com/azure/azure-functions/functions-run-local#v2)
+- [.NET Core SDK version 6](https://dotnet.microsoft.com/en-us/download)
+- [Azure Functions Core Tools](https://docs.microsoft.com/azure/azure-functions/functions-run-local#v4)
 
 ### Deploy the Azure resources
 
