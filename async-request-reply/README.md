@@ -59,13 +59,15 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
     func azure functionapp publish $(APP_NAME)-fn
     ```
 
-### Send a request
+### Validate the Azure Function app
 
-```bash
-curl -X POST "https://$(APP_NAME)-fn.azurewebsites.net/api/asyncprocessingworkacceptor" --header 'Content-Type: application/json' --header 'Accept: application/json' -k -i -d '{
-   "id": "1234",
-   "customername": "Contoso"
- }'
- ```
+1. Send an http request through the Async Processor Work Acceptor
 
- > Note. The app uses the WEBSITE_HOSTNAME environment variable. This environment variable is set automatically by the Azure App Service runtime environment. For more information, see [Azure runtime environment](https.://github.com/projectkudu/kudu/wiki/Azure-runtime-environment)
+   ```bash
+   curl -X POST "https://$(APP_NAME)-fn.azurewebsites.net/api/asyncprocessingworkacceptor" --header 'Content-Type: application/json' --header 'Accept: application/json' -k -i -d '{
+      "id": "1234",
+      "customername": "Contoso"
+   }'
+   ```
+
+   > **Note** the app uses the WEBSITE_HOSTNAME environment variable. This environment variable is set automatically by the Azure App Service runtime environment. For more information, see [Azure runtime environment](https.://github.com/projectkudu/kudu/wiki/Azure-runtime-environment)
