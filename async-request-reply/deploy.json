@@ -1,24 +1,15 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {
-        "appName": {
-            "type": "string",
-            "minLength": 2,
-            "maxLength": 6,
-            "metadata": {
-                "description": "Specifies the name for the app."
-            }
-        }
-    },
+    "parameters": {},
     "variables": {
-        "appStorageAccountName": "[toLower(concat(parameters('appName'),uniqueString(subscription().subscriptionId, resourceGroup().id)))]",
+        "appStorageAccountName": "[toLower(concat('stoapp',uniqueString(subscription().subscriptionId, resourceGroup().id)))]",
         "appStorageAccountId": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('appStorageAccountName'))]",
-        "dataStorageAccountName": "[toLower(concat(parameters('appName'),'data',uniqueString(subscription().subscriptionId, resourceGroup().id)))]",
+        "dataStorageAccountName": "[toLower(concat('stodata',uniqueString(subscription().subscriptionId, resourceGroup().id)))]",
         "dataStorageAccountId": "[concat(resourceGroup().id,'/providers/','Microsoft.Storage/storageAccounts/', variables('dataStorageAccountName'))]",
-        "hostingPlanName": "[parameters('appName')]",
-        "functionAppName": "[concat(parameters('appName'),'-fn')]",
-        "serviceBusNamespace": "[toLower(concat(parameters('appName'),'sb',uniqueString(subscription().subscriptionId, resourceGroup().id)))]"
+        "hostingPlanName": "app-reqrep",
+        "functionAppName": "[concat('fapp-reqrep-',uniqueString(subscription().subscriptionId, resourceGroup().id))]",
+        "serviceBusNamespace": "[toLower(concat('sb-reqrep-',uniqueString(subscription().subscriptionId, resourceGroup().id)))]"
     },
     "resources": [
         {
@@ -127,7 +118,7 @@
                   },
                   {
                     "name": "FUNCTIONS_EXTENSION_VERSION",
-                    "value": "~2"
+                    "value": "~4"
                   },
                   {
                     "name": "WEBSITE_NODE_DEFAULT_VERSION",
@@ -150,5 +141,10 @@
             }
           }
         ],
-    "outputs": {}
+    "outputs": {
+      "functionAppName": {
+        "type": "string",
+        "value": "[variables('functionAppName')]"
+      }
+    }
 }

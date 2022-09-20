@@ -11,8 +11,8 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
 ### Prerequisites
 
 - [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest)
-- [.NET Core SDK version 2.1](https://microsoft.com/net)
-- [Azure Functions Core Tools](https://docs.microsoft.com/azure/azure-functions/functions-run-local#v2)
+- [.NET Core SDK version 6](https://dotnet.microsoft.com/en-us/download)
+- [Azure Functions Core Tools](https://docs.microsoft.com/azure/azure-functions/functions-run-local#v4)
 
 ### Deploy the Azure resources
 
@@ -27,20 +27,13 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
 3. Create a resource group.
 
     ```bash
-    export RESOURCE_GROUP=<resource-group-name>
-    export APP_NAME=<app-name> # 2-6 characters
-    export LOCATION=<azure-region>
-
-    az group create --name $RESOURCE_GROUP --location $LOCATION
+    az group create --name rg-asyncrequestreply --location eastus
     ```
 
 4. Deploy the template.
 
     ```bash
-    az group deployment create \
-    --resource-group $RESOURCE_GROUP \
-    --template-file deploy.json \
-    --parameters appName=$APP_NAME
+    az deployment group create -g rg-asyncrequestreply -f deploy.json
     ```
 
 5. Wait for the deployment to complete.
@@ -56,16 +49,27 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
 2. Deploy the app.
 
     ```bash
-    func azure functionapp publish $(APP_NAME)-fn
+    FUNC_APP_NAME=$(az deployment group show -g rg-asyncrequestreply -n deploy --query properties.outputs.functionAppName.value -o tsv)
+
+    func azure functionapp publish $FUNC_APP_NAME --dotnet
     ```
 
-### Send a request
+### Validate the Azure Function app
 
-```bash
-curl -X POST "https://$(APP_NAME)-fn.azurewebsites.net/api/asyncprocessingworkacceptor" --header 'Content-Type: application/json' --header 'Accept: application/json' -k -i -d '{
-   "id": "1234",
-   "customername": "Contoso"
- }'
- ```
+1. Send an http request through the Async Processor Work Acceptor
 
- > Note. The app uses the WEBSITE_HOSTNAME environment variable. This environment variable is set automatically by the Azure App Service runtime environment. For more information, see [Azure runtime environment](https.://github.com/projectkudu/kudu/wiki/Azure-runtime-environment)
+   ```bash
+   curl -X POST "https://${FUNC_APP_NAME}.azurewebsites.net/api/asyncprocessingworkacceptor" --header 'Content-Type: application/json' --header 'Accept: application/json' -k -i -d '{
+      "id": "1234",
+      "customername": "Contoso"
+   }'
+   ```
+
+   > **Note** the app uses the WEBSITE_HOSTNAME environment variable. This environment variable is set automatically by the Azure App Service runtime environment. For more information, see [Azure runtime environment](https.://github.com/projectkudu/kudu/wiki/Azure-runtime-environment)
+
+### Clean up
+
+1. Delete all the Azure resources for this Cloud Async Pattern
+   ```bash
+   az group delete -n rg-asyncrequestreply -y
+   ```
