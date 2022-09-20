@@ -66,3 +66,10 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
    ```
 
    > **Note** the app uses the WEBSITE_HOSTNAME environment variable. This environment variable is set automatically by the Azure App Service runtime environment. For more information, see [Azure runtime environment](https.://github.com/projectkudu/kudu/wiki/Azure-runtime-environment)
+
+### Clean up
+
+1. Delete all the Azure resources for this Cloud Async Pattern
+   ```bash
+   az group delete -n rg-asyncrequestreply -y
+   ```
