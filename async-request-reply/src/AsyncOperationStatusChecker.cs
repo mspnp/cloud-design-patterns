@@ -21,7 +21,7 @@ namespace Contoso
         {
 
             OnCompleteEnum OnComplete = Enum.Parse<OnCompleteEnum>(req.Query["OnComplete"].FirstOrDefault() ?? "Redirect");
-            OnPendingEnum OnPending = Enum.Parse<OnPendingEnum>(req.Query["OnPending"].FirstOrDefault() ?? "Accepted");
+            OnPendingEnum OnPending = Enum.Parse<OnPendingEnum>(req.Query["OnPending"].FirstOrDefault() ?? "OK");
 
             log.LogInformation($"C# HTTP trigger function processed a request for status on {thisGUID} - OnComplete {OnComplete} - OnPending {OnPending}");
 
@@ -38,10 +38,10 @@ namespace Contoso
 
                 switch (OnPending)
                 {
-                    case OnPendingEnum.Accepted:
+                    case OnPendingEnum.OK:
                         {
-                            // Return an HTTP 202 status code with the 
-                            return (ActionResult)new AcceptedResult() { Location = rqs };
+                            // Return an HTTP 200 status code with the 
+                            return new OkObjectResult(new { status = "In progress", Location = rqs });
                         }
 
                     case OnPendingEnum.Synchronous:
@@ -64,7 +64,7 @@ namespace Contoso
                             else
                             {
                                 log.LogInformation($"Synchronous mode {thisGUID}.blob - NOT FOUND after timeout {backoff} ms");
-                                return (ActionResult)new NotFoundResult();
+                                return new NotFoundResult();
                             }
                         }
 
@@ -83,15 +83,15 @@ namespace Contoso
                 case OnCompleteEnum.Redirect:
                     {
                         // Redirect to the SAS URI to blob storage
-                       
-                        return (ActionResult)new RedirectResult(inputBlob.GenerateSASURI());
+
+                        return new RedirectResult(inputBlob.GenerateSASURI());
                     }
 
                 case OnCompleteEnum.Stream:
                     {
                         // Download the file and return it directly to the caller.
                         // For larger files, use a stream to minimize RAM usage.
-                        return (ActionResult)new OkObjectResult(await inputBlob.DownloadContentAsync());
+                        return new OkObjectResult(await inputBlob.DownloadContentAsync());
                     }
 
                 default:
@@ -102,15 +102,17 @@ namespace Contoso
         }
     }
 
-    public enum OnCompleteEnum {
+    public enum OnCompleteEnum
+    {
 
         Redirect,
         Stream
     }
 
-    public enum OnPendingEnum {
+    public enum OnPendingEnum
+    {
 
-        Accepted,
+        OK,
         Synchronous
     }
 }

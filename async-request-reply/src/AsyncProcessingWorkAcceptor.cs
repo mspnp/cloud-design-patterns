@@ -17,7 +17,7 @@ namespace Contoso
             [ServiceBus("outqueue", Connection = "ServiceBusConnectionAppSetting")] IAsyncCollector<ServiceBusMessage> OutMessages,
             ILogger log)
         {
-            if (String.IsNullOrEmpty(customer.id) || String.IsNullOrEmpty(customer.customername))
+            if (String.IsNullOrEmpty(customer.id) || string.IsNullOrEmpty(customer.customername))
             {
                 return new BadRequestResult();
             }
@@ -33,6 +33,7 @@ namespace Contoso
             message.ApplicationProperties["RequestStatusURL"] = rqs;
                 
             await OutMessages.AddAsync(message);
+            await OutMessages.FlushAsync();
 
             return (ActionResult) new AcceptedResult(rqs, $"Request Accepted for Processing{Environment.NewLine}ProxyStatus: {rqs}");
         }

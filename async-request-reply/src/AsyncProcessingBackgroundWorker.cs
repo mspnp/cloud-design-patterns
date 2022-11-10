@@ -19,6 +19,7 @@ namespace Contoso
             // This is where your actual service worker processing will be performed
 
             var id = myQueueItem.ApplicationProperties["RequestGUID"] as string;
+            //var id = 1;
 
             BlobClient blob = inputContainer.GetBlobClient($"{id}.blobdata");
 

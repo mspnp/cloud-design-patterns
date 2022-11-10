@@ -73,3 +73,18 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
    ```bash
    az group delete -n rg-asyncrequestreply -y
    ```
+
+### Running localy
+You could open the solution with  Visual Studio, then you need to create on the root `local.settings.json`
+
+```
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "ServiceBusConnectionAppSetting": "<yourdata>",
+    "StorageConnectionAppSetting": "<yourData>"
+  }
+}
+```
