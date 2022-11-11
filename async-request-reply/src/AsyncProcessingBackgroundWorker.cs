@@ -1,6 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
@@ -11,20 +12,20 @@ namespace Contoso
     {
         [FunctionName("AsyncProcessingBackgroundWorker")]
         public static async Task RunAsync(
-            [ServiceBusTrigger("outqueue", Connection = "ServiceBusConnectionAppSetting")] ServiceBusMessage myQueueItem,
+            [ServiceBusTrigger("outqueue", Connection = "ServiceBusConnectionAppSetting")] BinaryData customer,
+            IDictionary<string, object> applicationProperties,
             [Blob("data", FileAccess.ReadWrite, Connection = "StorageConnectionAppSetting")] BlobContainerClient inputContainer,
             ILogger log)
         {
             // Perform an actual action against the blob data source for the async readers to be able to check against.
             // This is where your actual service worker processing will be performed
 
-            var id = myQueueItem.ApplicationProperties["RequestGUID"] as string;
-            //var id = 1;
-
+            var id = applicationProperties["RequestGUID"] as string;
+            
             BlobClient blob = inputContainer.GetBlobClient($"{id}.blobdata");
 
             // Now write away the process 
-            await blob.UploadAsync(myQueueItem.Body);
+            await blob.UploadAsync(customer);
         }
     }
 }

@@ -28,14 +28,13 @@ namespace Contoso
 
             var messagePayload = JsonConvert.SerializeObject(customer);
             var message = new ServiceBusMessage(messagePayload);
-            message.ApplicationProperties["RequestGUID"] = reqid;
-            message.ApplicationProperties["RequestSubmittedAt"] = DateTime.Now;
-            message.ApplicationProperties["RequestStatusURL"] = rqs;
-                
-            await OutMessages.AddAsync(message);
-            await OutMessages.FlushAsync();
+            message.ApplicationProperties.Add("RequestGUID", reqid);
+            message.ApplicationProperties.Add("RequestSubmittedAt", DateTime.Now);
+            message.ApplicationProperties.Add("RequestStatusURL", rqs);
 
-            return (ActionResult) new AcceptedResult(rqs, $"Request Accepted for Processing{Environment.NewLine}ProxyStatus: {rqs}");
+            await OutMessages.AddAsync(message);
+
+            return new AcceptedResult(rqs, $"Request Accepted for Processing{Environment.NewLine}ProxyStatus: {rqs}");
         }
     }
 }

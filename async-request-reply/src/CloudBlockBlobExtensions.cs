@@ -14,7 +14,7 @@ namespace Contoso
                 BlobName = blob.Name,
                 Resource = "b",
                 StartsOn = DateTimeOffset.UtcNow,
-                ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(20)
+                ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(10)
             };
             blobSasBuilder.SetPermissions(BlobSasPermissions.Read);
 
