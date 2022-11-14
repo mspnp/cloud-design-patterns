@@ -1,5 +1,4 @@
 using System;
-using Azure.Storage;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
 
@@ -20,11 +19,10 @@ namespace Contoso
             blobSasBuilder.SetPermissions(BlobSasPermissions.Read);
 
             //Generate the shared access signature on the blob, setting the constraints directly on the signature.
-            StorageSharedKeyCredential credential = new StorageSharedKeyCredential(blob.AccountName, "AccountKey");
-            string sasBlobToken = blobSasBuilder.ToSasQueryParameters(credential).ToString();
+            Uri sasUri = blob.GenerateSasUri(blobSasBuilder);
 
             //Return the URI string for the container, including the SAS token.
-            return blob.Uri + sasBlobToken;
+            return sasUri.ToString();
         }
     }
 }

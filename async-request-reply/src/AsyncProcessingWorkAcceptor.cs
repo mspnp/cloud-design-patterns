@@ -17,7 +17,7 @@ namespace Contoso
             [ServiceBus("outqueue", Connection = "ServiceBusConnectionAppSetting")] IAsyncCollector<ServiceBusMessage> OutMessages,
             ILogger log)
         {
-            if (String.IsNullOrEmpty(customer.id) || String.IsNullOrEmpty(customer.customername))
+            if (String.IsNullOrEmpty(customer.id) || string.IsNullOrEmpty(customer.customername))
             {
                 return new BadRequestResult();
             }
@@ -28,13 +28,13 @@ namespace Contoso
 
             var messagePayload = JsonConvert.SerializeObject(customer);
             var message = new ServiceBusMessage(messagePayload);
-            message.ApplicationProperties["RequestGUID"] = reqid;
-            message.ApplicationProperties["RequestSubmittedAt"] = DateTime.Now;
-            message.ApplicationProperties["RequestStatusURL"] = rqs;
-                
+            message.ApplicationProperties.Add("RequestGUID", reqid);
+            message.ApplicationProperties.Add("RequestSubmittedAt", DateTime.Now);
+            message.ApplicationProperties.Add("RequestStatusURL", rqs);
+
             await OutMessages.AddAsync(message);
 
-            return (ActionResult) new AcceptedResult(rqs, $"Request Accepted for Processing{Environment.NewLine}ProxyStatus: {rqs}");
+            return new AcceptedResult(rqs, $"Request Accepted for Processing{Environment.NewLine}ProxyStatus: {rqs}");
         }
     }
 }
