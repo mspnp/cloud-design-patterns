@@ -3,28 +3,26 @@
     using Azure;
     using Azure.Storage.Blobs;
     using Microsoft.Extensions.Configuration;
-    using System;
-    using System.IO;
-    using System.Net;
-    using System.Runtime.Serialization.Json;
-    using System.Threading.Tasks;
+    using System.Net.Http.Json;
 
     public class Program
     {
-        public static void Main(string[] args)
+        private static readonly HttpClient httpClient = new();
+
+        public static async Task Main(string[] args)
         {
-            Console.WriteLine("Press any key to run sample...");
+            Console.WriteLine("Press any key to run the sample...");
             Console.ReadKey();
 
-            IConfiguration configuration = new ConfigurationBuilder()
-                                    .AddJsonFile("appsettings.json").Build();
+            var configuration = new ConfigurationBuilder()
+                                    .AddJsonFile("appsettings.json", false, false).Build();
 
-            // Make sure the endpoint matches with the web apis's endpoint.
+            // Make sure the endpoint matches with the web API's endpoint.
             var tokenServiceEndpoint = configuration.GetSection("AppSettings:ServiceEndpointUrl").Value;
 
-            var blobSas = GetBlobSas(new Uri(tokenServiceEndpoint)).Result;
+            var blobSas = await GetBlobSas(new Uri(tokenServiceEndpoint));
             UriBuilder sasUri = new UriBuilder(blobSas.BlobUri);
-            sasUri.Query = blobSas.Credentials;
+            sasUri.Query = blobSas.Signature;
 
             var blob = new BlobClient(sasUri.Uri);
             try
@@ -42,7 +40,7 @@
                 // Azure Storage returns this error.
                 if (e.Status == 403)
                 {
-                    Console.WriteLine("Read operation failed for SAS {0}", sasUri);
+                    Console.WriteLine("Write operation failed for SAS {0}", sasUri);
                     Console.WriteLine("Additional error information: " + e.Message);
                     Console.WriteLine();
                 }
@@ -60,13 +58,7 @@
 
         private static async Task<StorageEntitySas> GetBlobSas(Uri blobUri)
         {
-            var request = HttpWebRequest.Create(blobUri);
-            var response = await request.GetResponseAsync();
-
-            var serializer = new DataContractJsonSerializer(typeof(StorageEntitySas));
-            var blobSas = (StorageEntitySas)serializer.ReadObject(response.GetResponseStream());
-
-            return blobSas;
+            return await httpClient.GetFromJsonAsync<StorageEntitySas>(blobUri);
         }
 
         /// <summary>
@@ -92,10 +84,10 @@
             return stream;
         }
 
-        public struct StorageEntitySas
+        public class StorageEntitySas
         {
-            public string Credentials;
-            public Uri BlobUri;
+            public string? Signature { get; set; }
+            public Uri? BlobUri { get; set; }
         }
     }
 }
