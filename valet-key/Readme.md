@@ -1,48 +1,64 @@
 # Valet Key Pattern
 
-This document describes the Valet Key Pattern example from the guide [Cloud Design Patterns](https://docs.microsoft.com/azure/architecture/patterns/valet-key).
+This sample implements the [Valet Key pattern](https://learn.microsoft.com/azure/architecture/patterns/valet-key) from Azure Architecture Center's [Cloud Design Patterns](https://learn.microsoft.com/azure/architecture/patterns/) catalog.
 
 This example shows how a client application can obtain a shared access signature with the necessary permissions to write directly to blob storage. For simplicity, this sample focuses on the mechanism to obtain and consume a valet key and does not show how to implement authentication or secure communications.
 
-## System Requirements
+## Prerequisite
 
-* Microsoft .NET Framework 5
-* Microsoft Visual Studio 2019 or newer
+- Microsoft .NET 7
+- This repository cloned to your workstation
 
-## Provision a Azure Storage account
+## :rocket: Steps
 
-Provision an Azure Storage account from the Azure Portal. Once your storage account is created, add a container to it, name it **valetkeysample**.
+### Prepare an Azure Storage account
 
-## Running the example
+1. [Create an Azure Storage account](https://learn.microsoft.com/azure/storage/common/storage-account-create) for this sample, using the following configuration.
 
-You can either run this example locally or deploy it to Azure.
+    - Standard (general purpose v2)
+    - LRS (cost savings for sample)
+    - Require secure transfer
+    - Enable storage account key access
+    - Hot tier
+    - Public access from all networks (or at least needs to be network-accessible from the workstation that you are running the sample from.)
 
-### To run locally
+1. Add a _private_ container to the storage account named **valetkeysample**.
 
-1. Start Visual Studio.
-1. Set the _ValetKey.Web_ project as startup project.
-1. Edit the appsettings.json and replace the placeholder "\<StorageAccountName>" with the name of your storage account.
-1. Start a new instance of the ValetKey.Web.
-1. Once the Web API is running start a new instance of the ValetKey.Client project.
+1. Grant yourself **Storage Blob Data Owner** on the storage account.
 
-### To run on Azure
+### Launch key-granting web application
 
-1. Right click on the _ValetKey.Web_ project, select Publish.
-1. Select Azure as target and Azure App Service as specific target.
-1. Select an App service instance or create a new one.
-1. Skip the API Management step.
-1. Once the publish profile is created, in the Hosting section click on the "..." button in the upper right corner.
-1. Select "Manage Azure App Service Settings".
-1. Add this application setting and set its remote value:
+1. Update the **ValetKey.Web/appsettings.json** file.
 
-   `BlobEndpoint`: `https://<Your Storage Account Name>.blob.core.windows.net`
+   Replace the `<StorageAccountName>` placeholder with the name of your storage account.
 
-1. Publish the _ValetKey.Web_ project and note the URL.
-1. Open the file appsettings.json from the _ValetKey.Client_ project and change the setting `ServiceEndpointUrl` to `https://<Your Published API URL>/api/sas`.
-1. Once the Web API is running start a new instance of the ValetKey.Client project.
+1. Configure authentication.
 
-### Validate blob has been uploaded
+   This sample uses `DefaultAzureCredential` for the web application to authenticate to the Azure storage account as your identity with **Storage Blob Data Owner**. This must be [configured in your enviornment](https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods). (Visual Studio, Visual Studio Code, Azure CLI, etc.)
 
-1. Go to your Storage Account, from left menu select "container"
-1. Click on the container named "valetkeysample"
+1. Start the web api from a terminal instance.
+
+   ```bash
+   dotnet run --project ValetKey.Web
+   ```
+
+### Launch client
+
+1. Run the client from another terminal instance.
+
+   ```bash
+   dotnet run --project ValetKey.Client
+   ```
+
+   This will use the "User delegation key"-generated SaS token provided by the web application to upload a single file per execution.
+
+### Validate the blob has been uploaded
+
+1. Open the the **Storage brower** on your Storage Account.
+1. Select **Blob containers**.
+1. Click on the container named "valetkeysample."
 1. You should be able to see the list of uploaded blobs.
+
+### :broom: Clean up
+
+Remove the storage account when you are done with this sample.

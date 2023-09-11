@@ -1,27 +1,38 @@
 ﻿{
-  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "$schema": "https://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:10194"
+      "applicationUrl": "http://localhost:10194",
+      "sslPort": 10193
     }
   },
   "profiles": {
-    "IIS Express": {
-      "commandName": "IISExpress",
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
       "launchBrowser": true,
-      "launchUrl": "api/sas",
+      "launchUrl": "",
+      "applicationUrl": "http://localhost:10194",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
-    }, 
-    "ValetKey.Web": {
+    },
+    "https": {
       "commandName": "Project",
-      "dotnetRunMessages": "true",
+      "dotnetRunMessages": true,
       "launchBrowser": true,
-      "launchUrl": "swagger",
-      "applicationUrl": "https://localhost:5001;http://localhost:5000",
+      "launchUrl": "",
+      "applicationUrl": "https://localhost:10193;http://localhost:10194",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "launchUrl": "",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

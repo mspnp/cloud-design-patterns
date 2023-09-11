@@ -1,39 +1,27 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Runtime.Serialization.Json;
-using System.Text;
-using System.Threading.Tasks;
-using Azure.Identity;
-using Azure.Storage;
+﻿using Azure.Identity;
 using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-
 
 namespace ValetKey.Web.Controllers
 {
+
     [ApiController]
     public class SasController : ControllerBase
     {
-        private readonly string blobContainer = "valetkeysample";
-        private readonly string blobEndpoint;
-        private readonly IConfiguration configuration;
+        private readonly Uri _blobEndpoint;
+        private readonly ILogger<SasController> _logger;
 
-        public SasController(IConfiguration configuration)
+        public SasController(IConfiguration configuration, ILogger<SasController> logger)
         {
-            this.configuration = configuration;
-            this.blobEndpoint = this.configuration.GetSection("AppSettings:BlobEndpoint").Value;
+            _blobEndpoint = new Uri(configuration.GetSection("AppSettings:BlobEndpoint").Value!);
+            _logger = logger;
         }
 
         // This route would typically require authorization
         [HttpGet("api/sas")]
-        public async Task<string> Get()
+        public async Task<StorageEntitySas> Get()
         {
             try
             {
@@ -41,22 +29,15 @@ namespace ValetKey.Web.Controllers
 
                 // Retrieve a shared access signature of the location we should upload this file to
                 var blobSas = await this.GetSharedAccessReferenceForUpload(blobName.ToString());
-                Trace.WriteLine(string.Format("Blob Uri: {0} - Shared Access Signature: {1}", blobSas.BlobUri, blobSas.Credentials));
 
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    new DataContractJsonSerializer(typeof(StorageEntitySas)).WriteObject(ms, blobSas);
-                    return Encoding.Default.GetString(ms.ToArray());
-                }
+                _logger.LogInformation("Blob Uri: {uri} - Shared Access Signature: {signature}", blobSas.BlobUri, blobSas.Signature);
+
+                return blobSas;
             }
             catch (Exception ex)
             {
-                Trace.TraceError(ex.Message);
-                throw new System.Web.Http.HttpResponseException(new HttpResponseMessage(HttpStatusCode.InternalServerError)
-                {
-                    Content = new StringContent("An error has ocurred"),
-                    ReasonPhrase = "Critical Exception"
-                });
+                _logger.LogError(ex, "Error generateing SaS.");
+                throw;
             }
         }
 
@@ -65,42 +46,36 @@ namespace ValetKey.Web.Controllers
         /// </summary>
         private async Task<StorageEntitySas> GetSharedAccessReferenceForUpload(string blobName)
         {
-            var blobServiceClient = new BlobServiceClient(new Uri(blobEndpoint),
-                                                    new DefaultAzureCredential());
+            var blobServiceClient = new BlobServiceClient(_blobEndpoint, new DefaultAzureCredential());
+            var blobClient = blobServiceClient.GetBlobContainerClient("valetkeysample")
+                                              .GetBlockBlobClient(blobName);
 
-            var blobContainerClient = blobServiceClient.GetBlobContainerClient(this.blobContainer);
-            var blobClient = blobContainerClient.GetBlobClient(blobName);
-
-            var parentBlobServiceClient = blobContainerClient.GetParentBlobServiceClient();
-
-            UserDelegationKey key = await parentBlobServiceClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow,
-                                                                           DateTimeOffset.UtcNow.AddDays(7));
+            var userDelegationKey = await blobServiceClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow,
+                                                                           DateTimeOffset.UtcNow.AddDays(1));
 
             var blobSasBuilder = new BlobSasBuilder
             {
-                BlobContainerName = this.blobContainer,
-                BlobName = blobName,
+                BlobContainerName = blobClient.BlobContainerName,
+                BlobName = blobClient.Name,
                 Resource = "b",
                 StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
                 ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(5)
             };
             blobSasBuilder.SetPermissions(BlobSasPermissions.Write);
 
-            var storageSharedKeyCredential = new StorageSharedKeyCredential(blobServiceClient.AccountName, key.Value);
-
-            var sas = blobSasBuilder.ToSasQueryParameters(storageSharedKeyCredential).ToString();
+            var sas = blobSasBuilder.ToSasQueryParameters(userDelegationKey, blobServiceClient.AccountName).ToString();
 
             return new StorageEntitySas
             {
                 BlobUri = blobClient.Uri,
-                Credentials = sas
+                Signature = sas
             };
         }
 
-        public struct StorageEntitySas
+        public class StorageEntitySas
         {
-            public string Credentials;
-            public Uri BlobUri;
+            public string? Signature { get; internal set; }
+            public Uri? BlobUri { get; internal set; }
         }
 
     }
