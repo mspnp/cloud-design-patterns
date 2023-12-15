@@ -75,7 +75,7 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
     Location: http://<appservice-name>.azurewebsites.net/api/RequestStatus/<guid>
    ```
 
-   Open a browser and execute the location url, a file with the data you have send would be received.
+   Using a browser open the url from the *Location* field in the response. A file with the data you have sent will be downloaded.
 
    > **Note** the app uses the WEBSITE_HOSTNAME environment variable. This environment variable is set automatically by the Azure App Service runtime environment. For more information, see [Azure runtime environment](https.://github.com/projectkudu/kudu/wiki/Azure-runtime-environment)
 
