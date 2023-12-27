@@ -2,7 +2,7 @@
 set -e
 
 if ! command az >/dev/null; then
-    echo "Must install Azure CLI: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli" >&2
+    echo "Must install Azure CLI: https://learn.microsoft.com/cli/azure/install-azure-cli" >&2
     exit 1
 fi
 
