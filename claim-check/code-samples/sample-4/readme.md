@@ -2,7 +2,7 @@
 
 ## Technologies used: Azure Blob Storage, Azure Event Hubs with Kafka, .NET Core 3.1, .NET 5.0
 
-The reason this example uses Event Hubs with Kafka is to demonstrate the ease of using other Azure services like Azure Blob Storage, Azure functions etc. with a different messaging protocol like Kafka from your existing Kafka clients to implement the claim check messaging pattern. This sample consists of a Kafka client which drops the payload in the designated Azure Blob Storage and creates a notification message with location details to be sent to the consumer. The notification message is sent using [Event Hubs with Kafka enabled](https://docs.microsoft.com/azure/event-hubs/event-hubs-create-kafka-enabled). The consumer is notified each time these is a message in the Event Hub and can access the payload using the location information in the message received.
+The reason this example uses Event Hubs with Kafka is to demonstrate the ease of using other Azure services like Azure Blob Storage, Azure functions etc. with a different messaging protocol like Kafka from your existing Kafka clients to implement the claim check messaging pattern. This sample consists of a Kafka client which drops the payload in the designated Azure Blob Storage and creates a notification message with location details to be sent to the consumer. The notification message is sent using [Event Hubs with Kafka enabled](https://learn.microsoft.com/azure/event-hubs/event-hubs-create-kafka-enabled). The consumer is notified each time these is a message in the Event Hub and can access the payload using the location information in the message received.
 
 ![Sample Diagram](images/Sample-4-diagram.jpg)
 
@@ -15,7 +15,7 @@ In addition:
 * [Visual Studio](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/)
 * [.NET Core SDK](https://dotnet.microsoft.com/download)
 * [Git](https://www.git-scm.com/downloads)
-* [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli)
+* [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 * [Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/)
 
 ## Getting Started

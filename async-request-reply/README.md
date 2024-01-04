@@ -2,17 +2,17 @@
 
 Decouple backend processing from a frontend host, where backend processing needs to be asynchronous, but the frontend still needs a clear response.
 
-For more information about this pattern, see [Asynchronous Request-Reply pattern](https://docs.microsoft.com/azure/architecture/patterns/async-request-reply) on the Azure Architecture Center.
+For more information about this pattern, see [Asynchronous Request-Reply pattern](https://learn.microsoft.com/azure/architecture/patterns/async-request-reply) on the Azure Architecture Center.
 
-![Data flow of the async request-reply pattern](https://docs.microsoft.com/en-us/azure/architecture/patterns/_images/async-request-fn.png)
+![Data flow of the async request-reply pattern](https://learn.microsoft.com/azure/architecture/patterns/_images/async-request-fn.png)
 
 ## Deploying the sample
 
 ### Prerequisites
 
-- [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest)
+- [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest)
 - [.NET Core SDK version 6](https://dotnet.microsoft.com/en-us/download)
-- [Azure Functions Core Tools](https://docs.microsoft.com/azure/azure-functions/functions-run-local#v4)
+- [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#v4)
 
 ### Deploy the Azure resources
 

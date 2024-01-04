@@ -16,7 +16,7 @@ In addition:
 * [Visual Studio](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/)
 * [.NET Core SDK](https://dotnet.microsoft.com/download)
 * [Git](https://www.git-scm.com/downloads)
-* [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+* [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 * [Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/)
 
 ## Getting Started
@@ -93,7 +93,7 @@ cd client-consumer
 dotnet run
 ```
 
-You are now ready to drop a payload in Blob Storage to see the Claim Check pattern working. [Refer this to know how to upload blobs to a container using Storage Explorer](https://docs.microsoft.com/azure/storage/blobs/quickstart-storage-explorer#upload-blobs-to-the-container).
+You are now ready to drop a payload in Blob Storage to see the Claim Check pattern working. [Refer this to know how to upload blobs to a container using Storage Explorer](https://learn.microsoft.com/azure/storage/blobs/quickstart-storage-explorer#upload-blobs-to-the-container).
 
 ### Serverless Claim Check message consumption
 

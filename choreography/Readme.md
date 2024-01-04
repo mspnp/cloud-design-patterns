@@ -1,6 +1,6 @@
 # Choregraphy Pattern - Code sample
 
-This code sample contains a set of services designed to show how to implement the [choreography pattern](https://docs.microsoft.com/azure/architecture/patterns/choreography) using a [Drone Delivery app](https://github.com/mspnp/microservices-reference-implementation). These services run as a microservices in an [Azure Kubernetes Service](https://docs.microsoft.com/en-us/azure/aks/) cluster.
+This code sample contains a set of services designed to show how to implement the [choreography pattern](https://learn.microsoft.com/azure/architecture/patterns/choreography) using a [Drone Delivery app](https://github.com/mspnp/microservices-reference-implementation). These services run as a microservices in an [Azure Kubernetes Service](https://learn.microsoft.com/azure/aks/) cluster.
 
 ## Projects and folder structure
 > Technologies used: .NET 5, java, Azure Event Grid, Azure Cosmos DB, Azure Key Vault 
@@ -13,7 +13,7 @@ This code sample contains a set of services designed to show how to implement th
 
 ## The choreography service web API
 
-This service implements the application flow by receiving a list of [EventGrid](https://docs.microsoft.com/azure/event-grid/) events. Each event in the list has a Choreography operation associated to its event type, here is the list of operations:
+This service implements the application flow by receiving a list of [EventGrid](https://learn.microsoft.com/azure/event-grid/) events. Each event in the list has a Choreography operation associated to its event type, here is the list of operations:
 
             - ScheduleDelivery
             - RescheduledDelivery
@@ -23,7 +23,7 @@ This service implements the application flow by receiving a list of [EventGrid](
 
 Depending on the operation, the choreography service makes calls to the associated business services and, if the call is successful, it sets the EventType to the next choreography step (the next operation). This workflow continues until the entire request has been processed.
 
-[Learn more about the application design](https://docs.microsoft.com/azure/architecture/patterns/choreography#design)
+[Learn more about the application design](https://learn.microsoft.com/azure/architecture/patterns/choreography#design)
 
 ## Contributions
 
