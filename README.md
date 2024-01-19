@@ -15,7 +15,7 @@ This repository contains companion code for the article series found in the [Clo
 | [Leader Election](https://learn.microsoft.com/azure/architecture/patterns/leader-election) | [./leader-election/](/leader-election/) |
 | [Pipes & Filters](https://learn.microsoft.com/azure/architecture/patterns/pipes-and-filters) | [./pipes-and-filters/](/pipes-and-filters/) |
 | [Priority Queue](https://learn.microsoft.com/azure/architecture/patterns/priority-queue) | [./priority-queue/](/priority-queue/) |
-| [Rate Limiting](https://learn.microsoft.com/azure/architecture/patterns/rate-limiting-pattern) | Go: [mspnp/go-batcher](https://github.com/mspnp/go-batcher)$^{*}$<br />Java: [Azure-Samples/java-rate-limiting-pattern-sample](https://github.com/Azure-Samples/java-rate-limiting-pattern-sample)$^{*}$ |
+| [Rate Limiting](https://learn.microsoft.com/azure/architecture/patterns/rate-limiting-pattern) | Go: [mspnp/go-batcher](https://github.com/mspnp/go-batcher)$^{*}$ <br> Java: [Azure-Samples/java-rate-limiting-pattern-sample](https://github.com/Azure-Samples/java-rate-limiting-pattern-sample)$^{*}$ |
 | [Saga](https://learn.microsoft.com/azure/architecture/reference-architectures/saga/saga) | [Azure-Samples/saga-orchestration-serverless](https://github.com/Azure-Samples/saga-orchestration-serverless)$^{*}$ |
 | [Static Content Hosting](https://learn.microsoft.com/azure/architecture/patterns/static-content-hosting) | [/static-content-hosting/](/static-content-hosting/) |
 | [Valet Key](https://learn.microsoft.com/en-us/azure/architecture/patterns/valet-key) | [./valet-key/](/valet-key/) |
