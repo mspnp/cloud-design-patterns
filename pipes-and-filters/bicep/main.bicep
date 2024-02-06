@@ -93,5 +93,3 @@ resource queueContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' =
     principalType: 'User'
   }
 }
-
-output storageAccountResourceId string = storageAccount.id
