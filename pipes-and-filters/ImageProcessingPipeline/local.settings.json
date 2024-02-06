@@ -2,8 +2,8 @@
     "IsEncrypted": false,
     "Values": {
         "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-        "AzureWebJobsStorage__accountName": "ckittel008",
-        "pipe__accountName": "ckittel008",
-        "output__serviceUri": "https://ckittel008.blob.core.windows.net"
+        "AzureWebJobsStorage__accountName": "STORAGE_ACCOUNT_NAME",
+        "pipe__accountName": "STORAGE_ACCOUNT_NAME",
+        "output__serviceUri": "https://STORAGE_ACCOUNT_NAME.blob.core.windows.net"
     }
 }

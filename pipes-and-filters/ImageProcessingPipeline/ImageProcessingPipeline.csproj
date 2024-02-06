@@ -29,7 +29,7 @@
     <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
   </ItemGroup>
   <ItemGroup>
-    <Content Remove="images/watermark.png" />
-    <EmbeddedResource Include="images/watermark.png" />
+    <Content Remove="resources/watermark.png" />
+    <EmbeddedResource Include="resources/watermark.png" />
   </ItemGroup>
 </Project>

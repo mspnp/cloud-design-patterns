@@ -8,14 +8,9 @@ using SixLabors.ImageSharp.Processing;
 namespace ImageProcessingPipeline
 {
 
-    public class Resize
+    public class Resize(ILogger<Resize> logger)
     {
-        private readonly ILogger<Resize> _logger;
-
-        public Resize(ILogger<Resize> logger)
-        {
-            _logger = logger;
-        }
+        private readonly ILogger<Resize> _logger = logger;
 
         [Function(nameof(Resize))]
         [QueueOutput("pipe-fjur", Connection = "pipe")]

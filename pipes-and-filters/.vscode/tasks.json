@@ -10,7 +10,10 @@
         "/consoleloggerparameters:NoSummary"
       ],
       "type": "process",
-      "problemMatcher": "$msCompile"
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}/ImageProcessingPipeline"
+      }
     },
     {
       "label": "build (functions)",
@@ -26,7 +29,10 @@
         "kind": "build",
         "isDefault": true
       },
-      "problemMatcher": "$msCompile"
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}/ImageProcessingPipeline"
+      }
     },
     {
       "label": "clean release (functions)",
@@ -39,7 +45,10 @@
         "/consoleloggerparameters:NoSummary"
       ],
       "type": "process",
-      "problemMatcher": "$msCompile"
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}/ImageProcessingPipeline"
+      }
     },
     {
       "label": "publish (functions)",
@@ -53,13 +62,16 @@
       ],
       "type": "process",
       "dependsOn": "clean release (functions)",
-      "problemMatcher": "$msCompile"
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}/ImageProcessingPipeline"
+      }
     },
     {
       "type": "func",
       "dependsOn": "build (functions)",
       "options": {
-        "cwd": "${workspaceFolder}/bin/Debug/net8.0"
+        "cwd": "${workspaceFolder}/ImageProcessingPipeline/bin/Debug/net8.0"
       },
       "command": "host start",
       "isBackground": true,
