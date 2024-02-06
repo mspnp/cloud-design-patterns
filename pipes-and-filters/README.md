@@ -8,6 +8,8 @@ The sample takes a source image, resizes it (first filter), adds a watermark (se
 
 ## :rocket: Deployment guide
 
+Install the prerequisites and follow the steps to have deploy and run a example of the Pipes and Filters pattern.
+
 ### Prerequisites
 
 - A resource group in [Azure subscription](https://azure.com/free) under which you can create resources.
@@ -75,7 +77,7 @@ Now with your pipes deployed and filters ready to execute, it's time to send up 
 
    This repo has a sample image for you to see. Open images/clouds.png to see what the "before" image looks like. You'll notice it's larger than 600px wide and does not have a watermark on it.
 
-   ![A picture of fluffly clouds in a blue sky](./images/clouds.png)
+   ![A picture of fluffy clouds in a blue sky](./images/clouds.png)
 
 1. Upload a sample image to the storage account for processing through the pipes and filters.
 
@@ -140,4 +142,4 @@ Please see our [Contributor guide](../CONTRIBUTING.md).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact <opencode@microsoft.com> with any additional questions or comments.
 
-With :heart: from Microsoft Patterns & Practices, [Azure Architecture Center](https://azure.com/architecture).
+With :heart: from Azure patterns & practices, [Azure Architecture Center](https://azure.com/architecture).
