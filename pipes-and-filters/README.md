@@ -6,7 +6,7 @@ This example contains three filters that perform processing on an image. The thr
 
 The sample takes a source image, resizes it (first filter), adds a watermark (second filter), then publishes it to a output destination (third filter). In this sample, the order of the first two filters could be reversed as they are not dependent on each other. The pipe is Azure Storage queues.
 
-## Deployment guide
+## :rocket: Deployment guide
 
 ### Prerequisites
 
@@ -67,7 +67,7 @@ The sample takes a source image, resizes it (first filter), adds a watermark (se
 
 1. Switch back to viewing your original terminal window once you see the output message "Host lock lease acquired by instance ID ..." indicating that the filters are ready to execute.
 
-## Try it out
+### :checkered_flag: Try it out
 
 Now with your pipes deployed and filters ready to execute, it's time to send up a request for an image to be processed.
 
@@ -113,11 +113,11 @@ Now with your pipes deployed and filters ready to execute, it's time to send up 
    az storage blob download -f images/clouds-processed.png -c processed -n clouds.png --account-name $STORAGE_ACCOUNT_NAME --auth-mode login
    ```
 
-1. Open the processed image to see the "after" state.
+1. Open **images/clouds-processed.png** to see the "after" state.
 
    You'll notice it's resized to 600px wide and has a watermark on it.
 
-## Clean up
+## :broom: Clean up resources
 
 Be sure to delete Azure resources when not using them. Execute these commands to delete resources created as part of this deployment.
 
@@ -128,3 +128,16 @@ az storage account delete -n $STORAGE_ACCOUNT_NAME -g $RESOURCE_GROUP_NAME
 ## Deploying the functions to Azure
 
 If you wish to deploy the Azure functions to Azure instead of running locally, ensure the Azure Function has a system-managed identity and that identity is granted blob and queue data contributor rights on the storage account.
+
+## Related documentation
+
+- [Azure Functions documentation](https://learn.microsoft.com/azure/azure-functions/)
+- [Azure Queue Storage documentation](https://learn.microsoft.com/azure/storage/queues/storage-queues-introduction)
+
+## Contributions
+
+Please see our [Contributor guide](../CONTRIBUTING.md).
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact <opencode@microsoft.com> with any additional questions or comments.
+
+With :heart: from Microsoft Patterns & Practices, [Azure Architecture Center](https://azure.com/architecture).
