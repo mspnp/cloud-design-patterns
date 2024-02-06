@@ -63,7 +63,9 @@ The sample takes a source image, resizes it (first filter), adds a watermark (se
    func start
    ```
 
-   Continue once you see the output message "Host lock lease acquired by instance ID ...".  You monitor log output from this terminal tab for the following commands which 
+   From this terminal you can see trace messages from the functions executing and this is where you can terminate the function as well with <kbd>Ctrl</kbd> + <kbd>c</kbd>.
+
+1. Switch back to viewing your original terminal window once you see the output message "Host lock lease acquired by instance ID ..." indicating that the filters are ready to execute.
 
 ## Try it out
 
@@ -84,7 +86,7 @@ Now with your pipes deployed and filters ready to execute, it's time to send up 
 
 1. Observe the filter process.
 
-   If you look at your function output you should see log entries similar to the following, which shows the three filters being executed in series, with the final filter writing a copy of the file to the destination.
+   If you look at your function output, in your other terminal's tab, you should see log entries similar to the following, which shows the three filters being executed in series, with the final filter writing a copy of the file to the destination.
 
    ```output
    [TS] Executing 'Functions.Resize' (Reason='New queue message detected on 'pipe-xfty'.', Id=3918665c-eba0-4f80-bc3b-45260dccc7fe)
