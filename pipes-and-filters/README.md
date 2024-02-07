@@ -1,4 +1,4 @@
-﻿# Pipes and Filters Pattern
+﻿# Pipes and Filters pattern example
 
 This directory contains an example of the [Pipes and Filters cloud design pattern](https://learn.microsoft.com/azure/architecture/patterns/pipes-and-filters).
 
