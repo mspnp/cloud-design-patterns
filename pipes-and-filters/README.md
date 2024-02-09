@@ -4,7 +4,7 @@ This directory contains an example of the [Pipes and Filters cloud design patter
 
 This example contains three filters that perform processing on an image. The three filters are combined into a pipe; the output of one filter is passed as the input to the next. The filters are implemented as separate Function App functions and storage queue is the pipe. While this pattern shows the Function App functions being co-located under the same Function App for simplicity, they could very well be deployed individually to support more per-filter autonomy/scale.
 
-The sample takes a source image, resizes it (first filter), adds a watermark (second filter), then publishes it to a output destination (third filter). In this sample, the order of the first two filters could be reversed as they are not dependent on each other. The pipe is Azure Storage queues.
+The sample takes a source image, resizes it (first filter), adds a watermark (second filter), then publishes it to a output destination (third filter). In this sample, the order of the first two filters could be reversed as they are not dependent on each other. The pipes are Azure Storage queues.
 
 ## :rocket: Deployment guide
 
@@ -12,7 +12,7 @@ Install the prerequisites and follow the steps to have deploy and run a example 
 
 ### Prerequisites
 
-- A resource group in [Azure subscription](https://azure.com/free) under which you can create resources.
+- Permission to create a new resource group and resources in an [Azure subscription](https://azure.com/free).
 - [Git](https://git-scm.com/downloads)
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)
@@ -27,23 +27,25 @@ Install the prerequisites and follow the steps to have deploy and run a example 
    cd pipes-and-filters
    ```
 
-1. Log into Azure and set subscription information.
+1. Log into Azure and create an empty resource group.
+
+   Please create an empty resource group to hold the resources for this example. The location you select in the resource group creation command below is the Azure region that your resources will be deployment; adjust if needed.
 
    ```azurecli
    az login
    az account set -s <Name or ID of subscription>
 
-   RESOURCE_GROUP_NAME=<Existing Azure resource group name>
+   RESOURCE_GROUP_NAME=rg-pipes-and-filters
+   az group create -n $RESOURCE_GROUP_NAME -l eastus2
    ```
 
 1. Deploy the storage account.
 
-   This storage account contains the queues that will act as the pipe in this sample. This deployment will also configure your identity to be able to create blobs and add queue messages. The Azure Function app will  under your identity, and needs these permissions.
+   This storage account contains the queues that will act as the pipe in this sample. This deployment will also configure your identity to be able to create blobs and add queue messages. The Azure Function app will run under your identity, and needs these permissions.
 
    ```azurecli
    CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show -o tsv --query id)
-   STORAGE_ACCOUNT_NAME=st<UniqueName>
-
+   STORAGE_ACCOUNT_NAME="stpipe$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 10 | head -n 1)"
    # This takes about one minute
    az deployment group create -n deploy-pipe -f bicep/main.bicep -g $RESOURCE_GROUP_NAME -p storageAccountName=$STORAGE_ACCOUNT_NAME userObjectId=$CURRENT_USER_OBJECT_ID
    ```
@@ -51,7 +53,7 @@ Install the prerequisites and follow the steps to have deploy and run a example 
 1. Configure local Functions project to use the deployed Storage account.
 
    ```shell
-   sed -i "s/STORAGE_ACCOUNT_NAME/${STORAGE_ACCOUNT_NAME}/g" ImageProcessingPipeline/local.settings.json
+   sed "s/STORAGE_ACCOUNT_NAME/${STORAGE_ACCOUNT_NAME}/g" ImageProcessingPipeline/local.settings.template.json > ImageProcessingPipeline/local.settings.json
    ```
 
 1. Start the filters.
@@ -73,7 +75,7 @@ Install the prerequisites and follow the steps to have deploy and run a example 
 
 Now with your pipes deployed and filters ready to execute, it's time to send up a request for an image to be processed.
 
-1. Open a smaple image to see a "before" state.
+1. Open a sample image to see a "before" state.
 
    This repo has a sample image for you to see. Open images/clouds.png to see what the "before" image looks like. You'll notice it's larger than 600px wide and does not have a watermark on it.
 
@@ -121,10 +123,10 @@ Now with your pipes deployed and filters ready to execute, it's time to send up 
 
 ## :broom: Clean up resources
 
-Be sure to delete Azure resources when not using them. Execute these commands to delete resources created as part of this deployment.
+Be sure to delete Azure resources when not using them. Since all resources were deployed into a new resource group, you can simply delete the resource group.
 
 ```azurecli
-az storage account delete -n $STORAGE_ACCOUNT_NAME -g $RESOURCE_GROUP_NAME
+az group delete -n $RESOURCE_GROUP_NAME
 ```
 
 ## Deploying the functions to Azure
