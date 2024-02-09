@@ -1,0 +1,24 @@
+{
+  "version": "2.0",
+  "logging": {
+    "applicationInsights": {
+      "enableDependencyTracking": true,
+      "enableLiveMetrics": true,
+      "enablePerformanceCountersCollection": true,
+      "samplingSettings": {
+        "isEnabled": true,
+        "excludedTypes": "Request"
+      },
+      "enableLiveMetricsFilters": true
+    },
+    "logLevel": {
+      "default": "Warning",
+      "Host.Aggregator": "Information",
+      "Host.Results": "Information",
+      "Function": "Information",
+      "Azure.Storage.Blobs": "Critical",
+      "Azure.Core": "Critical",
+      "Azure.Identity": "Critical"
+    }
+  }
+}

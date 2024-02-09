@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "ms-dotnettools.csdevkit",
+    "ms-azuretools.vscode-azurefunctions",
+    "ms-vscode.azurecli",
+    "ms-azuretools.vscode-bicep",
+    "DavidAnson.vscode-markdownlint"
+  ]
+}
