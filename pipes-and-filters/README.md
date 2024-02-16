@@ -29,7 +29,7 @@ Install the prerequisites and follow the steps to have deploy and run a example 
 
 1. Log into Azure and create an empty resource group.
 
-   Please create an empty resource group to hold the resources for this example. The location you select in the resource group creation command below is the Azure region that your resources will be deployment; adjust if needed.
+   Please create an empty resource group to hold the resources for this example. The location you select in the resource group creation command below is the Azure region that your resources will be deployed in; adjust if needed.
 
    ```azurecli
    az login
