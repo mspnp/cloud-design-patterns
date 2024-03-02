@@ -89,6 +89,12 @@ namespace DistributedMutex
                     return null;
                 }
             }
+            catch (Exception e)
+            {
+                // If the storage account is unavailable or we fail for any other reason we still want to keep retrying
+                Trace.TraceError(e.Message);
+                return null;
+            }
 
             if (blobNotFound)
             {
