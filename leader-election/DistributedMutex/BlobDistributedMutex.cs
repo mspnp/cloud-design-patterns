@@ -13,13 +13,13 @@ namespace DistributedMutex
         private static readonly TimeSpan AcquireAttemptInterval = TimeSpan.FromSeconds(20);
         private readonly BlobSettings blobSettings;
         private readonly Func<CancellationToken, Task> taskToRunWhenLeaseAcquired;
-        private readonly Action? onLeaseRetry;
+        private readonly Action? onLeaseTimeoutRetry;
 
-        public BlobDistributedMutex(BlobSettings blobSettings, Func<CancellationToken, Task> taskToRunWhenLeaseAcquired, Action? onLeaseRetry = null)
+        public BlobDistributedMutex(BlobSettings blobSettings, Func<CancellationToken, Task> taskToRunWhenLeaseAcquired, Action? onLeaseTimeoutRetry = null)
         {
             this.blobSettings = blobSettings;
             this.taskToRunWhenLeaseAcquired = taskToRunWhenLeaseAcquired;
-            this.onLeaseRetry = onLeaseRetry;
+            this.onLeaseTimeoutRetry = onLeaseTimeoutRetry;
         }
 
         public async Task RunTaskWhenMutexAcquired(CancellationToken token)
@@ -98,9 +98,9 @@ namespace DistributedMutex
                 {
                     return leaseId;
                 }
-                if(onLeaseRetry != null)
+                if(onLeaseTimeoutRetry != null)
                 {
-                    onLeaseRetry();
+                    onLeaseTimeoutRetry();
                 }
                 await Task.Delay(AcquireAttemptInterval, token);
                 return null;

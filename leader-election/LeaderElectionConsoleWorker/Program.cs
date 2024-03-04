@@ -15,13 +15,12 @@ namespace LeaderElectionConsoleWorker
     {
         static async Task Main(string[] args)
         {
+            // Create a new shared cancellation token source
             CancellationTokenSource source = new CancellationTokenSource();
             CancellationToken token = source.Token;
 
             // Get the connection string from app settings
             var storageConnStr = ConfigurationManager.AppSettings["StorageConnectionString"];
-            var pid = System.Diagnostics.Process.GetCurrentProcess().Id;
-
             if (string.IsNullOrEmpty(storageConnStr))
             {
                 Console.Error.WriteLine("A connection string must be set in the app.config file.");
@@ -32,6 +31,9 @@ namespace LeaderElectionConsoleWorker
                 storageConnStr,
                 "leases",
                 "leader");
+
+            // Get the current process ID for output
+            var pid = System.Diagnostics.Process.GetCurrentProcess().Id;
 
             // Start an async task that will wait for a keypress and cancel the token when a key is pressed
             var uiTask = Task.Run(async () =>
@@ -50,6 +52,8 @@ namespace LeaderElectionConsoleWorker
 
             });
 
+            // Create a new BlobDistributedMutex object with the BlobSettings object and a task
+            // to run when the lease is acquired, and an action to run when the lease is not acquired.
             DistributedMutex.BlobDistributedMutex distributedMutex = new DistributedMutex.BlobDistributedMutex(
                 blobSettings,
                 async (CancellationToken token) =>
@@ -62,6 +66,8 @@ namespace LeaderElectionConsoleWorker
                 }, () => {
                     Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] This process ({pid}) could not acquire lease. Retrying in 20 seconds. Press any key to exit.");
                 });
+
+            // Wait for completion of the DistributedMutex and the UI task before exiting
             await distributedMutex.RunTaskWhenMutexAcquired(token);
             await uiTask;
         }
