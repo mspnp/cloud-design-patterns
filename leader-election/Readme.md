@@ -32,6 +32,14 @@ cd cloud-design-patterns
 cd leader-election
 ```
 
+### Build the solution
+
+Using the existing terminal window, build the solution.
+
+```shell
+dotnet build
+```
+
 ### Running with Azurite storage emulator
 
 The default `app.config` file is set up to use a local Azure Storage emulator. Open a new terminal window, navigate to an empty working directory for the Azurite data files, and start the emulator with the command `azurite`, or `npx azurite` if you installed via `npm`.
@@ -42,7 +50,7 @@ Using the Azure portal, create a new Azure Storage account, or us an existing ac
 
 The sample defaults to use a container named `leases`. If you are utilizing an existing storage account, be certain that this container is not already in use.
 
-Find the connection string in your Storage Account's `Access keys` section in the portal. Copy the Connection string value from either key1 or key2 and replace the `StorageConnectionString` value field in `app.config` with the copied value.
+Find the connection string in your Storage Account's `Access keys` section in the portal. Copy the Connection string value from either key1 or key2 and replace the `StorageConnectionString` value field in `LeaderElectionConsoleWorker/app.config` with the copied value.
 
 ### Running the worker process
 

@@ -16,9 +16,6 @@ namespace DistributedMutex
         public readonly string Container;
         public readonly string BlobName;
         public BlobServiceClient BlobServiceClient;
-        public readonly int LeaseTime;
-        public readonly int RenewInterval;
-
 
         public BlobSettings(String storageConnStr, string container, string blobName)
         {
