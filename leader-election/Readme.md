@@ -16,7 +16,7 @@ Ensure that you have installed the software prerequisites.
 
 ## About the Example
 
-This example shows how a worker process can become a leader among a group of peer instances. The leader can then perform tasks that coordinate and control the other instances; these tasks should be performed by only one instance of the worker role. The leader is elected by acquiring a blob lease.
+This example shows how a worker process can become a leader among a group of peer instances. The leader can then perform tasks that coordinate and control the other instances; these tasks should be performed by only one worker instance. The leader is elected by acquiring a blob lease.
 
 ## Running the Example
 
@@ -46,7 +46,7 @@ The default `app.config` file is set up to use a local Azure Storage emulator. O
 
 ### Running with Azure Storage account
 
-Using the Azure portal, create a new Azure Storage account, or us an existing account.
+Using the Azure portal, create a new Azure Storage account, or use an existing account.
 
 The sample defaults to use a container named `leases`. If you are utilizing an existing storage account, be certain that this container is not already in use.
 
@@ -54,14 +54,14 @@ Find the connection string in your Storage Account's `Access keys` section in th
 
 ### Running the worker process
 
-Navigate to the `leader-election/LeaderElectionConsoleApp` directory, and start the application
+Navigate to the `leader-election/LeaderElectionConsoleWorker` directory, and start the application.
 
 ```shell
 cd LeaderElectionConsoleWorker
 dotnet run
 ```
 
-You can start multiple instances of the worker process by opening additional terminal windows or tabs, and running the same command. When a worker process is the leader, you will see periodic output like:
+Ideally, you should start multiple instances of the worker process to see the coordination. To do this, open additional terminal windows or tabs, and run the same command. When a worker process is the leader, you will see periodic output like:
 
 ```output
 [14:22:30] This process (51635) is currently the leader. Press any key to exit.
@@ -73,7 +73,7 @@ If a worker process is not the leader, you will see:
 [14:23:21] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
 ```
 
-You can terminate the current leader, and watch the other processes to see one of them acquire the lease and become the new leader:
+You can terminate the current leader and watch one of the other worker processes acquire the lease and become the new leader:
 
 ```output
 [14:24:21] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
