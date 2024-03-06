@@ -85,9 +85,13 @@ Install the prerequisites and follow the steps to run the example and observe th
     [14:25:01] This process (51686) is currently the leader. Press any key to exit.
     ```
 
-2. Other experiments
+1. Run from multiple machines
 
-    If you are using an Azure Storage account, you can run the worker process from multiple machines. Try running it on a second machine, and then temporarily disable or unblug the network on one of the machines. You will see that as the lease expires, one of the still-connected worker processes will claim the lease and assume the role of leader.
+    If you are using an Azure Storage account, you can run the worker process from multiple machines. Try running it on a second machine, and then temporarily disable or unplug the network on the machine that hosts the leader process. You will see that as the lease expires, one of the still-connected worker processes will claim the lease and assume the role of leader.
+
+1. Observer detailed tracing
+
+    You can use the [`dotnet-trace` tool](https://learn.microsoft.com/dotnet/core/diagnostics/dotnet-trace) to observe detailed tracing information on the worker process as it attempts to acquire or renew the lease on the storage blob.
 
 ## :broom: Clean up resources
 
