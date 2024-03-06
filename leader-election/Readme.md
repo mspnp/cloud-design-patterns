@@ -1,82 +1,107 @@
-﻿# Leader Election Pattern
+﻿# Leader Election pattern example
 
-This document describes the Leader Election Pattern example from the guide [Cloud Design Patterns](http://aka.ms/Cloud-Design-Patterns).
+This directory contains an example of the [Leader Election cloud design pattern](https://learn.microsoft.com/azure/architecture/patterns/leader-election).
 
-## System Requirements
+This example shows how a worker process can become a leader among a group of peer instances. The leader could then perform tasks that coordinate and control the other instances; these tasks should be performed by only one worker instance.
+
+This example contains one project showing the implementation of a distributed mutex based on a storage blob lease, and another project showing a simple example worker process, implemented as a console app, that leverages the distributed mutex to ensure only one process runs the leader-specific code.
+
+## :rocket: Deployment guide
+
+Install the prerequisites and follow the steps to run the example and observe the leader election behavior.
+
+### Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Azurite emulator for local Azure Storage development](https://learn.microsoft.com/azure/storage/common/storage-use-azurite) or an [Azure Storage Account](https://learn.microsoft.com/azure/storage/common/storage-account-create)
 
-Optional:
+#### Optional
 - [Microsoft Visual Studio 2022 Community, Enterprise, or Professional](https://visualstudio.microsoft.com/) or [Visual Studio Code](https://code.visualstudio.com/) with [C# for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp)
 
-## Before you start
+### Steps
 
-Ensure that you have installed the software prerequisites.
+1. Clone the repository
 
-## About the Example
+    Open a terminal, clone the repository, and navigate to the `leader-election` directory.
 
-This example shows how a worker process can become a leader among a group of peer instances. The leader can then perform tasks that coordinate and control the other instances; these tasks should be performed by only one worker instance. The leader is elected by acquiring a blob lease.
+    ```shell
+    git clone https://github.com/mspnp/cloud-design-patterns.git
+    cd cloud-design-patterns
+    cd leader-election
+    ```
 
-## Running the Example
+1. Build the solution
 
-You can run this example anywhere you can run a .NET 8.0 console application.
+    Using the existing terminal window, build the solution.
 
-### Clone the repository
+    ```shell
+    dotnet build
+    ```
 
-Open a terminal, clone the repository, and navigate to the `leader-election` directory.
+1. Select your storage
 
-```shell
-git clone https://github.com/mspnp/cloud-design-patterns.git
-cd cloud-design-patterns
-cd leader-election
-```
+    #### Running with Azurite storage emulator
 
-### Build the solution
+    The included `app.config` file is set up to use a local Azure Storage emulator. Open a new terminal window, navigate to an empty working directory for the Azurite data files, and start the emulator with the command `azurite`, or `npx azurite` if you installed via `npm`.
 
-Using the existing terminal window, build the solution.
+    #### Running with Azure Storage account
 
-```shell
-dotnet build
-```
+    Using the Azure portal, create a new Azure Storage account, or use an existing account.
 
-### Running with Azurite storage emulator
+    The sample defaults to use a container named `leases`. If you are utilizing an existing storage account, be certain that this container is not already in use.
 
-The default `app.config` file is set up to use a local Azure Storage emulator. Open a new terminal window, navigate to an empty working directory for the Azurite data files, and start the emulator with the command `azurite`, or `npx azurite` if you installed via `npm`.
+    Find the connection string in your Storage Account's `Access keys` section in the portal. Copy the Connection string value from either key1 or key2 and replace the `StorageConnectionString` value field in `LeaderElectionConsoleWorker/app.config` with the copied value.
 
-### Running with Azure Storage account
+### :checkered_flag: Try it out
 
-Using the Azure portal, create a new Azure Storage account, or use an existing account.
+4. Running the worker process
 
-The sample defaults to use a container named `leases`. If you are utilizing an existing storage account, be certain that this container is not already in use.
+    Navigate to the `leader-election/LeaderElectionConsoleWorker` directory, and start the application.
 
-Find the connection string in your Storage Account's `Access keys` section in the portal. Copy the Connection string value from either key1 or key2 and replace the `StorageConnectionString` value field in `LeaderElectionConsoleWorker/app.config` with the copied value.
+    ```shell
+    cd LeaderElectionConsoleWorker
+    dotnet run
+    ```
 
-### Running the worker process
+    Ideally, you should start multiple instances of the worker process to see the coordination. To do this, open additional terminal windows or tabs, and run the same command. When a worker process is the leader, you will see periodic output like:
 
-Navigate to the `leader-election/LeaderElectionConsoleWorker` directory, and start the application.
+    ```output
+    [14:22:30] This process (51635) is currently the leader. Press any key to exit.
+    ```
 
-```shell
-cd LeaderElectionConsoleWorker
-dotnet run
-```
+    If a worker process is not the leader, you will see:
 
-Ideally, you should start multiple instances of the worker process to see the coordination. To do this, open additional terminal windows or tabs, and run the same command. When a worker process is the leader, you will see periodic output like:
+    ```output
+    [14:23:21] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
+    ```
 
-```output
-[14:22:30] This process (51635) is currently the leader. Press any key to exit.
-```
+1. Observe leader election recovery
 
-If a worker process is not the leader, you will see:
+    You can terminate the current leader and watch one of the other worker processes acquire the lease and become the new leader:
 
-```output
-[14:23:21] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
-```
+    ```output
+    [14:24:21] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
+    [14:24:41] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
+    [14:25:01] This process (51686) is currently the leader. Press any key to exit.
+    ```
 
-You can terminate the current leader and watch one of the other worker processes acquire the lease and become the new leader:
+2. Other experiments
 
-```output
-[14:24:21] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
-[14:24:41] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
-[14:25:01] This process (51686) is currently the leader. Press any key to exit.
-```
+    If you are using an Azure Storage account, you can run the worker process from multiple machines. Try running it on a second machine, and then temporarily disable or unblug the network on one of the machines. You will see that as the lease expires, one of the still-connected worker processes will claim the lease and assume the role of leader.
+
+## :broom: Clean up resources
+
+This example does not require the creation of any resources. If you created a new storage account in step 3, you should delete that account if you are no longer using it. If you used an existing storage account, you can delete the `leases` container that was used by this example.
+
+## Related documentation
+
+- [Azure Blob Storage documentation](https://learn.microsoft.com/azure/storage/blobs/storage-blobs-introduction)
+- [Create and manage blob leases with .NET](https://learn.microsoft.com/azure/storage/blobs/storage-blob-lease)
+
+## Contributions
+
+Please see our [Contributor guide](../CONTRIBUTING.md).
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact <opencode@microsoft.com> with any additional questions or comments.
+
+With :heart: from Azure patterns & practices, [Azure Architecture Center](https://azure.com/architecture).
