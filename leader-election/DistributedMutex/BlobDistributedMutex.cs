@@ -9,15 +9,17 @@ namespace DistributedMutex
 
     public class BlobDistributedMutex
     {
-        private static readonly TimeSpan RenewInterval = TimeSpan.FromSeconds(45);
-        private static readonly TimeSpan AcquireAttemptInterval = TimeSpan.FromSeconds(65);
+        private static readonly TimeSpan RenewInterval = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan AcquireAttemptInterval = TimeSpan.FromSeconds(20);
         private readonly BlobSettings blobSettings;
         private readonly Func<CancellationToken, Task> taskToRunWhenLeaseAcquired;
+        private readonly Action? onLeaseTimeoutRetry;
 
-        public BlobDistributedMutex(BlobSettings blobSettings, Func<CancellationToken, Task> taskToRunWhenLeaseAquired)
+        public BlobDistributedMutex(BlobSettings blobSettings, Func<CancellationToken, Task> taskToRunWhenLeaseAcquired, Action? onLeaseTimeoutRetry = null)
         {
             this.blobSettings = blobSettings;
-            this.taskToRunWhenLeaseAcquired = taskToRunWhenLeaseAquired;
+            this.taskToRunWhenLeaseAcquired = taskToRunWhenLeaseAcquired;
+            this.onLeaseTimeoutRetry = onLeaseTimeoutRetry;
         }
 
         public async Task RunTaskWhenMutexAcquired(CancellationToken token)
@@ -61,22 +63,22 @@ namespace DistributedMutex
             while (!token.IsCancellationRequested)
             {
                 // Try to acquire the blob lease, otherwise wait for some time before we can try again.
-                string leaseId = await this.TryAcquireLeaseOrWait(leaseManager, token);
+                string? leaseId = await this.TryAcquireLeaseOrWait(leaseManager, token);
 
                 if (!string.IsNullOrEmpty(leaseId))
                 {
-                    // Create a new linked cancellation token source, so if either the 
+                    // Create a new linked cancellation token source, so if either the
                     // original token is canceled or the lease cannot be renewed,
                     // then the leader task can be canceled.
-                    using (var leaseCts = 
+                    using (var leaseCts =
                         CancellationTokenSource.CreateLinkedTokenSource(new[] { token }))
                     {
                         // Run the leader task.
                         var leaderTask = this.taskToRunWhenLeaseAcquired.Invoke(leaseCts.Token);
 
-                        // Keeps renewing the lease in regular intervals. 
+                        // Keeps renewing the lease in regular intervals.
                         // If the lease cannot be renewed, then the task completes.
-                        var renewLeaseTask = 
+                        var renewLeaseTask =
                             this.KeepRenewingLease(leaseManager, leaseId, leaseCts.Token);
 
                         // When any task completes (either the leader task or when it could
@@ -87,7 +89,7 @@ namespace DistributedMutex
             }
         }
 
-        private async Task<string> TryAcquireLeaseOrWait(BlobLeaseManager leaseManager, CancellationToken token)
+        private async Task<string?> TryAcquireLeaseOrWait(BlobLeaseManager leaseManager, CancellationToken token)
         {
             try
             {
@@ -96,7 +98,10 @@ namespace DistributedMutex
                 {
                     return leaseId;
                 }
-
+                if(onLeaseTimeoutRetry != null)
+                {
+                    onLeaseTimeoutRetry();
+                }
                 await Task.Delay(AcquireAttemptInterval, token);
                 return null;
             }
@@ -127,7 +132,7 @@ namespace DistributedMutex
 
                     // We delay based on the time from the start of the last renew request to ensure
                     var renewIntervalAdjusted = RenewInterval - renewOffset.Elapsed;
-                    
+
                     // If the adjusted interval is greater than zero wait for that long
                     if (renewIntervalAdjusted > TimeSpan.Zero)
                     {

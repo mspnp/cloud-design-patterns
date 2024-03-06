@@ -17,13 +17,12 @@ namespace DistributedMutex
         public readonly string BlobName;
         public BlobServiceClient BlobServiceClient;
 
-
         public BlobSettings(String storageConnStr, string container, string blobName)
         {
             var blobClientOptions = new BlobClientOptions();
             blobClientOptions.Retry.Delay = TimeSpan.FromSeconds(5);
             blobClientOptions.Retry.MaxRetries = 3;
-            
+
             this.BlobServiceClient = new BlobServiceClient(storageConnStr, blobClientOptions);
             this.Container = container;
             this.BlobName = blobName;
@@ -47,7 +46,6 @@ namespace DistributedMutex
         {
             this.leaseContainerClient = blobServiceClient.GetBlobContainerClient(leaseContainerName);
             this.leaseBlobClient = this.leaseContainerClient.GetPageBlobClient(leaseBlobName);
-            
         }
 
         public void ReleaseLease(string leaseId)
@@ -57,23 +55,23 @@ namespace DistributedMutex
                 var leaseClient = this.leaseBlobClient.GetBlobLeaseClient(leaseId);
                 leaseClient.Release();
             }
-            catch (RequestFailedException e) 
+            catch (RequestFailedException e)
             {
                 // Lease will eventually be released.
                 Trace.TraceError(e.ErrorCode);
             }
         }
 
-        public async Task<string> AcquireLeaseAsync(CancellationToken token)
+        public async Task<string?> AcquireLeaseAsync(CancellationToken token)
         {
             bool blobNotFound = false;
             try
             {
                 var leaseClient = this.leaseBlobClient.GetBlobLeaseClient();
-                var lease = await leaseClient.AcquireAsync(TimeSpan.FromSeconds(60), null, token);
+                var lease = await leaseClient.AcquireAsync(TimeSpan.FromSeconds(15), null, token);
                 return lease.Value.LeaseId;
             }
-            catch (RequestFailedException storageException) 
+            catch (RequestFailedException storageException)
             {
                 Trace.TraceError(storageException.ErrorCode);
 
@@ -87,6 +85,12 @@ namespace DistributedMutex
                 {
                     return null;
                 }
+            }
+            catch (Exception e)
+            {
+                // If the storage account is unavailable or we fail for any other reason we still want to keep retrying
+                Trace.TraceError(e.Message);
+                return null;
             }
 
             if (blobNotFound)
