@@ -1,15 +1,61 @@
-# Valet Key Pattern
+# Valet Key pattern example
 
-This sample implements the [Valet Key pattern](https://learn.microsoft.com/azure/architecture/patterns/valet-key) from Azure Architecture Center's [Cloud Design Patterns](https://learn.microsoft.com/azure/architecture/patterns/) catalog.
+This directory contains an example of the [Valet Key cloud design pattern](https://learn.microsoft.com/azure/architecture/patterns/valet-key).
 
-This example shows how a client application can obtain a shared access signature with the necessary permissions to write directly to blob storage. For simplicity, this sample focuses on the mechanism to obtain and consume a valet key and does not show how to implement authentication or secure communications.
+This example shows how a client application can obtain necessary permissions to write directly to a storage destination, bypassing a server component that would not add value and introduce additional latency and risk to the operation.
 
-## Prerequisite
+Specifically this sample includes an Azure Function that provides a scoped, time-limited shared access signature (SaS) to authorized callers, who would then use that SaS token to perform a data upload to the storage account without consuming the resources of the Azure Function to proxy that request.
 
-- Microsoft .NET 7
-- This repository cloned to your workstation
+## :rocket: Deployment guide
 
-## :rocket: Steps
+Install the prerequisites and follow the steps to deploy and run an example of the Valet Key pattern.
+
+### Prerequisites
+
+- Permission to create a new resource group and resources in an [Azure subscription](https://azure.com/free).
+- [Git](https://git-scm.com/downloads)
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)
+- [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
+
+### Steps
+
+1. Clone this repository to your workstation and navigate to the working directory.
+
+   ```shell
+   git clone https://github.com/mspnp/cloud-design-patterns
+   cd valet-key
+   ```
+
+1. Log into Azure and create an empty resource group.
+
+   ```azurecli
+   az login
+   az account set -s <Name or ID of subscription>
+
+   RESOURCE_GROUP_NAME=rg-valet-key
+   az group create -n $RESOURCE_GROUP_NAME -l eastus2
+   ```
+
+1. Deploy Azure resources.
+
+   - One Azure Function
+   - Two storage accounts. One for Azure Functions (a service requirement) and one specifically for the client to upload files to as the destination.
+   - Appropriate role assignments
+
+   ```azurecli
+   STORAGE_ACCOUNT_NAME="stvaletblobs$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 7 | head -n 1)"
+   STORAGE_ACCOUNT_NAME="stvaletfn$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 10 | head -n 1)"
+
+   # This takes about one minute
+   az deployment group create -n deploy-valet-key -f bicep/main.bicep -g $RESOURCE_GROUP_NAME -p storageAccountName=$STORAGE_ACCOUNT_NAME userObjectId=$CURRENT_USER_OBJECT_ID
+   ```
+
+1. Deploy Azure Function code.
+
+### :checkered_flag: Try it out
+
+   
 
 ### Prepare an Azure Storage account
 

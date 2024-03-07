@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "ValetKey_Function": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7006",
+      "launchBrowser": false
+    }
+  }
+}
