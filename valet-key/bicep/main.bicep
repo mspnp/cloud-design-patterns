@@ -158,6 +158,10 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
           name: 'AzureWebJobsStorage__accountName'
           value: functionStorageAccount.name
         }
+        {
+          name: 'UploadStorage__blobServiceUri'
+          value: imageStorageAccount.properties.primaryEndpoints.blob
+        }
       ]
       alwaysOn: false
       use32BitWorkerProcess: false
