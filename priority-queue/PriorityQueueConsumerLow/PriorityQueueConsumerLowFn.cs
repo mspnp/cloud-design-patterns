@@ -1,14 +1,21 @@
-using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
+using Microsoft.Azure.Functions.Worker;
 
 namespace PriorityQueueConsumerLow
 {
-    public static class PriorityQueueConsumerLowFn
+    public class PriorityQueueConsumerLowFn
     {
-        [FunctionName("LowPriorityQueueConsumerFunction")]
-        public static void Run([ServiceBusTrigger("messages", "lowPriority", Connection = "ServiceBusConnection")]string lowPriorityMessage, ILogger log)
+        private readonly ILogger _logger;
+
+        public PriorityQueueConsumerLowFn(ILogger<PriorityQueueConsumerLowFn> logger)
         {
-            log.LogInformation($"C# ServiceBus topic trigger function processed message: {lowPriorityMessage}");
+            _logger = logger;
+        }
+
+        [Function("LowPriorityQueueConsumerFunction")]
+        public void Run([ServiceBusTrigger("messages", "lowPriority", Connection = "ServiceBusConnectionString")] string lowPriorityMessage)
+        {
+            _logger.LogInformation($"C# ServiceBus topic trigger function processed message: {lowPriorityMessage}");
         }
     }
 }
