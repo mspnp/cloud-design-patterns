@@ -3,6 +3,6 @@
     "Values": {
         "AzureWebJobsStorage": "UseDevelopmentStorage=true",
         "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-        "UploadStorage__blobServiceUri": "https://stimages.blob.core.windows.net"
+        "UploadStorage__blobServiceUri": "https://STORAGE_ACCOUNT_NAME.blob.core.windows.net"
     }
 }

@@ -38,20 +38,24 @@ Install the prerequisites and follow the steps to deploy and run an example of t
    az group create -n $RESOURCE_GROUP_NAME -l eastus2
    ```
 
-1. Deploy Azure resources.
-
-   - One Azure Function
-   - Two storage accounts. One for Azure Functions (a service requirement) and one specifically for the client to upload files to as the destination.
-   - Appropriate role assignments
+1. Deploy destination Azure Storage account.
 
    ```azurecli
+   CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show -o tsv --query id)
    STORAGE_ACCOUNT_NAME="stvaletblobs$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 7 | head -n 1)"
-   FUNCTION_STORAGE_ACCOUNT_NAME="stvaletfn$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 10 | head -n 1)"
 
    # This takes about one minute
-   az deployment group create -n deploy-valet-key -f bicep/main.bicep -g $RESOURCE_GROUP_NAME -p storageAccountName=$STORAGE_ACCOUNT_NAME userObjectId=$CURRENT_USER_OBJECT_ID
+   az deployment group create -n deploy-valet-key -f bicep/main.bicep -g $RESOURCE_GROUP_NAME -p storageAccountName=$STORAGE_ACCOUNT_NAME principalId=$CURRENT_USER_OBJECT_ID
    ```
 
+1. Configure local function and client to use the deployed Storage account.
+
+   ```shell
+   sed "s/STORAGE_ACCOUNT_NAME/${STORAGE_ACCOUNT_NAME}/g" ValetKey.Function/local.settings.template.json > ValetKey.Function/local.settings.json
+   sed "s/STORAGE_ACCOUNT_NAME/${STORAGE_ACCOUNT_NAME}/g" ValetKey.Client/local.settings.template.json > ValetKey.Client/local.settings.json
+   ```
+
+<!-- 
 1. Build the Azure Function.
 
    ```bash
@@ -69,57 +73,41 @@ Install the prerequisites and follow the steps to deploy and run an example of t
    az storage blob upload -f publish/publish-00.zip -c function-deployments --account-name $FUNCTION_STORAGE_ACCOUNT_NAME
    az functionapp config appsettings set -n functionappck04 -g rg-valet-key --settings WEBSITE_RUN_FROM_PACKAGE=$(az storage blob url --account-name $FUNCTION_STORAGE_ACCOUNT_NAME --container-name function-deployments -n publish-00.zip -o tsv)
    ```
+-->
 
 ### :checkered_flag: Try it out
 
-   
+### Launch valet key API
 
-### Prepare an Azure Storage account
+1. [Run Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite#run-azurite)
 
-1. [Create an Azure Storage account](https://learn.microsoft.com/azure/storage/common/storage-account-create) for this sample, using the following configuration.
+   > The local storage emulator is required as an Azure Storage account is a required "backing resource" for Azure Functions.
 
-    - Standard (general purpose v2)
-    - LRS (cost savings for sample)
-    - Require secure transfer
-    - Enable storage account key access
-    - Hot tier
-    - Public access from all networks (or at least needs to be network-accessible from the workstation that you are running the sample from.)
-
-1. Add a _private_ container to the storage account named **valetkeysample**.
-
-1. Grant yourself **Storage Blob Data Owner** on the storage account.
-
-### Launch key-granting web application
-
-1. Update the **ValetKey.Web/appsettings.json** file.
-
-   Replace the `<StorageAccountName>` placeholder with the name of your storage account.
-
-1. Configure authentication.
-
-   This sample uses `DefaultAzureCredential` for the web application to authenticate to the Azure storage account as your identity with **Storage Blob Data Owner**. This must be [configured in your enviornment](https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods). (Visual Studio, Visual Studio Code, Azure CLI, etc.)
-
-1. Start the web api from a terminal instance.
+1. Start the valet key API.
 
    ```bash
-   dotnet run --project ValetKey.Web
+   func start ValetKey.Function/
    ```
+
+   > This Azure Function implicitly uses `DefaultAzureCredential` for to authenticate to the Azure storage account as your identity with **Storage Blob Delegator**. This must be [configured in your environment](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods), and if you followed the instructions it already is with your usage of `az login`. The Azure Function is executing under your identity when running locally.
 
 ### Launch client
 
-1. Run the client from another terminal instance.
+1. Run the client that will use the valet key.
+
+   It's recommended to run this from another terminal instance.
 
    ```bash
    dotnet run --project ValetKey.Client
    ```
 
-   This will use the "User delegation key"-generated SaS token provided by the web application to upload a single file per execution.
+   The client will reach out to the valet-key API and request a scope and time-limited SaS token. The API will generate one for the client and return it to the client. The client will use that token to upload a file.
 
 ### Validate the blob has been uploaded
 
-1. Open the the **Storage brower** on your Storage Account.
+1. Open the the **Storage browser** on your Storage Account.
 1. Select **Blob containers**.
-1. Click on the container named "valetkeysample."
+1. Click on the container named `uploads`.
 1. You should be able to see the list of uploaded blobs.
 
 ### :broom: Clean up
