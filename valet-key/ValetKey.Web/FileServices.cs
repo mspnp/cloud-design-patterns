@@ -70,6 +70,4 @@ namespace ValetKey.Web
             public string? Signature { get; internal set; }
         }
     }
-
-
 }
