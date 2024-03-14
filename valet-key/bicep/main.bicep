@@ -60,7 +60,7 @@ resource functionStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' =
     accessTier: 'Hot'
     allowBlobPublicAccess: true
     allowCrossTenantReplication: false
-    allowSharedKeyAccess: false   // This storage account is configured to only work with Microsoft Entra ID authentication
+    allowSharedKeyAccess: true   // This storage account is configured to work with Microsoft Entra ID authentication and shared access keys (a requirement for Azure Functions Linux consumption plans for File share access)
     isLocalUserEnabled: false
     isHnsEnabled: false
     isNfsV3Enabled: false
@@ -75,7 +75,7 @@ resource functionStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' =
   resource blobContainers 'blobServices' = {
     name: 'default'
     
-    resource images 'containers' = {
+    resource deployments 'containers' = {
       name: 'function-deployments'
     }
   }
@@ -100,7 +100,7 @@ resource imageStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     isSftpEnabled: false
     largeFileSharesState: 'Disabled'
     minimumTlsVersion: 'TLS1_2'
-    publicNetworkAccess: 'Enabled'   // This sample does not use private networking, but could be configured to use Private Link connections if fully deploy to Azure
+    publicNetworkAccess: 'Enabled'   // In a valet-key scenario, typically clients are not hosted in your virtual network. However if they were, then you could disable this. In this sample, you'll be accessing this from your workstation.
     supportsHttpsTrafficOnly: true
     defaultToOAuthAuthentication: true
   }
@@ -121,7 +121,7 @@ resource functionHostingPlan 'Microsoft.Web/serverfarms@2023-01-01' = {
     name: 'Y1'
     tier: 'Dynamic'
   }
-  kind: 'functionapp'
+  kind: 'linux'
   properties: {
     reserved: true
   }
@@ -151,6 +151,10 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
           value: 'dotnet-isolated'
         }
         {
+          name: 'WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED'
+          value: '1'
+        }
+        {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
           value: appInsights.properties.ConnectionString
         }
@@ -159,8 +163,24 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
           value: functionStorageAccount.name
         }
         {
+          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${functionStorageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${functionStorageAccount.listKeys().keys[0].value}'
+        }
+        {
+          name: 'WEBSITE_CONTENTSHARE'
+          value: 'sitecontent00'
+        }
+        {
           name: 'UploadStorage__blobServiceUri'
           value: imageStorageAccount.properties.primaryEndpoints.blob
+        }
+        {
+          name: 'WEBSITE_RUN_FROM_PACKAGE'
+          value: '${functionStorageAccount.properties.primaryEndpoints.blob}${functionStorageAccount::blobContainers::deployments.name}/publish00.zip'
+        }
+        {
+          name: 'WEBSITE_RUN_FROM_PACKAGE_BLOB_MI_RESOURCE_ID'
+          value: 'SystemAssigned'
         }
       ]
       alwaysOn: false
@@ -171,23 +191,40 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
       localMySqlEnabled: false
       minTlsVersion: '1.2'
       remoteDebuggingEnabled: false
-      
       ftpsState: 'Disabled'
     }
     virtualNetworkSubnetId: null
   }
 
-  resource creds 'basicPublishingCredentialsPolicies' = {
+  resource scmCreds 'basicPublishingCredentialsPolicies' = {
     name: 'scm'
+    properties: {
+      allow: false
+    }
+  }
+
+    resource ftpCreds 'basicPublishingCredentialsPolicies' = {
+    name: 'ftp'
     properties: {
       allow: false
     }
   }
 }
 
-resource blobContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(functionApp.id, functionStorageAccount.id, storageBlobDataContributorRole.id)
+resource blobContributorFunctionStorage 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(functionApp.id, functionStorageAccount.id, storageBlobDataContributorRole.id, '00')
   scope: functionStorageAccount
+  properties: {
+    principalId: functionApp.identity.principalId
+    roleDefinitionId: storageBlobDataContributorRole.id
+    principalType: 'ServicePrincipal'
+    description: 'Replaces the need for key-based access to the storage account for Azure Functions'
+  }
+}
+
+resource blobContributorImageStorage 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(functionApp.id, imageStorageAccount.id, storageBlobDataContributorRole.id, '00')
+  scope: imageStorageAccount
   properties: {
     principalId: functionApp.identity.principalId
     roleDefinitionId: storageBlobDataContributorRole.id

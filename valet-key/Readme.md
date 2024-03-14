@@ -12,10 +12,11 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 
 ### Prerequisites
 
-- Permission to create a new resource group and resources in an [Azure subscription](https://azure.com/free).
+- Permission to create a new resource group and resources in an [Azure subscription](https://azure.com/free)
 - [Git](https://git-scm.com/downloads)
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)
+- [Azurite](/azure/storage/common/storage-use-azurite)
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 
 ### Steps
@@ -45,13 +46,29 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 
    ```azurecli
    STORAGE_ACCOUNT_NAME="stvaletblobs$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 7 | head -n 1)"
-   STORAGE_ACCOUNT_NAME="stvaletfn$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 10 | head -n 1)"
+   FUNCTION_STORAGE_ACCOUNT_NAME="stvaletfn$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 10 | head -n 1)"
 
    # This takes about one minute
    az deployment group create -n deploy-valet-key -f bicep/main.bicep -g $RESOURCE_GROUP_NAME -p storageAccountName=$STORAGE_ACCOUNT_NAME userObjectId=$CURRENT_USER_OBJECT_ID
    ```
 
-1. Deploy Azure Function code.
+1. Build the Azure Function.
+
+   ```bash
+   cd ValetKey.Function
+
+   dotnet publish -o publish/
+   cd publish && zip -r publish-00.zip * && cd ..
+   ```
+
+1. Deploy the Azure Function code.
+
+   > This storage account uses account key based access for uploading the .zip from your console. In a production system your pipeline's identity would be granted RBAC access and the agent would be running from a private network.
+
+   ```bash
+   az storage blob upload -f publish/publish-00.zip -c function-deployments --account-name $FUNCTION_STORAGE_ACCOUNT_NAME
+   az functionapp config appsettings set -n functionappck04 -g rg-valet-key --settings WEBSITE_RUN_FROM_PACKAGE=$(az storage blob url --account-name $FUNCTION_STORAGE_ACCOUNT_NAME --container-name function-deployments -n publish-00.zip -o tsv)
+   ```
 
 ### :checkered_flag: Try it out
 
