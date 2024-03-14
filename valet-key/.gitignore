@@ -1,0 +1,4 @@
+# Azurite
+__blobstorage__/
+__azurite*
+.mono/

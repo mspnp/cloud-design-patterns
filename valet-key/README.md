@@ -48,68 +48,65 @@ Install the prerequisites and follow the steps to deploy and run an example of t
    az deployment group create -n deploy-valet-key -f bicep/main.bicep -g $RESOURCE_GROUP_NAME -p storageAccountName=$STORAGE_ACCOUNT_NAME principalId=$CURRENT_USER_OBJECT_ID
    ```
 
-1. Configure local function and client to use the deployed Storage account.
+1. Configure API to use this Azure Storage account for its delegation.
 
    ```shell
-   sed "s/STORAGE_ACCOUNT_NAME/${STORAGE_ACCOUNT_NAME}/g" ValetKey.Function/local.settings.template.json > ValetKey.Function/local.settings.json
-   sed "s/STORAGE_ACCOUNT_NAME/${STORAGE_ACCOUNT_NAME}/g" ValetKey.Client/local.settings.template.json > ValetKey.Client/local.settings.json
+   sed "s/STORAGE_ACCOUNT_NAME/${STORAGE_ACCOUNT_NAME}/g" ValetKey.Web/local.settings.template.json > ValetKey.Web/local.settings.json
    ```
 
-<!-- 
-1. Build the Azure Function.
-
-   ```bash
-   cd ValetKey.Function
-
-   dotnet publish -o publish/
-   cd publish && zip -r publish-00.zip * && cd ..
-   ```
-
-1. Deploy the Azure Function code.
-
-   > This storage account uses account key based access for uploading the .zip from your console. In a production system your pipeline's identity would be granted RBAC access and the agent would be running from a private network.
-
-   ```bash
-   az storage blob upload -f publish/publish-00.zip -c function-deployments --account-name $FUNCTION_STORAGE_ACCOUNT_NAME
-   az functionapp config appsettings set -n functionappck04 -g rg-valet-key --settings WEBSITE_RUN_FROM_PACKAGE=$(az storage blob url --account-name $FUNCTION_STORAGE_ACCOUNT_NAME --container-name function-deployments -n publish-00.zip -o tsv)
-   ```
--->
-
-### :checkered_flag: Try it out
-
-### Launch valet key API
-
-1. [Run Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite#run-azurite)
+1. [Run Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite#run-azurite) blob emulation service.
 
    > The local storage emulator is required as an Azure Storage account is a required "backing resource" for Azure Functions.
 
 1. Start the valet key API.
 
    ```bash
-   func start ValetKey.Function/
+   cd ValetKey.Web/
+   func start
    ```
 
-   > This Azure Function implicitly uses `DefaultAzureCredential` for to authenticate to the Azure storage account as your identity with **Storage Blob Delegator**. This must be [configured in your environment](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods), and if you followed the instructions it already is with your usage of `az login`. The Azure Function is executing under your identity when running locally.
+   > This Azure Function implicitly uses `DefaultAzureCredential` to authenticate to the Azure storage account as your identity with **Storage Blob Delegator**. This must be [configured in your environment](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods), and if you followed the instructions it already is with your usage of `az login`. The Azure Function is executing under your identity when running locally.
 
-### Launch client
+### :checkered_flag: Try it out
 
-1. Run the client that will use the valet key.
+1. Run the client that will ask for and use the valet key.
 
-   It's recommended to run this from another terminal instance.
+   You'll need to run this from another terminal.
 
    ```bash
-   dotnet run --project ValetKey.Client
+   dotnet run --project ValetKey.Client/
    ```
 
-   The client will reach out to the valet-key API and request a scope and time-limited SaS token. The API will generate one for the client and return it to the client. The client will use that token to upload a file.
+   > The client reaches out to the valet key API and requests a scope and time-limited SaS token for a destination of the API's choosing. The API will generate the sas token and return it to the client along with the destination. The client will use that token to upload a file to that destination. Attempting to use that SaS token for any other purpose will be denied.
 
-### Validate the blob has been uploaded
+1. Validate the blob has been uploaded
 
-1. Open the the **Storage browser** on your Storage Account.
-1. Select **Blob containers**.
-1. Click on the container named `uploads`.
-1. You should be able to see the list of uploaded blobs.
+   1. Open the the **Storage browser** on your Storage Account.
+   1. Select **Blob containers**.
+   1. Click on the container named `uploads`.
+   1. You should be able to see the list of uploaded blobs.
 
 ### :broom: Clean up
 
-Remove the storage account when you are done with this sample.
+Remove the resource group that you created when you are done with this sample.
+
+```azurecli
+az group delete -n $RESOURCE_GROUP_NAME
+```
+
+## Deploying to Azure
+
+The Azure Function can be deployed to Azure and run under a managed identity. The managed identity must have the same role assignments granted to your user in this walkthrough (and your user could technically have those permissions removed). Once the function is running on Azure, there is no need for any local `az login` authentication in this sample; the client (ValetKey.Client) doesn't use it.
+
+## Related documentation
+
+- [Create a user delegation SAS](https://learn.microsoft.com/rest/api/storageservices/create-user-delegation-sas)
+- [Publish Azure Function to Azure](https://learn.microsoft.com/azure/azure-functions/functions-run-local#publish)
+
+## Contributions
+
+Please see our [Contributor guide](../CONTRIBUTING.md).
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact <opencode@microsoft.com> with any additional questions or comments.
+
+With :heart: from Azure patterns & practices, [Azure Architecture Center](https://azure.com/architecture).

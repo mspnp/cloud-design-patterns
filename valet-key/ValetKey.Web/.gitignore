@@ -13,7 +13,7 @@ local.settings.json
 # Azurite
 __blobstorage__/
 __azurite*
-
+.mono/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

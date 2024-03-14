@@ -9,7 +9,7 @@
     {
         private static readonly HttpClient httpClient = new();
 
-        public static async Task Main(string[] args)
+        public static async Task Main()
         {
             Console.WriteLine("Press any key to run the sample...");
             Console.ReadKey();
@@ -17,19 +17,24 @@
             var configuration = new ConfigurationBuilder()
                                     .AddJsonFile("appsettings.json", false, false).Build();
 
-            // Make sure the endpoint matches with the web API's endpoint.
+            // Get the valet key endpoint from config
             var tokenServiceEndpoint = configuration.GetSection("AppSettings:ServiceEndpointUrl").Value;
+            if (string.IsNullOrWhiteSpace(tokenServiceEndpoint)) throw new InvalidOperationException("Configure AppSettings:ServiceEndpointUrl and run again.");
 
-            var blobSas = await GetBlobSas(new Uri(tokenServiceEndpoint));
-            UriBuilder sasUri = new UriBuilder(blobSas.BlobUri);
-            sasUri.Query = blobSas.Signature;
+            // Get the valet key
+            var blobSas = await GetBlobSasAsync(new Uri(tokenServiceEndpoint));
+
+            var sasUri = new UriBuilder(blobSas!.BlobUri!)
+            {
+                Query = blobSas.Signature
+            };
 
             var blob = new BlobClient(sasUri.Uri);
             try
             {
-                using (var stream = GetFileToUpload(10))
+                using (var stream = await GetFileToUploadAsync(10))
                 {
-                    blob.Upload(stream);
+                    await blob.UploadAsync(stream);
                 }
 
                 Console.WriteLine("Blob uploaded successful: {0}", blob.Name);
@@ -56,7 +61,7 @@
             Console.ReadKey();
         }
 
-        private static async Task<StorageEntitySas> GetBlobSas(Uri blobUri)
+        private static async Task<StorageEntitySas?> GetBlobSasAsync(Uri blobUri)
         {
             return await httpClient.GetFromJsonAsync<StorageEntitySas>(blobUri);
         }
@@ -64,19 +69,19 @@
         /// <summary>
         /// Create a sample file containing random bytes of data
         /// </summary>
-        /// <param name="sizeMb"></param>
-        /// <returns></returns>
-        private static MemoryStream GetFileToUpload(int sizeMb)
+        private static async Task<MemoryStream> GetFileToUploadAsync(int sizeMb)
         {
             var stream = new MemoryStream();
+            
 
             var rnd = new Random();
             var buffer = new byte[1024 * 1024];
+            
 
             for (int i = 0; i < sizeMb; i++)
             {
                 rnd.NextBytes(buffer);
-                stream.Write(buffer, 0, buffer.Length);
+                await stream.WriteAsync(buffer.AsMemory(0, buffer.Length));
             }
 
             stream.Position = 0;
@@ -86,8 +91,9 @@
 
         public class StorageEntitySas
         {
-            public string? Signature { get; set; }
             public Uri? BlobUri { get; set; }
+
+            public string? Signature { get; set; }
         }
     }
 }
