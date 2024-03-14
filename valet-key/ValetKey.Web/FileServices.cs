@@ -23,7 +23,7 @@ namespace ValetKey.Web
         {
             _logger.LogInformation("Processing new request for a valet key.");
 
-             return await GetSharedAccessReferenceForUploadAsync(blobContainerClient, Guid.NewGuid().ToString(), cancellationToken);
+            return await GetSharedAccessReferenceForUploadAsync(blobContainerClient, Guid.NewGuid().ToString(), cancellationToken);
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace ValetKey.Web
             var blobServiceClient = blobContainerClient.GetParentBlobServiceClient();
             var blobClient = blobContainerClient.GetBlockBlobClient(blobName);
 
-            var userDelegationKey = await blobServiceClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow.AddMinutes(-3), 
+            var userDelegationKey = await blobServiceClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow.AddMinutes(-3),
                                                                                       DateTimeOffset.UtcNow.AddMinutes(3), cancellationToken);
 
             // Limit the scope of this SaS token to the following:
@@ -68,9 +68,9 @@ namespace ValetKey.Web
         {
             public Uri? BlobUri { get; internal set; }
 
-            public string? Signature { get; internal set; }   
+            public string? Signature { get; internal set; }
         }
     }
 
-    
+
 }

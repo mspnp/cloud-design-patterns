@@ -2,7 +2,8 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Hosting;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults(appBuilder => {
+    .ConfigureFunctionsWorkerDefaults(appBuilder =>
+    {
         appBuilder.ConfigureBlobStorageExtension();
     })
     .Build();
