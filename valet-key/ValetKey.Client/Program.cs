@@ -73,10 +73,8 @@
         {
             var stream = new MemoryStream();
 
-
             var rnd = new Random();
             var buffer = new byte[1024 * 1024];
-
 
             for (int i = 0; i < sizeMb; i++)
             {
@@ -92,7 +90,6 @@
         public class StorageEntitySas
         {
             public Uri? BlobUri { get; set; }
-
             public string? Signature { get; set; }
         }
     }
