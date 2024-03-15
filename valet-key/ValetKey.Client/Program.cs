@@ -61,9 +61,9 @@
             Console.ReadKey();
         }
 
-        private static async Task<StorageEntitySas?> GetBlobSasAsync(Uri blobUri)
+        private static async Task<StorageEntitySas?> GetBlobSasAsync(Uri tokenUri)
         {
-            return await httpClient.GetFromJsonAsync<StorageEntitySas>(blobUri);
+            return await httpClient.GetFromJsonAsync<StorageEntitySas>(tokenUri);
         }
 
         /// <summary>
