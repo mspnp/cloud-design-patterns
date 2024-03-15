@@ -89,8 +89,8 @@
 
         public class StorageEntitySas
         {
-            public Uri? BlobUri { get; internal set; }
-            public string? Signature { get; internal set; }
+            public Uri? BlobUri { get; set; }
+            public string? Signature { get; set; }
         }
     }
 }

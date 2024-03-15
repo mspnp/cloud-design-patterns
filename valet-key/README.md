@@ -50,13 +50,13 @@ Install the prerequisites and follow the steps to deploy and run an example of t
    az deployment group create -n deploy-valet-key -f bicep/main.bicep -g $RESOURCE_GROUP_NAME -p storageAccountName=$STORAGE_ACCOUNT_NAME principalId=$CURRENT_USER_OBJECT_ID
    ```
 
-1. Configure API to use this Azure Storage account for its delegation.
+1. Configure the API to use this Azure Storage account for its delegation.
 
    ```shell
    sed "s/STORAGE_ACCOUNT_NAME/${STORAGE_ACCOUNT_NAME}/g" ValetKey.Web/local.settings.template.json > ValetKey.Web/local.settings.json
    ```
 
-1. [Run Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite#run-azurite) blob emulation service.
+1. [Run Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite#run-azurite) blob storage emulation service.
 
    > The local storage emulator is required as an Azure Storage account is a required "backing resource" for Azure Functions.
 
@@ -73,7 +73,7 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 
 1. Run the client that will ask for and use the valet key.
 
-   You'll need to run this from another terminal.
+   _You'll need to run this from another terminal._
 
    ```bash
    dotnet run --project ValetKey.Client/
@@ -81,9 +81,9 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 
    > The client reaches out to the valet key API and requests a scope and time-limited SaS token for a destination of the API's choosing. The API will generate the sas token and return it to the client along with the destination. The client will use that token to upload a file to that destination. Attempting to use that SaS token for any other purpose will be denied.
 
-1. Validate the blob has been uploaded
+1. Validate the blob has been uploaded.
 
-   1. Open the the **Storage browser** on your Storage Account.
+   1. Open the the **Storage browser** on your [Storage account](https://portal.azure.com/#browse/Microsoft.Storage%2FStorageAccounts).
    1. Select **Blob containers**.
    1. Click on the container named `uploads`.
    1. You should be able to see the list of uploaded blobs.
