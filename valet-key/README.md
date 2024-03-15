@@ -6,6 +6,8 @@ This example shows how a client application can obtain necessary permissions to 
 
 Specifically this sample includes an Azure Function that provides a scoped, time-limited shared access signature (SaS) to authorized callers, who would then use that SaS token to perform a data upload to the storage account without consuming the resources of the Azure Function to proxy that request.
 
+![A diagram showing a client connecting to the token API, which in turn gets a SaS token for a storage account, and then the client connects to the storage account with that token.](valet-key-example.png)
+
 ## :rocket: Deployment guide
 
 Install the prerequisites and follow the steps to deploy and run an example of the Valet Key pattern.
