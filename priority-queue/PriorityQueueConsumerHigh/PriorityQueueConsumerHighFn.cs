@@ -1,6 +1,7 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 
+//<docsnippet_namespace_PriorityQueueConsumerHigh_start>
 namespace PriorityQueueConsumerHigh
 {
     public static class PriorityQueueConsumerHighFn
@@ -12,3 +13,4 @@ namespace PriorityQueueConsumerHigh
         }
     }
 }
+//<docsnippet_namespace_PriorityQueueConsumerHigh_end>
