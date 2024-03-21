@@ -5,7 +5,7 @@
     <RootNamespace>azure_function</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.10.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.13.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="5.0.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.13" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
