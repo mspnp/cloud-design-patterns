@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Azure.Functions.Worker;
 
+//<docsnippet_namespace_PriorityQueueConsumerLow>
 namespace PriorityQueueConsumerLow
 {
     public class PriorityQueueConsumerLowFn
@@ -19,3 +20,4 @@ namespace PriorityQueueConsumerLow
         }
     }
 }
+//</docsnippet_namespace_PriorityQueueConsumerLow>

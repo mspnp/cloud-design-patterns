@@ -4,6 +4,7 @@ using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Logging;
 using Microsoft.Azure.Functions.Worker;
 
+//<docsnippet_namespace_PriorityQueueSender>
 namespace PriorityQueueSender
 {
     public class PriorityQueueSenderFn(ILogger<PriorityQueueSenderFn> logger, ServiceBusClient client)
@@ -32,3 +33,4 @@ namespace PriorityQueueSender
         }
     }
 }
+//</docsnippet_namespace_PriorityQueueSender>
