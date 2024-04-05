@@ -17,6 +17,7 @@ This repository contains companion code for the article series found in the [Clo
 | [Priority Queue](https://learn.microsoft.com/azure/architecture/patterns/priority-queue) | ./priority-queue/ |
 | [Rate Limiting](https://learn.microsoft.com/azure/architecture/patterns/rate-limiting-pattern) | Go: [mspnp/go-batcher](https://github.com/mspnp/go-batcher)<sup>\*</sup><br/>Java: [Azure-Samples/java-rate-limiting-pattern-sample](https://github.com/Azure-Samples/java-rate-limiting-pattern-sample)<sup>\*</sup> |
 | [Saga](https://learn.microsoft.com/azure/architecture/reference-architectures/saga/saga) | [Azure-Samples/saga-orchestration-serverless](https://github.com/Azure-Samples/saga-orchestration-serverless)$^{*}$ |
+| [Sharding](https://learn.microsoft.com/azure/architecture/patterns/sharding) | ./sharding/ |
 | [Static Content Hosting](https://learn.microsoft.com/azure/architecture/patterns/static-content-hosting) | ./static-content-hosting/ |
 | [Valet Key](https://learn.microsoft.com/en-us/azure/architecture/patterns/valet-key) | ./valet-key/ |
 
