@@ -1,31 +1,16 @@
 # Choregraphy pattern example
 
-This code sample contains a set of services designed to show how to implement the [choreography pattern](https://learn.microsoft.com/azure/architecture/patterns/choreography) using a [Drone Delivery app](https://github.com/mspnp/microservices-reference-implementation). These services run as a microservices in an [Azure Kubernetes Service](https://learn.microsoft.com/azure/aks/) cluster.
+The [Choreography cloud design pattern](https://learn.microsoft.com/azure/architecture/patterns/choreography) does not have code associated with it. You'll find an example of this pattern in the Example section of that article.
 
-## Projects and folder structure
-> Technologies used: .NET 5, java, Azure Event Grid, Azure Cosmos DB, Azure Key Vault
+The scenario presented is how code running in an Azure Container Apps can use a nessage broker to exchange messages without central coordination to proccess a business transacition that requires ordered handling of unbounded sequences of related messages. The scenario uses a [Drone Delivery app](https://github.com/mspnp/microservices-reference-implementation).
 
-- Ingestion service. This business service Receives delivery requests made by a client through an HTTP endpoint and buffers them by sending them to a message bus (./src/ingestion).
-- Package service. This business service creates and update packages (./src/package).
-- Drone scheduler service. This business service assigns a drone to deliver the package (./src/dronescheduler).
-- Delivery service. This business manages deliveries that are scheduled or in-transit (./src/delivery).
-- Choreography service. Implements the workflow of the Drone Delivery app transactions by correlating calls across all business services and Event Grid hops.
-
-## The choreography service web API
-
-This service implements the application flow by receiving a list of [EventGrid](https://learn.microsoft.com/azure/event-grid/) events. Each event in the list has a Choreography operation associated to its event type, here is the list of operations:
-
-            - ScheduleDelivery
-            - RescheduledDelivery
-            - CancelDelivery
-            - GetDrone
-            - CreatePackage
-
-Depending on the operation, the choreography service makes calls to the associated business services and, if the call is successful, it sets the EventType to the next choreography step (the next operation). This workflow continues until the entire request has been processed.
-
-[Learn more abosut the application design](https://learn.microsoft.com/azure/architecture/patterns/choreography#design)
+![Diagram of an event driven cloud native example workload implementing choreography pattern](./choreography-example.png)
 
 ## Related documentation
+
+- [Choose between Azure messaging services](https://learn.microsoft.com/en-us/azure/service-bus-messaging/compare-messaging-services)
+- Use asynchronous distributed messaging through the [publisher-subscriber pattern](https://learn.microsoft.com/azure/architecture/patterns/publisher-subscriber)
+- Managing consistency issues implementing [Saga](https://learn.microsoft.com/azure/architecture/reference-architectures/saga/saga)
 
 ## Contributions
 
