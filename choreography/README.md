@@ -2,13 +2,13 @@
 
 The [Choreography cloud design pattern](https://learn.microsoft.com/azure/architecture/patterns/choreography) does not have code associated with it. You'll find an example of this pattern in the Example section of that article.
 
-The scenario presented is how code running in an Azure Container Apps can use a nessage broker to exchange messages without central coordination to proccess a business transacition that requires ordered handling of unbounded sequences of related messages. The scenario uses a [Drone Delivery app](https://github.com/mspnp/microservices-reference-implementation).
+The scenario presented is how code running in an Azure Container Apps can use a message broker to exchange messages without central coordination to process a business transaction that requires ordered handling of unbounded sequences of related messages. The scenario uses a [Drone Delivery app](https://github.com/mspnp/microservices-reference-implementation).
 
 ![Diagram of an event driven cloud native example workload implementing choreography pattern](./choreography-example.png)
 
 ## Related documentation
 
-- [Choose between Azure messaging services](https://learn.microsoft.com/en-us/azure/service-bus-messaging/compare-messaging-services)
+- [Choose between Azure messaging services](https://learn.microsoft.com/azure/service-bus-messaging/compare-messaging-services)
 - Use asynchronous distributed messaging through the [publisher-subscriber pattern](https://learn.microsoft.com/azure/architecture/patterns/publisher-subscriber)
 - Managing consistency issues implementing [Saga](https://learn.microsoft.com/azure/architecture/reference-architectures/saga/saga)
 
