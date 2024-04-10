@@ -1,9 +1,9 @@
-# Choregraphy Pattern - Code sample
+# Choregraphy pattern example
 
 This code sample contains a set of services designed to show how to implement the [choreography pattern](https://learn.microsoft.com/azure/architecture/patterns/choreography) using a [Drone Delivery app](https://github.com/mspnp/microservices-reference-implementation). These services run as a microservices in an [Azure Kubernetes Service](https://learn.microsoft.com/azure/aks/) cluster.
 
 ## Projects and folder structure
-> Technologies used: .NET 5, java, Azure Event Grid, Azure Cosmos DB, Azure Key Vault 
+> Technologies used: .NET 5, java, Azure Event Grid, Azure Cosmos DB, Azure Key Vault
 
 - Ingestion service. This business service Receives delivery requests made by a client through an HTTP endpoint and buffers them by sending them to a message bus (./src/ingestion).
 - Package service. This business service creates and update packages (./src/package).
@@ -23,7 +23,9 @@ This service implements the application flow by receiving a list of [EventGrid](
 
 Depending on the operation, the choreography service makes calls to the associated business services and, if the call is successful, it sets the EventType to the next choreography step (the next operation). This workflow continues until the entire request has been processed.
 
-[Learn more about the application design](https://learn.microsoft.com/azure/architecture/patterns/choreography#design)
+[Learn more abosut the application design](https://learn.microsoft.com/azure/architecture/patterns/choreography#design)
+
+## Related documentation
 
 ## Contributions
 
