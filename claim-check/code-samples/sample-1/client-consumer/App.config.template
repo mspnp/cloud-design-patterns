@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<configuration>
-  <appSettings>
-    <add key="StorageConnectionString" value="{StorageConnectionString}"/>
-    <add key="StorageQueueName" value="{StorageQueueName}"/>
-    <add key="DownloadDestination" value="temp"/>
-  </appSettings>
-</configuration>
-

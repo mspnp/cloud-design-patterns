@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+		<PropertyGroup>
+				<TargetFramework>net8.0</TargetFramework>
+				<AzureFunctionsVersion>v4</AzureFunctionsVersion>
+				<OutputType>Exe</OutputType>
+				<ImplicitUsings>enable</ImplicitUsings>
+				<Nullable>enable</Nullable>
+		</PropertyGroup>
+
+		<ItemGroup>
+				<FrameworkReference Include="Microsoft.AspNetCore.App" />
+				<PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
+				<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.22.0" />
+				<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage" Version="6.3.0" />
+				<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage.Queues" Version="5.3.0" />
+				<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.17.2" />
+				<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="1.2.1" />
+				<PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />
+				<PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="1.2.0" />
+				<PackageReference Include="Azure.Identity" Version="1.11.2" />
+		</ItemGroup>
+
+		<ItemGroup>
+				<None Update="host.json">
+						<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+				</None>
+				<Content Include="local.settings.json">
+						<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+				</Content>
+				<None Update="local.settings.json.template">
+						<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+				</None>
+		</ItemGroup>
+
+		<ItemGroup>
+				<Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
+		</ItemGroup>
+</Project>

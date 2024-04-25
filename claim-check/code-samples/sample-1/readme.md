@@ -1,131 +1,105 @@
-# Sample 1: Automatic Tag Generation, Queues as Message Bus
+# Sample 1: Automatic token generation with Event Grid, Queues as messaging system
 
-## Technologies used: Azure Blob Storage, Azure Event Grid, Azure Functions, Azure Storage Queue, .NET Core 3.1, .NET 5.0
+## Technologies used: Azure Blob Storage, Azure Event Grid, Azure Functions, Azure Storage Queue, .NET 8.0
 
-In this example we're using Blob Store to store data, but any service that supportes Event Grid integration can be used too. A client just needs to drop the payload to be shared into the designated Azure Blob Store and Event Grid will automatically generate a Claim Check message and send it to one of the supported message bus. In this sample the message bus is created using Azure Storage Queues. This allows a client application to poll the queue, get the message and then use the stored reference data to download the payload directly from Azure Blob Storage.
-The same message, without the need to go through a message bus, can also be directly consumed via Azure Function, leveraging in this case the serverless nature of both Azure Event Grid and Azure Functions.
+This example uses Azure Blob Store to store the payload, but any service that supports [Event Grid](https://azure.microsoft.com/services/event-grid/) integration can be used. A client application uploads the payload to Azure Blob Store and Event Grid automatically generates an event, with a reference to the blob that can be used as a claim check token. The event is forwarded to an Azure Storage Queue from where it can be retrieved by the consumer sample apps.
+
+This approach allows a client application to poll the queue, get the message and then use the stored reference data to download the payload directly from Azure Blob Storage. Azure Functions can also consume the Event Grid message directly.
+
+> This example uses [`DefaultAzureCredential`](https://learn.microsoft.com/edotnet/azure/sdk/authentication/?#defaultazurecredential) for authentication while accessing Azure resources. the user principal must be provided as a parameter to the included Bicep script. The Bicep script is responsible for assigning the necessary RBAC (Role-Based Access Control) permissions for accessing the various Azure resources. While the principal can be the account associated with the interactive user, there are alternative [configurations](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods) available.
 
 ![Diagram](images/sample-1-diagram.png)
 
+## :rocket: Deployment guide
+
+Install the prerequisites and follow the steps to deploy and run the examples.
+
 ## Prerequisites
 
-If you don't have an Azure subscription, create a [free account](https://azure.microsoft.com/free/?ref=microsoft.com&utm_source=microsoft.com&utm_medium=docs&utm_campaign=visualstudio) before you begin.
-
-In addition:
-
-* [Visual Studio](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/)
-* [.NET Core SDK](https://dotnet.microsoft.com/download)
-* [Git](https://www.git-scm.com/downloads)
-* [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-* [Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/)
+- Permission to create a new resource group and resources in an [Azure subscription](https://azure.com/free)
+- Unix-like shell. Also available in:
+  - [Azure Cloud Shell](https://shell.azure.com/)
+  - [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/windows/wsl/install)
+- [Git](https://git-scm.com/downloads)
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)
+- [Azurite](/azure/storage/common/storage-use-azurite)
+- [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
+- Optionally, an IDE, like  [Visual Studio](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/). 
 
 ## Getting Started
 
 Make sure you have WSL (Windows System For Linux) installed and have AZ CLI version > 2.0.50. Before running any script also make sure you are authenticated on AZ CLI using
 
-```bash
-az login
-```
+### Steps
 
-and have selected the Azure Subscription you want to use for the tests:
+1. Clone this repository to your workstation and navigate to the working directory.
 
-```bash
-az account list --output table
-az account set --subscription "<YOUR SUBSCRIPTION NAME>"
-```
+   ```shell
+   git clone https://github.com/mspnp/cloud-design-patterns
+   cd cloud-design-patterns/claim-check/code-samples/sample-1
+   ```
 
-## Clone the sample project
+1. Log into Azure and create an empty resource group.
 
-Clone the repository and open the code-samples directory from your command line tool.
+   ```azurecli
+   az login
+   az account set -s <Name or ID of subscription>
 
-```bash
-git clone https://github.com/mspnp/cloud-design-patterns.git
-cd cloud-design-patterns/claim-check/code-samples/sample-1
-```
+   NAME_PREFIX=<unique value between three to five characters>
+   az group create -n "rg-${NAME_PREFIX}" -l eastus2
+   ```
 
-## Run Azure Setup Script
+1. Deploy the supporting Azure resources.
 
-Run the azure setup script to get the resources deployed and everything set up
+   ```azurecli
+   CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show -o tsv --query id)
 
-```bash
-./sample-1-azure-setup.sh <unique-name>
-```
+   # This could take a few minutes
+   az deployment group create -n deploy-claim-check -f bicep/main.bicep -g "rg-${NAME_PREFIX}" -p namePrefix=$NAME_PREFIX principalId=$CURRENT_USER_OBJECT_ID
+   ```
 
-_unique-name_ should be something that is unlikely to be used by someone else. This is needed to make sure that no conflict with other people running the same sample at the same time will arise. The name should only contains numbers and letters should not be longer than 12 characters (as additional text will be added by the script itself to identify each created resource) If you're not sure about what to use here, you can just generate a random string using the following bash command:
+1. Configure the samples to use the created Azure resources.
 
-```bash
-echo `openssl rand 5 -base64 | cut -c1-7 | tr '[:upper:]' '[:lower:]' | tr -cd '[[:alnum:]]._-'`
-```
+   ```shell
+   sed "s/{STORAGE_ACCOUNT_NAME}/st${NAME_PREFIX}cc/g" ClientConsumer1/appsettings.json.template > ClientConsumer1/appsettings.json
 
-This script will create
+   sed "s/{STORAGE_ACCOUNT_NAME}/st${NAME_PREFIX}cc/g" FunctionConsumer1/local.settings.json.template > FunctionConsumer1/local.settings.json
+   ```
 
-* a resource group
-* a V2 storage account and storage queue
-* an event grid topic and subscriptions
-* a function app in an app service plan
-* an application insights service
+1. [Run Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite#run-azurite) blob storage emulation service.
 
-Copy the connection string values displayed at the end of this script on execution. These will be used later.
+   > The local storage emulator is required as an Azure Storage account is a required "backing resource" for Azure Functions.
 
-## Running the sample
+1. Launch the consumer sample application that will process the claim check messages from Storage Queue.
 
-There are two applications provided as sample: one to be executed on premises, the other one to be executed on Azure. In order to generate a Claim Check message you just have to drop a file in the created Azure Storage account. You can use Azure Storage Explorer to do that.
+   Two applications are provided as sample that illustrate consuming the claim check message sent via Azure Storage Queues: one implemented as a Command Line Interface (CLI) application, and the other one implemented as an Azure Function, showcasing the serveless approach.
 
-### On-Premises Claim Check message consumption
+   Run the desired sample application, CLI or Function to connect to the messaging system and process messages as they arrive.
 
-The "client-consumer" is a sample console application that monitors the created Azure Storage Queue for Claim Check messages sent by Azure Event Grid. The application reads the Claim Check message and downloads the blob mentioned in the message itself using Azure Storage SDK.
+   1. For the CLI sample
 
-Azure Event grid is already configured to send data to Event Hubs by the `sample-1-azure-setup.sh` script:
+   ```bash
+   dotnet run --project sample-1\ClientConsumer1
+   ```
 
-```bash
-az eventgrid event-subscription create
-  --name "queue"
-  --endpoint "<storage-queue-resoure-id>"
-  --endpoint-type "storagequeue"
-  --included-event-types "Microsoft.Storage.BlobCreated"
-  --source-resource-id "<storage-account-resoure-id>"
-```
+   1. For the Function sample
 
-The script will also automatically configure `App.config` so that the consumer application will point to the created resources. Run the consumer application locally:
+   ```bash
+   cd sample-1\FunctionConsumer1
+   func start
+   ```
 
-```bash
-cd client-consumer
-dotnet run
-```
+  > Please note: For demo purposes, the console application prints payload content on the screen. So keep that in mind if you want to try sending really large payloads.
 
-You are now ready to drop a payload in Blob Storage to see the Claim Check pattern working. [Refer this to know how to upload blobs to a container using Storage Explorer](https://learn.microsoft.com/azure/storage/blobs/quickstart-storage-explorer#upload-blobs-to-the-container).
+### :checkered_flag: Try it out
 
-### Serverless Claim Check message consumption
+To generate a claim check message you just have to drop a file in the created Azure Storage account. You can use Azure **Storage browser** to do that. [Refer this to know how to upload blobs to a container using Storage Explorer](https://learn.microsoft.com/azure/storage/blobs/quickstart-storage-explorer#upload-blobs-to-the-container).
 
-The "azure-function" sample shows how easy is to set up a complete serverless solution to process Claim Check messages using Azure Event Grid and Azure Functions. There is no need to have an intermediate message bus here, as Azure Event Grid can execute Azure Function directly, just by creating a subscription to the Azure Storage account events. This is already done by the `sample-1-azure-setup.sh` script:
+### :broom: Clean up
 
-```bash
-az eventgrid event-subscription create
-  --name "function"
-  --included-event-types "Microsoft.Storage.BlobCreated"
-  --endpoint "https://myfunctionapp.azurewebsites.net/api/ClaimCheck"
-  --endpoint-type "webhook"
-  --source-resource-id "<storage-account-resoure-id>"
-```
+Remove the resource group that you created when you are done with this sample.
 
-The sample Azure Function will only get the Claim Check message, extract the payload address and log it. You can see the logged messages using the Application Insight resource, searching for TRACE messages created in the last 24h. Here's a sample query you can use:
-
-```
-traces
-| where operation_Name == "ClaimCheck" and timestamp  > ago(12h) and customDimensions.Category == 'Function.ClaimCheck.User'
-| order by timestamp desc
-```
-
-You will see log messages like the following:
-
-```output
-Got BlobCreated event data, blob URI https://pnp1ccstorage.blob.core.windows.net/sample/my-sampl-big-file.jpg
-```
-
-## Cleanup
-
-To complete cleanup of your solution, since this will create a dedicated resource group for the sample, you can just delete the entire resource group:
-
-```bash
-az group delete -n <unique-name>
+```azurecli
+az group delete -n "rg-${NAME_PREFIX}"
 ```

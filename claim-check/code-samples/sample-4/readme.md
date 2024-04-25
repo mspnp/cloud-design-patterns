@@ -1,105 +1,98 @@
-# Sample 4: Manual Tagging
+# Sample 4: Manual token generation, Azure Event Hubs with Kafka as messaging system
 
-## Technologies used: Azure Blob Storage, Azure Event Hubs with Kafka, .NET Core 3.1, .NET 5.0
+## Technologies used: Azure Blob Storage, Azure Event Hubs with Kafka, .NET 8.0
 
-The reason this example uses Event Hubs with Kafka is to demonstrate the ease of using other Azure services like Azure Blob Storage, Azure functions etc. with a different messaging protocol like Kafka from your existing Kafka clients to implement the claim check messaging pattern. This sample consists of a Kafka client which drops the payload in the designated Azure Blob Storage and creates a notification message with location details to be sent to the consumer. The notification message is sent using [Event Hubs with Kafka enabled](https://learn.microsoft.com/azure/event-hubs/event-hubs-create-kafka-enabled). The consumer is notified each time these is a message in the Event Hub and can access the payload using the location information in the message received.
+In this example the client application uploads the payload to Azure Storage Blob and manuall generates the claim check token, which is sent via Event Hubs.
+
+The sample producer CLI application uses the Apache Kafka libraries to send the messages to [Event Hubs with Kafka enabled](https://learn.microsoft.com/azure/event-hubs/event-hubs-create-kafka-enabled), to demonstrate the ease of using other Azure services like Azure Blob Storage, Azure functions etc. with a different messaging protocol like Kafka. The Azure Function is used to demonstrate a client application that acts as the consumer for the  payload.
+
+> This example uses [`DefaultAzureCredential`](https://learn.microsoft.com/edotnet/azure/sdk/authentication/?#defaultazurecredential) for authentication while accessing Azure resources. the user principal must be provided as a parameter to the included Bicep script. The Bicep script is responsible for assigning the necessary RBAC (Role-Based Access Control) permissions for accessing the various Azure resources. While the principal can be the account associated with the interactive user, there are alternative [configurations](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods) available.
 
 ![Sample Diagram](images/Sample-4-diagram.jpg)
 
+## :rocket: Deployment guide
+
+Install the prerequisites and follow the steps to deploy and run the examples.
+
 ## Prerequisites
 
-If you don't have an Azure subscription, create a [free account](https://azure.microsoft.com/free/?ref=microsoft.com&utm_source=microsoft.com&utm_medium=docs&utm_campaign=visualstudio) before you begin.
-
-In addition:
-
-* [Visual Studio](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/)
-* [.NET Core SDK](https://dotnet.microsoft.com/download)
-* [Git](https://www.git-scm.com/downloads)
-* [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-* [Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/)
+- Permission to create a new resource group and resources in an [Azure subscription](https://azure.com/free)
+- Unix-like shell. Also available in:
+  - [Azure Cloud Shell](https://shell.azure.com/)
+  - [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/windows/wsl/install)
+- [Git](https://git-scm.com/downloads)
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)
+- [Azurite](/azure/storage/common/storage-use-azurite)
+- [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
+- Optionally, an IDE, like  [Visual Studio](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/).
 
 ## Getting Started
 
-Make sure you have WSL (Windows System For Linux) installed and have AZ CLI version > 2.0.50
-Before running any script make sure you are authenticated on AZ CLI using
+Make sure you have WSL (Windows System For Linux) installed and have AZ CLI version > 2.0.50. Before running any script also make sure you are authenticated on AZ CLI using
 
-```bash
-az login
-```
+### Steps
 
-and have selected the Azure Subscription you want to use for the tests:
+1. Clone this repository to your workstation and navigate to the working directory.
 
-```bash
-az account list --output table
-az account set --subscription "<YOUR SUBSCRIPTION NAME>"
-```
+   ```shell
+   git clone https://github.com/mspnp/cloud-design-patterns
+   cd cloud-design-patterns/claim-check/code-samples/sample-4
+   ```
 
-## Clone the sample project
+1. Log into Azure and create an empty resource group.
 
-Clone the repository and open the code-samples directory from your command line tool.
+  ```azurecli
+  az login
+  az account set -s <Name or ID of subscription>
 
-```bash
-git clone https://github.com/mspnp/cloud-design-patterns.git
-cd claim-check/code-samples/sample-4
-```
+  NAME_PREFIX=<unique value between three to five characters of length>
+  az group create -n "rg-${NAME_PREFIX}" -l eastus2
+  ```
 
-## Run Azure Setup Script
+1. Deploy the supporting Azure resources.
 
-Run the azure setup script to get the resources deployed and everything set up
+   ```azurecli
+   CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show -o tsv --query id)
 
-```bash
-./sample-4-azure-setup.sh <unique-name>
-```
+   # This could take a few minutes
+   az deployment group create -n deploy-claim-check -f bicep/main.bicep -g "rg-${NAME_PREFIX}" -p namePrefix=$NAME_PREFIX principalId=$CURRENT_USER_OBJECT_ID
+   ```
 
-_unique-name_ should be something that is unlikely to be used by someone else. This is needed to make sure that no conflict with other people running the same sample at the same time will arise. The name should only contains numbers and letters should not be longer than 12 characters (as additional text will be added by the script itself to identify each created resource) If you're not sure about what to use here, you can just generate a random string using the following bash command:
+1. Configure the samples to use the created Azure resources.
 
-```bash
-echo `openssl rand 5 -base64 | cut -c1-7 | tr '[:upper:]' '[:lower:]' | tr -cd '[[:alnum:]]._-'`
-```
+   ```shell
+   sed "s/{EVENT_HUBS_NAMESPACE}/evhns-${NAME_PREFIX}/g" ClientProducer4/appsettings.json.template >ClientProducer4/appsettings.json
+   sed -i "s/{STORAGE_ACCOUNT_NAME}/st${NAME_PREFIX}cc/g" ClientProducer4/appsettings.json
 
-This script will create
+   sed "s/{EVENT_HUBS_NAMESPACE}/evhns-${NAME_PREFIX}/g" FunctionConsumer4/local.settings.json.template > FunctionConsumer4/local.settings.json
+   ```
 
-* a resource group
-* a V2 storage account
-* a storage account container
-* an event hub namespace with Kafka enabled, event hub
-* a function app in an app service plan
-* an application insights service
+1. [Run Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite#run-azurite) blob storage emulation service.
 
-## Running the sample
+   > The local storage emulator is required as an Azure Storage account is a required "backing resource" for Azure Functions.
 
-The script `sample-4-azure-setup.sh` had automatically configured `App.config` so that the consumer application points to the created resources. Run the consumer application locally:
+1. Launch the Function sample that will process the claim check messages as they arrive to Event Hubs.
 
-```bash
-cd client-consumer
-dotnet run
-```
+  ```bash
+  cd ./FunctionConsumer4
+  func start
+  ```
 
-This console application will create a test file on your local machine which acts as the large payload and uploads it to blob storage. The console application is a Kafka client producer which then sends a Kafka message with the blob details as a notification to your Event Hub.
+### :checkered_flag: Try it out
 
-The Kafka message will contain something like this:
+1. Run the CLI sample that will generate a claim check message and send it to Event Hubs using the Kafka Api.
 
-```json
-{
-  "ContainerName": "heavypayload0fc21425-5df3-4c0d-930c-9261ee83ad53",
-  "BlobName": "HeavyPayload_82db7213-ca94-4aa0-9e65-fb668e51ccc9.txt"
-}
-```
+   _You'll need to run this from another terminal._
 
-The Azure Function is used to demonstrate a client application that acts as the consumer  for the large payload. We have used the Azure Function Event Hub binding here to be notified of an incoming message in the Event Hub.
+  ```bash
+  dotnet run --project ./ClientProducer4
+  ```
 
-You can use the Azure portal to see the output of the Azure Function. You can see the logged messages using the Application Insight resource, searching for TRACE messages created in the last 24h. Here's a sample query you can use:
+### :broom: Clean up
 
-```
-traces
-| where timestamp  > ago(12h) and operation_Name == "AzFuncConsumer" and customDimensions.Category == 'Function.AzFuncConsumer.User'
-| order by timestamp desc
-```
+Remove the resource group that you created when you are done with this sample.
 
-## Cleanup
-
-To complete cleanup of your solution, since this will create a dedicated resource group for the sample, you can just delete the entire resource group:
-
-```bash
-az group delete -n <unique-name>
+```azurecli
+az group delete -n "rg-${NAME_PREFIX}"
 ```
