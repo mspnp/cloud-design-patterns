@@ -64,7 +64,7 @@ namespace Pnp.Samples.ClaimCheckPattern
         /// Process the event data recived from Event Hub.
         /// </summary>
         /// <param name="eventArgs"></param>
-        
+
         async Task ProcessEventHandlerAsync(ProcessEventArgs eventArgs)
         {
             eventArgs.CancellationToken.ThrowIfCancellationRequested();
