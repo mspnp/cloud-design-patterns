@@ -4,23 +4,3 @@
     "ServiceBusQueue": "esbq-claimcheck",
   }
 }
-
-{
-  "AppSettings": {
-    "ServiceBusNamespace": "rjv38ccsbname.servicebus.windows.net",
-    "ServiceBusQueue": "rjv38ccsbq",
-
-    "StorageBlobUri": "https://rjv38ccstorage.blob.core.windows.net/",
-    "PayloadContainerName": "payloads"
-  }
-}
-
-{
-  "AppSettings": {
-    "EventHubsFullyQualifiedNamespace": "{SERVICE_BUS_NAMESPACE}.servicebus.windows.net",
-    "EventHubName": "evh-claimcheck",
-
-    "EventProcessorStorageBlobUrl": "https://{EVENT_PROCESSOR_STORAGE_ACCOUNT_NAME}.blob.core.windows.net",
-    "EventProcessorStorageContainer": "eventprocessor"
-  }
-}
