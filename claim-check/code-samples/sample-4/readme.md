@@ -2,11 +2,11 @@
 
 ## Technologies used: Azure Blob Storage, Azure Event Hubs with Kafka, .NET 8.0
 
-In this example the client application uploads the payload to Azure Storage Blob and manuall generates the claim check token, which is sent via Event Hubs.
+In this example the client application uploads the payload to Azure Storage Blob and manually generates the claim check token, which is sent via Event Hubs.
 
-The sample producer CLI application uses the Apache Kafka libraries to send the messages to [Event Hubs with Kafka enabled](https://learn.microsoft.com/azure/event-hubs/event-hubs-create-kafka-enabled), to demonstrate the ease of using other Azure services like Azure Blob Storage, Azure functions etc. with a different messaging protocol like Kafka. The Azure Function is used to demonstrate a client application that acts as the consumer for the  payload.
+The sample producer CLI application uses the Apache Kafka libraries to send the messages to [Event Hubs with Kafka enabled](https://learn.microsoft.com/azure/event-hubs/event-hubs-create-kafka-enabled), to demonstrate the ease of using other Azure services like Azure Blob Storage, Azure functions etc. with a different messaging protocol like Kafka. The Azure Function is used to demonstrate a client application that acts as the consumer for the payload.
 
-> This example uses [`DefaultAzureCredential`](https://learn.microsoft.com/edotnet/azure/sdk/authentication/?#defaultazurecredential) for authentication while accessing Azure resources. the user principal must be provided as a parameter to the included Bicep script. The Bicep script is responsible for assigning the necessary RBAC (Role-Based Access Control) permissions for accessing the various Azure resources. While the principal can be the account associated with the interactive user, there are alternative [configurations](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods) available.
+> This example uses [`DefaultAzureCredential`](https://learn.microsoft.com/dotnet/azure/sdk/authentication/#defaultazurecredential) for authentication while accessing Azure resources. the user principal must be provided as a parameter to the included Bicep script. The Bicep script is responsible for assigning the necessary RBAC (Role-Based Access Control) permissions for accessing the various Azure resources. While the principal can be the account associated with the interactive user, there are alternative [configurations](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods) available.
 
 ![Sample Diagram](images/Sample-4-diagram.jpg)
 

@@ -1,4 +1,4 @@
-# Sample 1: Automatic token generation with Event Grid, Queues as messaging system
+# Sample 1: Automatic claim check token generation with Event Grid, Storage Queues as messaging system
 
 ## Technologies used: Azure Blob Storage, Azure Event Grid, Azure Functions, Azure Storage Queue, .NET 8.0
 
@@ -6,7 +6,7 @@ This example uses Azure Blob Store to store the payload, but any service that su
 
 This approach allows a client application to poll the queue, get the message and then use the stored reference data to download the payload directly from Azure Blob Storage. Azure Functions can also consume the Event Grid message directly.
 
-> This example uses [`DefaultAzureCredential`](https://learn.microsoft.com/edotnet/azure/sdk/authentication/?#defaultazurecredential) for authentication while accessing Azure resources. the user principal must be provided as a parameter to the included Bicep script. The Bicep script is responsible for assigning the necessary RBAC (Role-Based Access Control) permissions for accessing the various Azure resources. While the principal can be the account associated with the interactive user, there are alternative [configurations](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods) available.
+> This example uses [`DefaultAzureCredential`](https://learn.microsoft.com/dotnet/azure/sdk/authentication/#defaultazurecredential) for authentication while accessing Azure resources. the user principal must be provided as a parameter to the included Bicep script. The Bicep script is responsible for assigning the necessary RBAC (Role-Based Access Control) permissions for accessing the various Azure resources. While the principal can be the account associated with the interactive user, there are alternative [configurations](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods) available.
 
 ![Diagram](images/sample-1-diagram.png)
 

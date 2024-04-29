@@ -102,7 +102,7 @@ resource eventHubNamespace 'Microsoft.EventHub/namespaces@2023-01-01-preview' = 
     kafkaEnabled: true
   }
 
-  @description('The Event Hubs to send/receive claim-check venet messages.')
+  @description('The Event Hubs to send/receive claim-check event messages.')
   resource claimCheckEventHub 'eventhubs' = {
     name: 'evh-claimcheck'
     properties: {
