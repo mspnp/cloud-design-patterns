@@ -4,7 +4,7 @@ This folder contains several examples illustrating the use of the [Claim-Check d
 
 > All the examples in this folder use [`DefaultAzureCredential`](https://learn.microsoft.com/dotnet/azure/sdk/authentication/#defaultazurecredential) to authenticate when accessing Azure resources. The Bicep script on each sample assigns the necessary RBAC (Role-Based Access Control) permissions to an account principal, which is provided as a parameter, during deployment.
 
-## [Automatic claim check token Generation, Storage Queues as messaging system](./code-samples/sample-1/)
+## [Automatic claim check token generation, Storage Queues as messaging system](./code-samples/sample-1/)
 
 > Technologies used: Azure Blob Storage, Azure Event Grid, Azure Functions, Azure Blob Queue, .NET
 
