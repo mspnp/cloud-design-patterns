@@ -1,4 +1,5 @@
-﻿using Azure.Identity;
+﻿using Azure.Core;
+using Azure.Identity;
 using Confluent.Kafka;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,7 +18,6 @@ namespace Pnp.Samples.ClaimCheckPattern
 
         public async Task SendMessage(string message)
         {
-            var userPrincipal = GetCurrentUserPrincipal();
             try
             {
                 var config = new ProducerConfig
@@ -33,7 +33,7 @@ namespace Pnp.Samples.ClaimCheckPattern
                     {
                         var credential = new DefaultAzureCredential();
                         var accessToken = await credential.GetTokenAsync(new Azure.Core.TokenRequestContext([_eventHubEndpoint]));
-                        client.OAuthBearerSetToken(accessToken.Token, accessToken.ExpiresOn.ToUnixTimeMilliseconds(), userPrincipal);
+                        client.OAuthBearerSetToken(accessToken.Token, accessToken.ExpiresOn.ToUnixTimeMilliseconds(), credential.GetUserPrincipal());
                     })
                     .Build();
                 try
@@ -50,20 +50,6 @@ namespace Pnp.Samples.ClaimCheckPattern
             {
                 Console.WriteLine("!!! Exception Occurred - {0}", e.Message);
             }
-        }
-
-        /// <summary>
-        /// Get the current user principal
-        /// </summary>     
-        static string GetCurrentUserPrincipal()
-        {
-            const string DefaultEntraIdCredentialContext = "https://management.azure.com/.default";
-
-            var azureCredential = new DefaultAzureCredential();
-            var token = azureCredential.GetToken(new Azure.Core.TokenRequestContext([DefaultEntraIdCredentialContext]));
-            var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = handler.ReadJwtToken(token.Token);
-            return jwtSecurityToken.Subject;
         }
     }
 }

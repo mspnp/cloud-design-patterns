@@ -2,13 +2,13 @@
 
 ## Technologies used: Azure Blob Storage, Azure Event Grid, Azure Functions, Azure Storage Queue, .NET 8.0
 
-This example uses Azure Blob Store to store the payload, but any service that supports [Event Grid](https://azure.microsoft.com/services/event-grid/) integration can be used. A client application uploads the payload to Azure Blob Store and Event Grid automatically generates an event, with a reference to the blob that can be used as a claim check token. The event is forwarded to an Azure Storage Queue from where it can be retrieved by the consumer sample apps.
+This example uses Azure Blob Store to store the payload, but any service that supports [Event Grid](https://azure.microsoft.com/services/event-grid/) integration can be used. A client application uploads the payload to Azure Blob Store and Event Grid automatically generates an event, with a reference to the blob that can be used as a claim check token. The event is forwarded to an Azure Storage Queue from where it can be retrieved by the consumer sample app.
 
-This approach allows a client application to poll the queue, get the message and then use the stored reference data to download the payload directly from Azure Blob Storage. Azure Functions can also consume the Event Grid message directly.
+This approach allows a consumer application to poll the queue, get the message and then use the reference to Azure Storage Blob embedded in the message to download the payload directly from Azure Blob Storage. While not showcased in this sample, Azure Functions can also consume the Event Grid message directly.
 
 > This example uses [`DefaultAzureCredential`](https://learn.microsoft.com/dotnet/azure/sdk/authentication/#defaultazurecredential) for authentication while accessing Azure resources. the user principal must be provided as a parameter to the included Bicep script. The Bicep script is responsible for assigning the necessary RBAC (Role-Based Access Control) permissions for accessing the various Azure resources. While the principal can be the account associated with the interactive user, there are alternative [configurations](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods) available.
 
-![Diagram](images/sample-1-diagram.png)
+![Diagram.](images/sample-1-diagram.png)
 
 ## :rocket: Deployment guide
 
@@ -59,11 +59,9 @@ Make sure you have WSL (Windows System For Linux) installed and have AZ CLI vers
    az deployment group create -n deploy-claim-check -f bicep/main.bicep -g "rg-${NAME_PREFIX}" -p namePrefix=$NAME_PREFIX principalId=$CURRENT_USER_OBJECT_ID
    ```
 
-1. Configure the samples to use the created Azure resources.
+1. Configure the sample consumer to use the created Azure resources.
 
    ```shell
-   sed "s/{STORAGE_ACCOUNT_NAME}/st${NAME_PREFIX}cc/g" ClientConsumer1/appsettings.json.template > ClientConsumer1/appsettings.json
-
    sed "s/{STORAGE_ACCOUNT_NAME}/st${NAME_PREFIX}cc/g" FunctionConsumer1/local.settings.json.template > FunctionConsumer1/local.settings.json
    ```
 
@@ -71,26 +69,16 @@ Make sure you have WSL (Windows System For Linux) installed and have AZ CLI vers
 
    > The local storage emulator is required as an Azure Storage account is a required "backing resource" for Azure Functions.
 
-1. Launch the consumer sample application that will process the claim check messages from Storage Queue.
+1. Launch the consumer sample application to receive and process claim check messages from Storage Queue.
 
-   Two applications are provided as sample that illustrate consuming the claim check message sent via Azure Storage Queues: one implemented as a Command Line Interface (CLI) application, and the other one implemented as an Azure Function, showcasing the serveless approach.
-
-   Run the desired sample application, CLI or Function to connect to the messaging system and process messages as they arrive.
-
-   1. For the CLI sample
-
-   ```bash
-   dotnet run --project sample-1\ClientConsumer1
-   ```
-
-   1. For the Function sample
+   The message consumer sample application for this scenario is implemented as an Azure Function, showcasing the serveless approach. Run the sample application to connect to the the queue and process messages as they arrive.
 
    ```bash
    cd sample-1\FunctionConsumer1
    func start
    ```
 
-  > Please note: For demo purposes, the console application prints payload content on the screen. So keep that in mind if you want to try sending really large payloads.
+  > Please note: For demo purposes, the sample consumer application will write the payload content to the the screen. Keep that in mind before you try sending really large payloads.
 
 ### :checkered_flag: Try it out
 

@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FunctionConsumer2", "FunctionConsumer2\FunctionConsumer2.csproj", "{EE55C300-757B-4A30-B998-28D125AEE15E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientConsumer2", "ClientConsumer2\ClientConsumer2.csproj", "{325326E4-0909-4B3E-97E6-283900C84DF6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FC97FAC0-E4D1-43FF-869F-FB079BA5CB68}"
@@ -18,10 +16,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EE55C300-757B-4A30-B998-28D125AEE15E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EE55C300-757B-4A30-B998-28D125AEE15E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EE55C300-757B-4A30-B998-28D125AEE15E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EE55C300-757B-4A30-B998-28D125AEE15E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{325326E4-0909-4B3E-97E6-283900C84DF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{325326E4-0909-4B3E-97E6-283900C84DF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{325326E4-0909-4B3E-97E6-283900C84DF6}.Release|Any CPU.ActiveCfg = Release|Any CPU

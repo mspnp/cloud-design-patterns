@@ -1,5 +1,0 @@
-{
-  "AppSettings": {
-    "StorageQueueUri": "https://{STORAGE_ACCOUNT_NAME}.queue.core.windows.net/claimcheckqueue"
-  }
-}

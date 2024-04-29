@@ -1,6 +1,0 @@
-{
-  "AppSettings": {
-    "ServiceBusNamespace": "{SERVICE_BUS_NAMESPACE}.servicebus.windows.net",
-    "ServiceBusQueue": "esbq-claimcheck",
-  }
-}

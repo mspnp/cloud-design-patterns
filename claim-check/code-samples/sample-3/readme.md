@@ -48,8 +48,7 @@ Make sure you have WSL (Windows System For Linux) installed and have AZ CLI vers
 
    NAME_PREFIX=<unique value between three to five characters>
    az group create -n "rg-${NAME_PREFIX}" -l eastus2
-
-  ```
+   ```
 
 1. Deploy the supporting Azure resources.
 
@@ -63,36 +62,25 @@ Make sure you have WSL (Windows System For Linux) installed and have AZ CLI vers
 1. Configure the samples to use the created Azure resources.
 
    ```shell
-   sed "s/{EVENT_HUBS_NAMESPACE}/evhns-${NAME_PREFIX}/g" ClientConsumer2/appsettings.json.template >ClientConsumer2/appsettings.json
-   sed -i "s/{EVENT_PROCESSOR_STORAGE_ACCOUNT_NAME}/st${NAME_PREFIX}ehub/g" ClientConsumer2/appsettings.json
-
-   sed "s/{EVENT_HUBS_NAMESPACE}/evhns-${NAME_PREFIX}/g" FunctionConsumer2/local.settings.json.template > FunctionConsumer2/local.settings.json
+   sed "s/{SERVICE_BUS_NAMESPACE}/evhns-${NAME_PREFIX}/g" FunctionConsumer3/local.settings.json.template > FunctionConsumer3/local.settings.json
    ```
 
 1. [Run Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite#run-azurite) blob storage emulation service.
 
    > The local storage emulator is required as an Azure Storage account is a required "backing resource" for Azure Functions.
 
-1. Launch the consumer sample application that will process the claim check messages from Service Bus.
+1. Launch the consumer sample application to receive and process claim check messages from Service Bus.
+
+   The message consumer sample application for this scenario is implemented as an Azure Function, showcasing the serveless approach. Run the sample application to connect to the the Service Bus queue and process messages as they arrive.
 
    Two applications are provided as sample that illustrate consuming the claim check message sent via Azure Event Hubs: one implemented as a Command Line Interface (CLI) application, and the other one implemented as an Azure Function, showcasing the serveless approach.
 
-   Run the desired sample application, CLI or Function to connect to the messaging system and process messages as they arrive.
-
-   1. For the CLI sample
-
    ```bash
-   dotnet run --project sample-3\ClientConsumer3
-   ```
-
-   1. For the Function sample
-
-   ```bash
-   cd sample-2\FunctionConsumer3
+   cd sample-3\FunctionConsumer3
    func start
    ```
 
-  > Please note: For demo purposes, the console application prints payload content on the screen. So keep that in mind if you want to try sending really large payloads.
+  > Please note: For demo purposes, the sample application will write the payload content to the the screen. Keep that in mind before you try sending really large payloads.
 
 ### :checkered_flag: Try it out
 

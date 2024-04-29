@@ -79,6 +79,8 @@ Make sure you have WSL (Windows System For Linux) installed and have AZ CLI vers
   func start
   ```
 
+  > Please note: For demo purposes, the sample application will write the payload content to the the screen. Keep that in mind before you try sending really large payloads.
+
 ### :checkered_flag: Try it out
 
 1. Run the CLI sample that will generate a claim check message and send it to Event Hubs using the Kafka Api.

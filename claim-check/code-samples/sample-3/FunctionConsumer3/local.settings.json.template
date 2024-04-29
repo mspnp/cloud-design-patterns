@@ -6,7 +6,7 @@
 
     "AzureFunctionsJobHost__logging__applicationInsights__samplingSettings__isEnabled": "false",
 
-    "ServiceBusConnection:fullyQualifiedNamespace": "{ServiceBusConnection:fullyQualifiedNamespace}",
-    "ServiceBusQueue": "{ServiceBusQueue}"
+    "ServiceBusConnection:fullyQualifiedNamespace": "{SERVICE_BUS_NAMESPACE}.servicebus.windows.net",
+    "ServiceBusQueue": "esbq-claimcheck"
   }
 }
