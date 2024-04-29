@@ -12,7 +12,7 @@ This example uses Azure Blob Store to store the payload, but any service that su
 
 This approach allows a client application to poll the queue, get the message and then use the stored reference data to download the payload directly from Azure Blob Storage. Azure Functions can also consume the Event Grid message directly.
 
-## [Automatic claim check token Generation, Event Hubs as messaging system](./code-samples/sample-2/)
+## [Automatic claim check token generation, Event Hubs as messaging system](./code-samples/sample-2/)
 
 > Technologies used: Azure Blob Storage, Azure Event Grid, Azure Event Hubs, .NET
 
