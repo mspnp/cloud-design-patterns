@@ -1,0 +1,9 @@
+{
+  "AppSettings": {
+    "EventHubsFullyQualifiedNamespace": "{EVENT_HUBS_NAMESPACE}.servicebus.windows.net",
+    "EventHubName": "evh-claimcheck",
+
+    "EventProcessorStorageBlobUrl": "https://{EVENT_PROCESSOR_STORAGE_ACCOUNT_NAME}.blob.core.windows.net",
+    "EventProcessorStorageContainer": "eventprocessor"
+  }
+}
