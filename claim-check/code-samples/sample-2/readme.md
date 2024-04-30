@@ -20,7 +20,7 @@ Using Event Hubs enable integration with a existing Event Hub-based solutions an
 
 Install the prerequisites and follow the steps to deploy and run the examples.
 
-## Prerequisites
+### Prerequisites
 
 - Permission to create a new resource group and resources in an [Azure subscription](https://azure.com/free)
 - Unix-like shell. Also available in:
@@ -30,10 +30,6 @@ Install the prerequisites and follow the steps to deploy and run the examples.
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 - Optionally, an IDE, like  [Visual Studio](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/).
-
-## Getting Started
-
-Make sure you have WSL (Windows System For Linux) installed and have AZ CLI version > 2.0.50. Before running any script also make sure you are authenticated on AZ CLI using
 
 ### Steps
 

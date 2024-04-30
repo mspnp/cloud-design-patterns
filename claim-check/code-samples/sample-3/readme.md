@@ -20,7 +20,7 @@ Forwarding Event Grid events to Service Bus simplifies integration with existing
 
 Install the prerequisites and follow the steps to deploy and run the examples.
 
-## Prerequisites
+### Prerequisites
 
 - Permission to create a new resource group and resources in an [Azure subscription](https://azure.com/free)
 - Unix-like shell. Also available in:
@@ -32,10 +32,6 @@ Install the prerequisites and follow the steps to deploy and run the examples.
 - [Azurite](/azure/storage/common/storage-use-azurite)
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 - Optionally, an IDE, like  [Visual Studio](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/).
-
-## Getting Started
-
-Make sure you have WSL (Windows System For Linux) installed and have AZ CLI version > 2.0.50. Before running any script also make sure you are authenticated on AZ CLI using
 
 ### Steps
 
