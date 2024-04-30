@@ -1,14 +1,19 @@
 # Sample 4: Manual token generation, Azure Event Hubs with Kafka as messaging system
 
-## Technologies used: Azure Blob Storage, Azure Event Hubs with Kafka, .NET 8.0
+## Technologies used: Azure Blob Storage, Azure Event Hubs with Kafka API enabled, Azure Functions, .NET 8.0
 
-In this example the client application uploads the payload to Azure Storage Blob and manually generates the claim check token, which is sent via Event Hubs.
+In this example the client application uploads the payload to Azure Blob Storage and manually generates the claim check token, which is sent via Event Hubs.
 
 The sample producer CLI application uses the Apache Kafka libraries to send the messages to [Event Hubs with Kafka enabled](https://learn.microsoft.com/azure/event-hubs/event-hubs-create-kafka-enabled), to demonstrate the ease of using other Azure services like Azure Blob Storage, Azure functions etc. with a different messaging protocol like Kafka. The Azure Function is used to demonstrate a client application that acts as the consumer for the payload.
 
 > This example uses [`DefaultAzureCredential`](https://learn.microsoft.com/dotnet/azure/sdk/authentication/#defaultazurecredential) for authentication while accessing Azure resources. the user principal must be provided as a parameter to the included Bicep script. The Bicep script is responsible for assigning the necessary RBAC (Role-Based Access Control) permissions for accessing the various Azure resources. While the principal can be the account associated with the interactive user, there are alternative [configurations](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods) available.
 
-![Sample Diagram](images/Sample-4-diagram.jpg)
+![A diagram showing a client CLI application acting as a producer and an Azure Function as the consumer, with Azure Blob Storage serving as the data store and Event Hubs as the messaging syste. The producer uploads the payload to Blob Storage, manually creates the claim-check message containing the blob location, and sends the message using the Kafka API to Event Hubs. The consumer Function receives the message from Event Hubs, extracts the reference, and dowloads the blob from the storage account.](images/sample-4-diagram.jpg)
+
+1. The producer CLI application uploads the payload to Azure Blob Storage.
+1. The producer creates the claim-check message containing the blob location, and sends the message using the Kafka API to Event Hubs.
+1. The consumer Function receives the message from Event Hubs.
+1. The Function extracts the reference to the payload blob from the message and downloads the blob directly from storage.
 
 ## :rocket: Deployment guide
 
