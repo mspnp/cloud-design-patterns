@@ -1,15 +1,6 @@
-# Static Content Hosting Pattern
+# Static Content Hosting pattern example
 
-This document describes the Static Content Hosting Pattern example from the guide [Cloud Design Patterns](http://aka.ms/Cloud-Design-Patterns).
-
-
-## Before you start
-
-Ensure that you have installed all of the software prerequisites.
-
-The example demonstrates operational aspects of static websites hosted in Azure Storage Accounts with support for static websites. Therefore, you will need to deploy this example in Azure.
-
-## About the Example
+This directory contains an example of the [Static Content Hosting cloud design pattern](https://learn.microsoft.com/azure/architecture/patterns/static-content-hosting).
 
 This example shows how to reference static content from a publicly accessible storage service. The example contains steps to host a 404 HTML document and a stylesheet file into an Azure storage account. This type of content is typically deployed to the storage account as part of the application deployment process. However, to simplify the example as well as concentrate on the pattern itself, files are uploaded to the storage account by following the steps below.
 
@@ -17,12 +8,12 @@ This example shows how to reference static content from a publicly accessible st
 
 The example is divided into two different parts:
 
-1. `src/static` pre-generated content with a 404 HTML document and a stylesheet file. Both are going to be referenced from a index.html file.
-1. `src/index.html` is a generated document during the deployment guide for the sake of simplicty. This is just a html file in your local working copy targeting the static hosted content. Typically, this _index.html_ is hosted from an Azure compute instance where its content including urls are dynamically generated.
+1. `src/static` pre-generated content with a 404 HTML document and a stylesheet file. Both are going to be referenced from an index.html file.
+1. `src/index.html` is a generated document during the deployment guide for the sake of simplicity. This is just a html file in your local working copy targeting the static hosted content. Typically, this file would be hosted from an Azure compute instance where its content including URLs are dynamically generated.
 
-When navigating the _index.html_ from your browser, all static resources are directly served out of the storage account, as opposed to being delivered by the compute instance.
+When navigating the **index.html** from your browser, all static resources are directly served out of the storage account, as opposed to being delivered by the compute instance.
 
-## 🚀 Deployment guide
+## :rocket: Deployment guide
 
 Install the prerequisites and follow the steps to deploy and run an example of the Static Content Hosting pattern.
 
@@ -30,19 +21,12 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 
 ### Prerequisites
 
-1. Latest Azure CLI installed (must be at least 2.40) locally, or you can perform this from Azure Cloud Shell by clicking below or using devcontainers in GitHub.
-
-   [![Launch Azure Cloud Shell](https://learn.microsoft.com/azure/includes/media/cloud-shell-try-it/launchcloudshell.png)](https://shell.azure.com)
-
-   > 💡 The steps shown here and elsewhere in the example use Bash shell commands. On Windows, locally you can use the Windows Subsystem for Linux to run Bash.
-
-1. An Azure subscription.
-
-   The subscription used in this deployment cannot be a [free account](https://azure.microsoft.com/free); it must be a standard EA, pay-as-you-go, or Visual Studio benefit subscription. This is because the resources deployed here are beyond the quotas of free subscriptions.
-
-   > :warning: The user or service principal initiating the deployment process *must* have the following minimal set of Azure role-based access control (RBAC) roles:
-   >
-   > - [User Access Administrator role](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#user-access-administrator) is *required* at the subscription level since you'll be performing role assignments to managed identities across various resource groups.
+- Permission to create a new resource group and resources in an [Azure subscription](https://azure.com/free)
+- Unix-like shell. Also available in:
+  - [Azure Cloud Shell](https://shell.azure.com/)
+  - [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/windows/wsl/install)
+- [Git](https://git-scm.com/downloads)
+- [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 
 ### Steps
 
@@ -91,19 +75,19 @@ Install the prerequisites and follow the steps to deploy and run an example of t
    # Enables static website
    az storage blob service-properties update --account-name $STORAGE_ACCOUNT_NAME --static-website --404-document 404.html --index-document index.html --auth-mode login
 
-   # upload more files
+   # upload static content
    az storage blob upload-batch -s "./src/static" --destination "\$web" --account-name $STORAGE_ACCOUNT_NAME --pattern "*.html" --content-type "text/html" --content-cache max-age=3600 --auth-mode login
    az storage blob upload-batch -s "./src/static" --destination "\$web" --account-name $STORAGE_ACCOUNT_NAME --pattern "*.css" --content-type "text/css" --content-cache max-age=3600 --auth-mode login
    ```
 
-1. Obtain the public url
+1. Obtain the public URL of the storage account.
 
    ```bash
    # Retrieve the static website endpoint
    export STATIC_WEBSITE_URL=$(az storage account show -n $STORAGE_ACCOUNT_NAME -g rg-hosting-static-content  --query primaryEndpoints.web --output tsv)
    ```
 
-1. Generate a _index.html_ document file for validation purposes
+1. Generate an **index.html** document file for validation purposes.
 
    ```bash
    cat > src/index.html << EOF
@@ -119,18 +103,32 @@ Install the prerequisites and follow the steps to deploy and run an example of t
    EOF
    ```
 
-### 🏁 Try it out
+### :checkered_flag: Try it out
 
-Open the browsers of your preference and navigate to the website url
+Open the browser of your preference and navigate to the website URL.
 
 ```bash
 open src/index.html
 ```
 
-🧹 Clean up
+### :broom: Clean up
 
 Remove the resource group that you created when you are done with this example.
 
 ```bash
 az group delete -n rg-hosting-static-content -y
 ```
+
+## Related documentation
+
+- [Static website hosting in Azure Storage](https://learn.microsoft.com/azure/storage/blobs/storage-blob-static-website)
+- [Map a custom domain to an Azure Blob Storage endpoint](https://learn.microsoft.com/azure/storage/blobs/storage-custom-domain-name)
+
+## Contributions
+
+Please see our [Contributor guide](../CONTRIBUTING.md).
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact <opencode@microsoft.com> with any additional questions or comments.
+
+With :heart: from Azure patterns & practices, [Azure Architecture Center](https://azure.com/architecture).
+

@@ -36,7 +36,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     defaultToOAuthAuthentication: true
     allowedCopyScope: 'PrivateLink'
     networkAcls: {
-      defaultAction: 'Allow' // For this sample, public Internet access is expected since content is delivered to anonymouse client
+      defaultAction: 'Allow' // For this sample, public Internet access is expected since content is delivered to anonymous client
       bypass: 'None'
       virtualNetworkRules: []
       ipRules: []
