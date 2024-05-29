@@ -8,6 +8,18 @@ param location string = resourceGroup().location
 @description('The globally unique name for the storage account.')
 param storageAccountName string
 
+@minLength(5)
+@description('The user assignee object id to be granted with Storage Blob Data Contributor permissions.')
+param assigneeObjectId string
+
+
+/*** EXISTING SUBSCRIPTION RESOURCES ***/
+
+resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+  name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+  scope: subscription()
+}
+
 /*** EXISTING RESOURCES ***/
 
 /*** NEW RESOURCES ***/
@@ -43,3 +55,15 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     }
   }
 }
+
+resource storageAccountUserStorageBlobDataContributorRole_roleAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+  scope: storageAccount
+  name: guid(storageAccount.id, storageBlobDataContributorRole.id, assigneeObjectId)
+  properties: {
+    roleDefinitionId: storageBlobDataContributorRole.id
+    description: 'Allows cluster identity to join the nodepool vmss resources to this subnet.'
+    principalId: assigneeObjectId
+    principalType: 'User'
+  }
+}
+

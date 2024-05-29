@@ -57,17 +57,10 @@ Install the prerequisites and follow the steps to deploy and run an example of t
    STORAGE_ACCOUNT_NAME="stvaletblobs$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 7 | head -n 1)"
 
    # [This takes about one minute to run.]
-   az deployment group create -n deploy-hosting-static-content -f bicep/main.bicep -g rg-hosting-static-content -p storageAccountName=$STORAGE_ACCOUNT_NAME
+   az deployment group create -n deploy-hosting-static-content -f bicep/main.bicep -g rg-hosting-static-content -p storageAccountName=$STORAGE_ACCOUNT_NAME assigneeObjectId=$(az ad signed-in-user show --query 'id' -o tsv)
    ```
 
    > :warning: for those using devcontainers and running on arm platform, consider `az bicep uninstall && az bicep install --target-platform linux-arm64`
-
-1. [Control Plane] RBAC your user with Storage Blob Data Contributor. This is required to be able to upload files to the recently created storage account
-
-   ```bash
-   ROLEASSIGNMENT_TO_UPLOAD_CONTENT=$(az role assignment create --role ba92f5b4-2d11-453d-a403-e96b0029c9fe --assignee-principal-type user --assignee-object-id $(az ad signed-in-user show --query 'id' -o tsv) --scope $(az storage account show -g rg-hosting-static-content -n $STORAGE_ACCOUNT_NAME --query 'id' -o tsv) --query 'id' -o tsv)
-   echo ROLEASSIGNMENT_TO_UPLOAD_CONTENT: $ROLEASSIGNMENT_TO_UPLOAD_CONTENT
-   ```
 
 1. [Data Plane] Enable static website and upload content
 
