@@ -80,20 +80,10 @@ Install the prerequisites and follow the steps to deploy and run an example of t
    export STATIC_WEBSITE_URL=$(az storage account show -n $STORAGE_ACCOUNT_NAME -g rg-hosting-static-content  --query primaryEndpoints.web --output tsv)
    ```
 
-1. Generate an **index.html** document file for validation purposes.
+1. Replace the url placeholder from the _index.html_ document using the recently created storage account static website url
 
    ```bash
-   cat > src/index.html << EOF
-   <!DOCTYPE html>
-   <html>
-   <head>
-       <link href="${STATIC_WEBSITE_URL}style.css" rel="stylesheet" type="text/css" data-preload="true"/>
-   </head>
-   <body>
-       <h1>Welcome to contoso.com</h1>
-   </body>
-   </html>
-   EOF
+   sed "s#<static-website-url>#${STATIC_WEBSITE_URL}#g" ./src/index.template.html > ./src/index.html
    ```
 
 ### :checkered_flag: Try it out
