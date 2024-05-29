@@ -397,5 +397,5 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
-# ignore index.htlm template file
+# ignore the resulting index.html file
 src/index.html
