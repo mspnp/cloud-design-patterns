@@ -66,7 +66,7 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 
    ```bash
    # Enables static website
-   az storage blob service-properties update --account-name $STORAGE_ACCOUNT_NAME --static-website --404-document 404.html --index-document index.html --auth-mode login
+   az storage blob service-properties update --account-name $STORAGE_ACCOUNT_NAME --static-website --404-document 404.html --auth-mode login
 
    # upload static content
    az storage blob upload-batch -s "./src/static" --destination "\$web" --account-name $STORAGE_ACCOUNT_NAME --pattern "*.html" --content-type "text/html" --content-cache max-age=3600 --auth-mode login
