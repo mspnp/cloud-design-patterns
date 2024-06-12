@@ -17,7 +17,7 @@
 				<PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />
 				<PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="1.2.0" />
 				<PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
-				<PackageReference Include="Azure.Identity" Version="1.11.1" />
+				<PackageReference Include="Azure.Identity" Version="1.11.4" />
 		</ItemGroup>
 
 		<ItemGroup>
