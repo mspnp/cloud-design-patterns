@@ -11,7 +11,7 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
 ### Prerequisites
 
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest)
-- [.NET Core SDK version 6](https://dotnet.microsoft.com/en-us/download)
+- [.NET Core SDK version 8](https://dotnet.microsoft.com/en-us/download)
 - [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#v4)
 
 ### Deploy the Azure resources
@@ -24,16 +24,37 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
    cd async-request-reply
    ```
 
-3. Create a resource group.
+3. Azure Login
+
+   Our journey begins with logging into Azure. Use the command below:
 
    ```bash
-   az group create --name rg-asyncrequestreply --location eastus
+   az login
+   # Optionally, set the default subscription:
+   # az account set --subscription <subscription_id>
    ```
 
-4. Deploy the template.
+4. Environment Setup
+
+   We need to prepare our environment:
 
    ```bash
-   az deployment group create -g rg-asyncrequestreply -f deploy.bicep
+   export LOCATION=eastus
+   export RESOURCEGROUP_BASE_NAME=rg-asyncrequestreply
+   export RESOURCEGROUP=${RESOURCEGROUP_BASE_NAME}-${LOCATION}
+   ```
+
+5. Create a resource group.
+
+   ```bash
+   az group create --name ${RESOURCEGROUP} --location ${LOCATION}
+   ```
+
+6. Deploy the template.
+   All the resources are going to be created on the resouce group location.  
+
+   ```bash
+   az deployment group create -g ${RESOURCEGROUP} -f deploy.bicep
    ```
 
 5. Wait for the deployment to complete.
@@ -49,9 +70,9 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
 2. Deploy the app.
 
    ```bash
-   FUNC_APP_NAME=$(az deployment group show -g rg-asyncrequestreply -n deploy --query properties.outputs.functionAppName.value -o tsv)
+   FUNC_APP_NAME=$(az deployment group show -g ${RESOURCEGROUP} -n deploy --query properties.outputs.functionAppName.value -o tsv)
 
-   func azure functionapp publish $FUNC_APP_NAME --dotnet
+   func azure functionapp publish $FUNC_APP_NAME --dotnetIsolated 
    ```
 
 ### Validate the Azure Function app
@@ -75,7 +96,7 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
     Location: http://<appservice-name>.azurewebsites.net/api/RequestStatus/<guid>
    ```
 
-   Using a browser open the url from the *Location* field in the response. A file with the data you have sent will be downloaded.
+   Using a browser open the url from the _Location_ field in the response. A file with the data you have sent will be downloaded.
 
    > **Note** the app uses the WEBSITE_HOSTNAME environment variable. This environment variable is set automatically by the Azure App Service runtime environment. For more information, see [Azure runtime environment](https.://github.com/projectkudu/kudu/wiki/Azure-runtime-environment)
 
@@ -84,7 +105,7 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
 1. Delete all the Azure resources for this Cloud Async Pattern
 
    ```bash
-   az group delete -n rg-asyncrequestreply -y
+   az group delete -n ${RESOURCEGROUP} -y
    ```
 
 ### Running localy
@@ -92,13 +113,13 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
 You could open the solution with Visual Studio, then you need to create on the root `local.settings.json`
 
    ```json
-    {
-    "IsEncrypted": false,
-    "Values": {
-        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-        "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-        "ServiceBusConnectionAppSetting": "<yourdata>",
-        "StorageConnectionAppSetting": "<yourData>"
-    }
-    }
+   {
+      "IsEncrypted": false,
+      "Values": {
+         "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+         "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+         "ServiceBusConnectionAppSetting": "<yourdata>",
+         "StorageConnectionAppSetting": "<yourData>"
+      }
+   }
    ```

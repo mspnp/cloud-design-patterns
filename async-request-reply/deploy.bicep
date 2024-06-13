@@ -58,20 +58,30 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   sku: {
     name: 'Y1'
     tier: 'Dynamic'
+    size: 'Y1'
   }
-  properties: {
-    name: hostingPlanName
-    computeMode: 'Dynamic'
-  }
+  properties: {}
 }
 
-resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
+resource functionApp  'Microsoft.Web/sites@2022-09-01' = {
   name: functionAppName
   location: location
   kind: 'functionapp'
   properties: {
+    enabled: true
     serverFarmId: hostingPlan.id
+    httpsOnly: true
+    redundancyMode: 'None'
+    publicNetworkAccess: 'Enabled'
+    keyVaultReferenceIdentity: 'SystemAssigned'
     siteConfig: {
+      netFrameworkVersion: 'v8.0'
+      numberOfWorkers: 1
+      alwaysOn: false
+      http20Enabled: false
+      functionAppScaleLimit: 200
+      minimumElasticInstanceCount: 0
+      use32BitWorkerProcess: false
       appSettings: [
         {
           name: 'AzureWebJobsDashboard'
@@ -94,12 +104,12 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: '~4'
         }
         {
-          name: 'WEBSITE_NODE_DEFAULT_VERSION'
-          value: '8.11.1'
+          name: 'WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED'
+          value: '1'
         }
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: 'dotnet'
+          value: 'dotnet-isolated'
         }
         {
           name: 'ServiceBusConnectionAppSetting'

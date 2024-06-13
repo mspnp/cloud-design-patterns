@@ -1,29 +1,28 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Azure.Storage.Blobs.Specialized;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace Contoso
+namespace asyncpattern
 {
-    public static class AsyncOperationStatusChecker
+    public class AsyncOperationStatusChecker
     {
-        [FunctionName("AsyncOperationStatusChecker")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "RequestStatus/{thisGUID}")] HttpRequest req,
-            [Blob("data/{thisGuid}.blobdata", FileAccess.Read, Connection = "StorageConnectionAppSetting")] BlockBlobClient inputBlob, string thisGUID,
-            ILogger log)
-        {
+        private readonly ILogger<AsyncOperationStatusChecker> _logger;
 
+        public AsyncOperationStatusChecker(ILogger<AsyncOperationStatusChecker> logger)
+        {
+            _logger = logger;
+        }
+
+        [Function("AsyncOperationStatusChecker")]
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "RequestStatus/{thisGUID}")] HttpRequest req,
+             [BlobInput("data/{thisGUID}.blobdata",Connection = "StorageConnectionAppSetting")] BlockBlobClient inputBlob, string thisGUID)
+        {
             OnCompleteEnum OnComplete = Enum.Parse<OnCompleteEnum>(req.Query["OnComplete"].FirstOrDefault() ?? "Redirect");
             OnPendingEnum OnPending = Enum.Parse<OnPendingEnum>(req.Query["OnPending"].FirstOrDefault() ?? "OK");
 
-            log.LogInformation($"C# HTTP trigger function processed a request for status on {thisGUID} - OnComplete {OnComplete} - OnPending {OnPending}");
+            _logger.LogInformation($"C# HTTP trigger function processed a request for status on {thisGUID} - OnComplete {OnComplete} - OnPending {OnPending}");
 
             // ** Check to see if the blob is present **
             if (await inputBlob.ExistsAsync())
@@ -51,19 +50,19 @@ namespace Contoso
 
                             while (!await inputBlob.ExistsAsync() && backoff < 64000)
                             {
-                                log.LogInformation($"Synchronous mode {thisGUID}.blob - retrying in {backoff} ms");
+                                _logger.LogInformation($"Synchronous mode {thisGUID}.blob - retrying in {backoff} ms");
                                 backoff = backoff * 2;
                                 await Task.Delay(backoff);
                             }
 
                             if (await inputBlob.ExistsAsync())
                             {
-                                log.LogInformation($"Synchronous Redirect mode {thisGUID}.blob - completed after {backoff} ms");
+                                _logger.LogInformation($"Synchronous Redirect mode {thisGUID}.blob - completed after {backoff} ms");
                                 return await OnCompleted(OnComplete, inputBlob, thisGUID);
                             }
                             else
                             {
-                                log.LogInformation($"Synchronous mode {thisGUID}.blob - NOT FOUND after timeout {backoff} ms");
+                                _logger.LogInformation($"Synchronous mode {thisGUID}.blob - NOT FOUND after timeout {backoff} ms");
                                 return new NotFoundResult();
                             }
                         }
@@ -75,8 +74,7 @@ namespace Contoso
                 }
             }
         }
-
-        private static async Task<IActionResult> OnCompleted(OnCompleteEnum OnComplete, BlockBlobClient inputBlob, string thisGUID)
+        private async Task<IActionResult> OnCompleted(OnCompleteEnum OnComplete, BlockBlobClient inputBlob, string thisGUID)
         {
             switch (OnComplete)
             {
@@ -101,6 +99,7 @@ namespace Contoso
             }
         }
     }
+
 
     public enum OnCompleteEnum
     {
