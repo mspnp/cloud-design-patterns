@@ -1,8 +1,7 @@
-using System;
-using Azure.Storage.Blobs.Specialized;
+﻿using Azure.Storage.Blobs.Specialized;
 using Azure.Storage.Sas;
 
-namespace Contoso
+namespace asyncpattern
 {
     public static class CloudBlockBlobExtensions
     {
