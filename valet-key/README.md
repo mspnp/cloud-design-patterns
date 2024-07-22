@@ -39,7 +39,9 @@ Install the prerequisites and follow the steps to deploy and run an example of t
    az login
    az account set -s <Name or ID of subscription>
 
-   az group create -n rg-valet-key -l eastus2
+   LOCATION=eastus2
+   RESOURCE_GROUP_NAME=rg-valet-key-${LOCATION}
+   az group create -n ${RESOURCE_GROUP_NAME} -l eastus2
    ```
 
 1. Deploy destination Azure Storage account.
@@ -49,7 +51,7 @@ Install the prerequisites and follow the steps to deploy and run an example of t
    STORAGE_ACCOUNT_NAME="stvaletblobs$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 7 | head -n 1)"
 
    # This takes about one minute
-   az deployment group create -n deploy-valet-key -f bicep/main.bicep -g rg-valet-key -p storageAccountName=$STORAGE_ACCOUNT_NAME principalId=$CURRENT_USER_OBJECT_ID
+   az deployment group create -n deploy-valet-key -f bicep/main.bicep -g ${RESOURCE_GROUP_NAME} -p storageAccountName=$STORAGE_ACCOUNT_NAME principalId=$CURRENT_USER_OBJECT_ID
    ```
 
 1. Configure the API to use this Azure Storage account for its delegation.
@@ -95,7 +97,7 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 Remove the resource group that you created when you are done with this sample.
 
 ```azurecli
-az group delete -n rg-valet-key
+az group delete -n ${RESOURCE_GROUP_NAME}
 ```
 
 ## Deploying to Azure
