@@ -51,13 +51,13 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
    ```
 
 6. Deploy the template.
-   All the resources are going to be created on the resouce group location.  
+   All the resources are going to be created on the resouce group location.
 
    ```bash
    az deployment group create -g ${RESOURCEGROUP} -f deploy.bicep
    ```
 
-5. Wait for the deployment to complete.
+7. Wait for the deployment to complete.
 
 ### Deploy the Functions app
 
@@ -72,7 +72,7 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
    ```bash
    FUNC_APP_NAME=$(az deployment group show -g ${RESOURCEGROUP} -n deploy --query properties.outputs.functionAppName.value -o tsv)
 
-   func azure functionapp publish $FUNC_APP_NAME --dotnetIsolated 
+   func azure functionapp publish $FUNC_APP_NAME --dotnetIsolated
    ```
 
 ### Validate the Azure Function app
@@ -112,14 +112,14 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
 
 You could open the solution with Visual Studio, then you need to create on the root `local.settings.json`
 
-   ```json
-   {
-      "IsEncrypted": false,
-      "Values": {
-         "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-         "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-         "ServiceBusConnectionAppSetting": "<yourdata>",
-         "StorageConnectionAppSetting": "<yourData>"
-      }
-   }
-   ```
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "ServiceBusConnectionAppSetting": "<yourdata>",
+    "StorageConnectionAppSetting": "<yourData>"
+  }
+}
+```
