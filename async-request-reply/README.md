@@ -123,3 +123,29 @@ You could open the solution with Visual Studio, then you need to create on the r
   }
 }
 ```
+
+As far the implementation is using manage identity, you need to assign the role to your [developer identity](https://learn.microsoft.com/azure/azure-functions/functions-reference?tabs=blob&pivots=programming-language-csharp#local-development-with-identity-based-connections).
+
+```yarm
+// Assign Role to allow sending messages to the Service Bus
+resource serviceBusSenderRoleAssignmentf 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, 'LocalUser', 'ServiceBusSenderRole')
+  scope: serviceBusNamespace
+  properties: {
+    roleDefinitionId: senderServiceBusRole
+    principalId: <your user object id>
+    principalType: 'User'
+  }
+}
+
+// Assign Role to allow receiving messages from the Service Bus
+resource serviceBusReceiverRoleAssignmentf 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, 'LocalUser', 'ServiceBusReceiverRolef')
+  scope: serviceBusNamespace
+  properties: {
+    roleDefinitionId: receiverServiceBusRole
+    principalId: <your user object id>
+    principalType: 'User'
+  }
+}
+```

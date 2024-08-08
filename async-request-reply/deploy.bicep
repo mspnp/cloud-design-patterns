@@ -6,6 +6,14 @@ var hostingPlanName = 'app-reqrep'
 var functionAppName = 'fapp-reqrep-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var serviceBusNamespaceName = toLower('sb-reqrep-${uniqueString(subscription().subscriptionId, resourceGroup().id)}')
 
+var senderServiceBusRole = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39'
+) // Azure Service Bus Data Sender
+var receiverServiceBusRole = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0'
+) // Azure Service Bus Data Receiver
 
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
   name: serviceBusNamespaceName
@@ -63,10 +71,13 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   properties: {}
 }
 
-resource functionApp  'Microsoft.Web/sites@2022-09-01' = {
+resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: functionAppName
   location: location
   kind: 'functionapp'
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     enabled: true
     serverFarmId: hostingPlan.id
@@ -112,8 +123,8 @@ resource functionApp  'Microsoft.Web/sites@2022-09-01' = {
           value: 'dotnet-isolated'
         }
         {
-          name: 'ServiceBusConnectionAppSetting'
-          value: listKeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', serviceBusNamespace.name, 'RootManageSharedAccessKey'), '2015-08-01').primaryConnectionString
+          name: 'ServiceBusConnection__fullyQualifiedNamespace'
+          value: '${serviceBusNamespace.name}.servicebus.windows.net'
         }
         {
           name: 'StorageConnectionAppSetting'
@@ -121,6 +132,28 @@ resource functionApp  'Microsoft.Web/sites@2022-09-01' = {
         }
       ]
     }
+  }
+}
+
+// Assign Role to allow sending messages to the Service Bus
+resource serviceBusSenderRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, functionApp.id, 'ServiceBusSenderRole')
+  scope: serviceBusNamespace
+  properties: {
+    roleDefinitionId: senderServiceBusRole
+    principalId: functionApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Assign Role to allow receiving messages from the Service Bus
+resource serviceBusReceiverRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, functionApp.id, 'ServiceBusReceiverRole')
+  scope: serviceBusNamespace
+  properties: {
+    roleDefinitionId: receiverServiceBusRole
+    principalId: functionApp.identity.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 

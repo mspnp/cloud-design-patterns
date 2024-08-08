@@ -1,3 +1,4 @@
+using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using Microsoft.Azure.Functions.Worker;
@@ -12,8 +13,10 @@ var host = new HostBuilder()
         services.ConfigureFunctionsApplicationInsights();
         var blobServiceClientConnectionString = Environment.GetEnvironmentVariable("StorageConnectionAppSetting");
         services.AddSingleton(new BlobServiceClient(blobServiceClientConnectionString));
-        var serviceBusClientConnectionString = Environment.GetEnvironmentVariable("ServiceBusConnectionAppSetting");
-        services.AddSingleton(new ServiceBusClient(serviceBusClientConnectionString));
+        // ServiceBusClient using Managed Identity
+        var fullyQualifiedNamespace = Environment.GetEnvironmentVariable("ServiceBusConnection__fullyQualifiedNamespace");
+        var serviceBusClient = new ServiceBusClient(fullyQualifiedNamespace, new DefaultAzureCredential());
+        services.AddSingleton(serviceBusClient);
     })
     .Build();
 

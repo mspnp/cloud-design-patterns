@@ -18,7 +18,7 @@ namespace asyncpattern
         }
 
         [Function(nameof(AsyncProcessingBackgroundWorker))]
-        public async Task Run([ServiceBusTrigger("outqueue", Connection = "ServiceBusConnectionAppSetting")] ServiceBusReceivedMessage message)
+        public async Task Run([ServiceBusTrigger("outqueue", Connection = "ServiceBusConnection")] ServiceBusReceivedMessage message)
         {
             //Perform an actual action against the blob data source for the async readers to be able to check against.
             // This is where your actual service worker processing will be performed
