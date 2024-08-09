@@ -6,7 +6,11 @@ For more information about this pattern, see [Asynchronous Request-Reply pattern
 
 ![Data flow of the async request-reply pattern](https://learn.microsoft.com/azure/architecture/patterns/_images/async-request-fn.png)  
 
-The implementation use managed identity. When running [Function App in a Consumption](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/use-managed-identity-instead-of-azurewebjobsstorage-to-connect-a/ba-p/3657606), your app uses the WEBSITE_AZUREFILESCONNECTIONSTRING and WEBSITE_CONTENTSHARE settings when connecting to Azure Files on the storage account used by your function app. Azure Files doesn't support using managed identity when accessing the file share. Then that reference is using connection string. The manage identity is used on aplication dependencies.  
+The implementation uses a managed identity to control access to your storage accounts and Service Bus in the code, which is highly recommended wherever possible as a security best practice.
+
+When running [Function App in a Consumption](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/use-managed-identity-instead-of-azurewebjobsstorage-to-connect-a/ba-p/3657606), your app uses the WEBSITE_AZUREFILESCONNECTIONSTRING and WEBSITE_CONTENTSHARE settings when connecting to Azure Files on the storage account used by your function app. Azure Files doesn't support using managed identity when accessing the file share. Then that reference is using connection string. The manage identity is used on aplication dependencies.  
+
+The typical way to generate a SAS token in code requires the storage account key. In this scenario, you won’t have a storage account key, so you’ll need to find another way to generate the shared access signatures. To do that, we need to use an approach called “user delegation” SAS . By using a user delegation SAS, we can sign the signature with the Azure Ad credentials instead of the storage account key.
 
 ## Deploying the sample
 
