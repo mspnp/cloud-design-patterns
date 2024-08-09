@@ -1,29 +1,30 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
+using Azure.Storage.Sas;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace Contoso
+namespace asyncpattern
 {
-    public static class AsyncOperationStatusChecker
+    public class AsyncOperationStatusChecker
     {
-        [FunctionName("AsyncOperationStatusChecker")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "RequestStatus/{thisGUID}")] HttpRequest req,
-            [Blob("data/{thisGuid}.blobdata", FileAccess.Read, Connection = "StorageConnectionAppSetting")] BlockBlobClient inputBlob, string thisGUID,
-            ILogger log)
-        {
+        private readonly ILogger<AsyncOperationStatusChecker> _logger;
 
+        public AsyncOperationStatusChecker(ILogger<AsyncOperationStatusChecker> logger)
+        {
+            _logger = logger;
+        }
+
+        [Function("AsyncOperationStatusChecker")]
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "RequestStatus/{thisGUID}")] HttpRequest req,
+             [BlobInput("data/{thisGUID}.blobdata", Connection = "DataStorage")] BlockBlobClient inputBlob, string thisGUID)
+        {
             OnCompleteEnum OnComplete = Enum.Parse<OnCompleteEnum>(req.Query["OnComplete"].FirstOrDefault() ?? "Redirect");
             OnPendingEnum OnPending = Enum.Parse<OnPendingEnum>(req.Query["OnPending"].FirstOrDefault() ?? "OK");
 
-            log.LogInformation($"C# HTTP trigger function processed a request for status on {thisGUID} - OnComplete {OnComplete} - OnPending {OnPending}");
+            _logger.LogInformation($"C# HTTP trigger function processed a request for status on {thisGUID} - OnComplete {OnComplete} - OnPending {OnPending}");
 
             // ** Check to see if the blob is present **
             if (await inputBlob.ExistsAsync())
@@ -51,19 +52,19 @@ namespace Contoso
 
                             while (!await inputBlob.ExistsAsync() && backoff < 64000)
                             {
-                                log.LogInformation($"Synchronous mode {thisGUID}.blob - retrying in {backoff} ms");
+                                _logger.LogInformation($"Synchronous mode {thisGUID}.blob - retrying in {backoff} ms");
                                 backoff = backoff * 2;
                                 await Task.Delay(backoff);
                             }
 
                             if (await inputBlob.ExistsAsync())
                             {
-                                log.LogInformation($"Synchronous Redirect mode {thisGUID}.blob - completed after {backoff} ms");
+                                _logger.LogInformation($"Synchronous Redirect mode {thisGUID}.blob - completed after {backoff} ms");
                                 return await OnCompleted(OnComplete, inputBlob, thisGUID);
                             }
                             else
                             {
-                                log.LogInformation($"Synchronous mode {thisGUID}.blob - NOT FOUND after timeout {backoff} ms");
+                                _logger.LogInformation($"Synchronous mode {thisGUID}.blob - NOT FOUND after timeout {backoff} ms");
                                 return new NotFoundResult();
                             }
                         }
@@ -75,16 +76,21 @@ namespace Contoso
                 }
             }
         }
-
-        private static async Task<IActionResult> OnCompleted(OnCompleteEnum OnComplete, BlockBlobClient inputBlob, string thisGUID)
+        private async Task<IActionResult> OnCompleted(OnCompleteEnum OnComplete, BlockBlobClient inputBlob, string thisGUID)
         {
             switch (OnComplete)
             {
                 case OnCompleteEnum.Redirect:
-                    {
-                        // Redirect to the SAS URI to blob storage
 
-                        return new RedirectResult(inputBlob.GenerateSASURI());
+                    {
+                        //The typical way to generate a SAS token in code requires the storage account key.
+                        //If you need to use “Managed Identity” to control access to your storage accounts in code, which is something I highly recommend wherever possible as this is a security best practice.
+                        //In this scenario, you won’t have a storage account key, so you’ll need to find another way to generate the shared access signatures.
+                        //To do that, we need to use an approach called “user delegation” SAS . By using a user delegation SAS, we can sign the signature with the Azure Ad credentials instead of the storage account key.
+                        BlobServiceClient blobServiceClient = inputBlob.GetParentBlobContainerClient().GetParentBlobServiceClient();
+                        var userDelegationKey = await blobServiceClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(7));
+                        // Redirect to the SAS URI to blob storage
+                        return new RedirectResult(inputBlob.GenerateSASURI(userDelegationKey));
                     }
 
                 case OnCompleteEnum.Stream:
@@ -101,6 +107,7 @@ namespace Contoso
             }
         }
     }
+
 
     public enum OnCompleteEnum
     {

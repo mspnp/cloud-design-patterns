@@ -6,6 +6,19 @@ var hostingPlanName = 'app-reqrep'
 var functionAppName = 'fapp-reqrep-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var serviceBusNamespaceName = toLower('sb-reqrep-${uniqueString(subscription().subscriptionId, resourceGroup().id)}')
 
+var senderServiceBusRole = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39'
+) // Azure Service Bus Data Sender
+var receiverServiceBusRole = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0'
+) // Azure Service Bus Data Receiver
+
+var storageBlobDataContributorRole = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+) // Azure Storage Blob Data Contributor
 
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
   name: serviceBusNamespaceName
@@ -32,7 +45,10 @@ resource appStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   }
   kind: 'StorageV2'
   location: location
-  properties: {}
+  properties: {
+    supportsHttpsTrafficOnly: true
+    minimumTlsVersion: 'TLS1_2'
+  }
 }
 
 resource dataStorageAccount 'Microsoft.Storage/storageAccounts@2019-04-01' = {
@@ -42,10 +58,14 @@ resource dataStorageAccount 'Microsoft.Storage/storageAccounts@2019-04-01' = {
   }
   kind: 'StorageV2'
   location: location
-  properties: {}
+  properties: {
+    allowSharedKeyAccess: false
+    supportsHttpsTrafficOnly: true
+    minimumTlsVersion: 'TLS1_2'
+  }
 }
 
-resource dataStorageAccountName_default_data 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+resource dataStorageAccountNameContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
   name: '${dataStorageAccountName}/default/data'
   dependsOn: [
     dataStorageAccount
@@ -58,20 +78,33 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   sku: {
     name: 'Y1'
     tier: 'Dynamic'
+    size: 'Y1'
   }
-  properties: {
-    name: hostingPlanName
-    computeMode: 'Dynamic'
-  }
+  properties: {}
 }
 
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: functionAppName
   location: location
   kind: 'functionapp'
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
+    enabled: true
     serverFarmId: hostingPlan.id
+    httpsOnly: true
+    redundancyMode: 'None'
+    publicNetworkAccess: 'Enabled'
+    keyVaultReferenceIdentity: 'SystemAssigned'
     siteConfig: {
+      netFrameworkVersion: 'v8.0'
+      numberOfWorkers: 1
+      alwaysOn: false
+      http20Enabled: false
+      functionAppScaleLimit: 200
+      minimumElasticInstanceCount: 0
+      use32BitWorkerProcess: false
       appSettings: [
         {
           name: 'AzureWebJobsDashboard'
@@ -94,23 +127,57 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: '~4'
         }
         {
-          name: 'WEBSITE_NODE_DEFAULT_VERSION'
-          value: '8.11.1'
+          name: 'WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED'
+          value: '1'
         }
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: 'dotnet'
+          value: 'dotnet-isolated'
         }
         {
-          name: 'ServiceBusConnectionAppSetting'
-          value: listKeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', serviceBusNamespace.name, 'RootManageSharedAccessKey'), '2015-08-01').primaryConnectionString
+          name: 'ServiceBusConnection__fullyQualifiedNamespace'
+          value: '${serviceBusNamespace.name}.servicebus.windows.net'
         }
         {
-          name: 'StorageConnectionAppSetting'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${dataStorageAccount.name};AccountKey=${listKeys(dataStorageAccount.id, '2015-05-01-preview').key1}'
+          name: 'DataStorage__blobServiceUri '
+          value: 'https://${dataStorageAccount.name}.blob.${environment().suffixes.storage}'
         }
       ]
     }
+  }
+}
+
+// Assign Role to allow sending messages to the Service Bus
+resource serviceBusSenderRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, functionApp.id, 'ServiceBusSenderRole')
+  scope: serviceBusNamespace
+  properties: {
+    roleDefinitionId: senderServiceBusRole
+    principalId: functionApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Assign Role to allow receiving messages from the Service Bus
+resource serviceBusReceiverRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, functionApp.id, 'ServiceBusReceiverRole')
+  scope: serviceBusNamespace
+  properties: {
+    roleDefinitionId: receiverServiceBusRole
+    principalId: functionApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+
+// Assign Role to allow Read, write, and delete Azure Storage containers and blobs. 
+resource dataStorageBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, dataStorageAccount.id, 'StorageBlobDataContributorRole')
+  scope: dataStorageAccount
+  properties: {
+    roleDefinitionId: storageBlobDataContributorRole
+    principalId: functionApp.identity.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 
