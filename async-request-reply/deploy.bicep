@@ -15,6 +15,11 @@ var receiverServiceBusRole = subscriptionResourceId(
   '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0'
 ) // Azure Service Bus Data Receiver
 
+var storageBlobDataContributorRole = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+) // Azure Storage Blob Data Contributor
+
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
   name: serviceBusNamespaceName
   location: location
@@ -53,7 +58,7 @@ resource dataStorageAccount 'Microsoft.Storage/storageAccounts@2019-04-01' = {
   properties: {}
 }
 
-resource dataStorageAccountName_default_data 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+resource dataStorageAccountNameContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
   name: '${dataStorageAccountName}/default/data'
   dependsOn: [
     dataStorageAccount
@@ -127,8 +132,8 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: '${serviceBusNamespace.name}.servicebus.windows.net'
         }
         {
-          name: 'StorageConnectionAppSetting'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${dataStorageAccount.name};AccountKey=${listKeys(dataStorageAccount.id, '2015-05-01-preview').key1}'
+          name: 'DataStorage__blobServiceUri '
+          value: 'https://${dataStorageAccount.name}.blob.${environment().suffixes.storage}'
         }
       ]
     }
@@ -152,6 +157,18 @@ resource serviceBusReceiverRoleAssignment 'Microsoft.Authorization/roleAssignmen
   scope: serviceBusNamespace
   properties: {
     roleDefinitionId: receiverServiceBusRole
+    principalId: functionApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+
+// Assign Role to allow Read, write, and delete Azure Storage containers and blobs. 
+resource dataStorageBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, dataStorageAccount.id, 'StorageBlobDataContributorRole')
+  scope: dataStorageAccount
+  properties: {
+    roleDefinitionId: storageBlobDataContributorRole
     principalId: functionApp.identity.principalId
     principalType: 'ServicePrincipal'
   }

@@ -4,7 +4,9 @@ Decouple backend processing from a frontend host, where backend processing needs
 
 For more information about this pattern, see [Asynchronous Request-Reply pattern](https://learn.microsoft.com/azure/architecture/patterns/async-request-reply) on the Azure Architecture Center.
 
-![Data flow of the async request-reply pattern](https://learn.microsoft.com/azure/architecture/patterns/_images/async-request-fn.png)
+![Data flow of the async request-reply pattern](https://learn.microsoft.com/azure/architecture/patterns/_images/async-request-fn.png)  
+
+The implementation use managed identity. When running [Function App in a Consumption](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/use-managed-identity-instead-of-azurewebjobsstorage-to-connect-a/ba-p/3657606), your app uses the WEBSITE_AZUREFILESCONNECTIONSTRING and WEBSITE_CONTENTSHARE settings when connecting to Azure Files on the storage account used by your function app. Azure Files doesn't support using managed identity when accessing the file share. Then that reference is using connection string. The manage identity is used on aplication dependencies.  
 
 ## Deploying the sample
 
@@ -140,10 +142,21 @@ resource serviceBusSenderRoleAssignmentf 'Microsoft.Authorization/roleAssignment
 
 // Assign Role to allow receiving messages from the Service Bus
 resource serviceBusReceiverRoleAssignmentf 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, 'LocalUser', 'ServiceBusReceiverRolef')
+  name: guid(resourceGroup().id, 'LocalUser', 'ServiceBusReceiverRole')
   scope: serviceBusNamespace
   properties: {
     roleDefinitionId: receiverServiceBusRole
+    principalId: <your user object id>
+    principalType: 'User'
+  }
+}
+
+// Assign Role to allow Read, write, and delete Azure Storage containers and blobs. 
+resource dataStorageBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, 'LocalUser', 'StorageBlobDataContributorRole')
+  scope: dataStorageAccount
+  properties: {
+ roleDefinitionId: receiverServiceBusRole
     principalId: <your user object id>
     principalType: 'User'
   }

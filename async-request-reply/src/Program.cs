@@ -11,8 +11,15 @@ var host = new HostBuilder()
     {
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
-        var blobServiceClientConnectionString = Environment.GetEnvironmentVariable("StorageConnectionAppSetting");
-        services.AddSingleton(new BlobServiceClient(blobServiceClientConnectionString));
+
+        // blobServiceClient using Managed Identity
+        var storageAccountUriString = Environment.GetEnvironmentVariable("DataStorage__blobServiceUri");
+        var storageContainerEndpoint = storageAccountUriString + "/data";
+
+        // Get a credential and create a client object for the blob container.
+        BlobContainerClient containerClient = new BlobContainerClient(new Uri(storageContainerEndpoint),new DefaultAzureCredential());
+        services.AddSingleton(containerClient);
+
         // ServiceBusClient using Managed Identity
         var fullyQualifiedNamespace = Environment.GetEnvironmentVariable("ServiceBusConnection__fullyQualifiedNamespace");
         var serviceBusClient = new ServiceBusClient(fullyQualifiedNamespace, new DefaultAzureCredential());

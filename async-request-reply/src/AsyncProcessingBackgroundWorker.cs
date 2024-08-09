@@ -9,11 +9,11 @@ namespace asyncpattern
     {
         private readonly ILogger<AsyncProcessingBackgroundWorker> _logger;
 
-        private readonly BlobServiceClient _blobServiceClient;
+        private readonly BlobContainerClient _blobContainerClient;
 
-        public AsyncProcessingBackgroundWorker(BlobServiceClient blobServiceClient, ILogger<AsyncProcessingBackgroundWorker> logger)
+        public AsyncProcessingBackgroundWorker(BlobContainerClient blobContainerClient, ILogger<AsyncProcessingBackgroundWorker> logger)
         {
-            _blobServiceClient = blobServiceClient;
+            _blobContainerClient = blobContainerClient;
             _logger = logger;
         }
 
@@ -25,12 +25,10 @@ namespace asyncpattern
 
             var requestGuid = message.ApplicationProperties["RequestGUID"].ToString();
             string blobName = $"{requestGuid}.blobdata";
-            string containerName = "data";
 
-            BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
-            await containerClient.CreateIfNotExistsAsync();
+            await _blobContainerClient.CreateIfNotExistsAsync();
 
-            var blobClient = containerClient.GetBlobClient(blobName);
+            var blobClient = _blobContainerClient.GetBlobClient(blobName);
             using (MemoryStream memoryStream = new MemoryStream())
             using (StreamWriter writer = new StreamWriter(memoryStream))
             {
