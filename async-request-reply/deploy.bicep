@@ -45,7 +45,10 @@ resource appStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   }
   kind: 'StorageV2'
   location: location
-  properties: {}
+  properties: {
+    supportsHttpsTrafficOnly: true
+    minimumTlsVersion: 'TLS1_2'
+  }
 }
 
 resource dataStorageAccount 'Microsoft.Storage/storageAccounts@2019-04-01' = {
@@ -55,7 +58,11 @@ resource dataStorageAccount 'Microsoft.Storage/storageAccounts@2019-04-01' = {
   }
   kind: 'StorageV2'
   location: location
-  properties: {}
+  properties: {
+    allowSharedKeyAccess: false
+    supportsHttpsTrafficOnly: true
+    minimumTlsVersion: 'TLS1_2'
+  }
 }
 
 resource dataStorageAccountNameContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {

@@ -120,8 +120,8 @@ You could open the solution with Visual Studio, then you need to create on the r
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-    "ServiceBusConnectionAppSetting": "<yourdata>",
-    "StorageConnectionAppSetting": "<yourData>"
+    "ServiceBusConnection__fullyQualifiedNamespace": "<yourData>",
+    "DataStorage__blobServiceUri": "<yourData>"
   }
 }
 ```
@@ -130,7 +130,7 @@ As far the implementation is using manage identity, you need to assign the role 
 
 ```yarm
 // Assign Role to allow sending messages to the Service Bus
-resource serviceBusSenderRoleAssignmentf 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource serviceBusSenderRoleAssignmentUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, 'LocalUser', 'ServiceBusSenderRole')
   scope: serviceBusNamespace
   properties: {
@@ -141,7 +141,7 @@ resource serviceBusSenderRoleAssignmentf 'Microsoft.Authorization/roleAssignment
 }
 
 // Assign Role to allow receiving messages from the Service Bus
-resource serviceBusReceiverRoleAssignmentf 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource serviceBusReceiverRoleAssignmentUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, 'LocalUser', 'ServiceBusReceiverRole')
   scope: serviceBusNamespace
   properties: {
@@ -152,7 +152,7 @@ resource serviceBusReceiverRoleAssignmentf 'Microsoft.Authorization/roleAssignme
 }
 
 // Assign Role to allow Read, write, and delete Azure Storage containers and blobs. 
-resource dataStorageBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource dataStorageBlobDataContributorRoleAssignmentUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, 'LocalUser', 'StorageBlobDataContributorRole')
   scope: dataStorageAccount
   properties: {
