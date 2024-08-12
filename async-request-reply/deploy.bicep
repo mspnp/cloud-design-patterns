@@ -8,6 +8,7 @@ var serviceBusNamespaceName = toLower('sb-reqrep-${uniqueString(subscription().s
 var deploymentStorageContainerName = 'app-package-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var appInsigthName = 'appinsigth-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var logAnalyticsName = 'loganalytics-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
+var vnetName = 'asycReplyVnet'
 
 var senderServiceBusRole = subscriptionResourceId(
   'Microsoft.Authorization/roleDefinitions',
@@ -28,6 +29,37 @@ var storageBlobDataOwnerRole = subscriptionResourceId(
   'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
 ) //Storage Blob Data Owner role
 
+// Define VNet and Subnet
+resource vnet 'Microsoft.Network/virtualNetworks@2023-02-01' = {
+  name: vnetName
+  location: location
+  properties: {
+    addressSpace: {
+      addressPrefixes: ['10.0.0.0/16']
+    }
+    subnets: [
+      {
+        name: 'storagepesbnt'
+        properties: {
+          addressPrefix: '10.0.1.0/24'
+          serviceEndpoints: [
+            {
+              service: 'Microsoft.Storage'
+            }
+          ]
+        }
+      }
+      {
+        name: 'functiondsbnt'
+        properties: {
+          addressPrefix: '10.0.2.0/24'
+          serviceEndpoints: []
+        }
+      }
+    ]
+  }
+}
+
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
   name: serviceBusNamespaceName
   location: location
@@ -46,7 +78,35 @@ resource serviceBusNamespace_outqueue 'Microsoft.ServiceBus/namespaces/queues@20
   }
 }
 
-resource appStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: '${serviceBusNamespace.name}-diagnostic'
+  scope: serviceBusNamespace
+  properties: {
+    logs: [
+      {
+        category: 'OperationalLogs'
+        enabled: true
+        retentionPolicy: {
+          enabled: false
+          days: 0
+        }
+      }
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          enabled: false
+          days: 0
+        }
+      }
+    ]
+    workspaceId: logAnalytics.id
+  }
+}
+
+resource appStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: appStorageAccountName
   sku: {
     name: 'Standard_LRS'
@@ -153,6 +213,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
     redundancyMode: 'None'
     publicNetworkAccess: 'Enabled'
     keyVaultReferenceIdentity: 'SystemAssigned'
+    vnetRouteAllEnabled: true
     siteConfig: {
       netFrameworkVersion: 'v8.0'
       numberOfWorkers: 1
