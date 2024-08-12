@@ -5,6 +5,9 @@ var dataStorageAccountName = toLower('stodata${uniqueString(subscription().subsc
 var hostingPlanName = 'app-reqrep'
 var functionAppName = 'fapp-reqrep-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var serviceBusNamespaceName = toLower('sb-reqrep-${uniqueString(subscription().subscriptionId, resourceGroup().id)}')
+var deploymentStorageContainerName = 'app-package-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
+var appInsigthName = 'appinsigth-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
+var logAnalyticsName = 'loganalytics-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 
 var senderServiceBusRole = subscriptionResourceId(
   'Microsoft.Authorization/roleDefinitions',
@@ -19,6 +22,11 @@ var storageBlobDataContributorRole = subscriptionResourceId(
   'Microsoft.Authorization/roleDefinitions',
   'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 ) // Azure Storage Blob Data Contributor
+
+var storageBlobDataOwnerRole = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
+) //Storage Blob Data Owner role
 
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
   name: serviceBusNamespaceName
@@ -41,13 +49,35 @@ resource serviceBusNamespace_outqueue 'Microsoft.ServiceBus/namespaces/queues@20
 resource appStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   name: appStorageAccountName
   sku: {
-    name: 'Standard_RAGRS'
+    name: 'Standard_LRS'
   }
   kind: 'StorageV2'
   location: location
   properties: {
+    accessTier: 'Hot'
     supportsHttpsTrafficOnly: true
     minimumTlsVersion: 'TLS1_2'
+    allowBlobPublicAccess: false
+    allowSharedKeyAccess: false
+    networkAcls: {
+      bypass: 'AzureServices'
+      virtualNetworkRules: []
+      ipRules: []
+      defaultAction: 'Allow'
+    }
+  }
+
+  resource blobServices 'blobServices' = {
+    name: 'default'
+    properties: {
+      deleteRetentionPolicy: {}
+    }
+    resource container 'containers' = {
+      name: deploymentStorageContainerName
+      properties: {
+        publicAccess: 'None'
+      }
+    }
   }
 }
 
@@ -72,21 +102,47 @@ resource dataStorageAccountNameContainer 'Microsoft.Storage/storageAccounts/blob
   ]
 }
 
-resource hostingPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
+resource hostingPlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: hostingPlanName
   location: location
+  kind: 'functionapp'
   sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
-    size: 'Y1'
+    tier: 'FlexConsumption'
+    name: 'FC1'
   }
-  properties: {}
+  properties: {
+    reserved: true
+  }
 }
 
-resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
+  name: logAnalyticsName
+  location: location
+  properties: any({
+    retentionInDays: 30
+    features: {
+      searchVersion: 1
+    }
+    sku: {
+      name: 'PerGB2018'
+    }
+  })
+}
+
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: appInsigthName
+  location: location
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: logAnalytics.id
+  }
+}
+
+resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
   name: functionAppName
   location: location
-  kind: 'functionapp'
+  kind: 'functionapp,linux'
   identity: {
     type: 'SystemAssigned'
   }
@@ -102,47 +158,45 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       numberOfWorkers: 1
       alwaysOn: false
       http20Enabled: false
-      functionAppScaleLimit: 200
       minimumElasticInstanceCount: 0
       use32BitWorkerProcess: false
       appSettings: [
         {
-          name: 'AzureWebJobsDashboard'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${appStorageAccount.name};AccountKey=${listKeys(appStorageAccount.id, '2015-05-01-preview').key1}'
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: applicationInsights.properties.ConnectionString
         }
         {
-          name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${appStorageAccount.name};AccountKey=${listKeys(appStorageAccount.id, '2015-05-01-preview').key1}'
-        }
-        {
-          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${appStorageAccount.name};AccountKey=${listKeys(appStorageAccount.id, '2015-05-01-preview').key1}'
-        }
-        {
-          name: 'WEBSITE_CONTENTSHARE'
-          value: toLower(functionAppName)
-        }
-        {
-          name: 'FUNCTIONS_EXTENSION_VERSION'
-          value: '~4'
-        }
-        {
-          name: 'WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED'
-          value: '1'
-        }
-        {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: 'dotnet-isolated'
+          name: 'AzureWebJobsStorage__accountName'
+          value: appStorageAccount.name
         }
         {
           name: 'ServiceBusConnection__fullyQualifiedNamespace'
           value: '${serviceBusNamespace.name}.servicebus.windows.net'
         }
         {
-          name: 'DataStorage__blobServiceUri '
+          name: 'DataStorage__blobServiceUri'
           value: 'https://${dataStorageAccount.name}.blob.${environment().suffixes.storage}'
         }
       ]
+    }
+    functionAppConfig: {
+      deployment: {
+        storage: {
+          type: 'blobContainer'
+          value: '${appStorageAccount.properties.primaryEndpoints.blob}${deploymentStorageContainerName}'
+          authentication: {
+            type: 'SystemAssignedIdentity'
+          }
+        }
+      }
+      scaleAndConcurrency: {
+        maximumInstanceCount: 100
+        instanceMemoryMB: 2048
+      }
+      runtime: {
+        name: 'dotnet-isolated'
+        version: '8.0'
+      }
     }
   }
 }
@@ -169,13 +223,23 @@ resource serviceBusReceiverRoleAssignment 'Microsoft.Authorization/roleAssignmen
   }
 }
 
-
 // Assign Role to allow Read, write, and delete Azure Storage containers and blobs. 
 resource dataStorageBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, dataStorageAccount.id, 'StorageBlobDataContributorRole')
   scope: dataStorageAccount
   properties: {
     roleDefinitionId: storageBlobDataContributorRole
+    principalId: functionApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Allow access from function app to storage account using a managed identity
+resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(resourceGroup().id, appStorageAccount.id, 'StorageBlobDataOwnerRole')
+  scope: appStorageAccount
+  properties: {
+    roleDefinitionId: storageBlobDataOwnerRole
     principalId: functionApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
