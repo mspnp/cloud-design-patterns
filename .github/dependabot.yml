@@ -6,6 +6,12 @@
 version: 2
 updates:
   - package-ecosystem: "nuget" # See documentation for possible values
-    directory: "/" # Location of package manifests
+    directories:
+      - "/async-request-reply/src"
+      - "/claim-check/code-samples"
+      - "/leader-election"
+      - "/pipes-and-filters/ImageProcessingPipeline"
+      - "/priority-queue"
+      - "/valet-key/ValetKey.*"
     schedule:
       interval: "weekly"
