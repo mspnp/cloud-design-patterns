@@ -48,7 +48,9 @@ Install the prerequisites and follow the steps to deploy and run the examples.
   az account set -s <Name or ID of subscription>
 
   NAME_PREFIX=<unique value between three to five characters of length>
-  az group create -n "rg-${NAME_PREFIX}" -l eastus2
+  LOCATION=eastus2
+  RESOURCE_GROUP_NAME="rg-${NAME_PREFIX}-${LOCATION}"
+  az group create -n "${RESOURCE_GROUP_NAME}" -l ${LOCATION}
   ```
 
 1. Deploy the supporting Azure resources.
@@ -57,7 +59,7 @@ Install the prerequisites and follow the steps to deploy and run the examples.
    CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show -o tsv --query id)
 
    # This could take a few minutes
-   az deployment group create -n deploy-claim-check -f bicep/main.bicep -g "rg-${NAME_PREFIX}" -p namePrefix=$NAME_PREFIX principalId=$CURRENT_USER_OBJECT_ID
+   az deployment group create -n deploy-claim-check -f bicep/main.bicep -g "${RESOURCE_GROUP_NAME}" -p namePrefix=$NAME_PREFIX principalId=$CURRENT_USER_OBJECT_ID
    ```
 
 1. Configure the samples to use the created Azure resources.
@@ -97,5 +99,5 @@ Install the prerequisites and follow the steps to deploy and run the examples.
 Remove the resource group that you created when you are done with this sample.
 
 ```azurecli
-az group delete -n "rg-${NAME_PREFIX}"
+az group delete -n  "${RESOURCE_GROUP_NAME}" 
 ```

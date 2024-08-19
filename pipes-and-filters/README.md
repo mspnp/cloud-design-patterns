@@ -35,8 +35,9 @@ Install the prerequisites and follow the steps to have deploy and run a example 
    az login
    az account set -s <Name or ID of subscription>
 
-   RESOURCE_GROUP_NAME=rg-pipes-and-filters
-   az group create -n $RESOURCE_GROUP_NAME -l eastus2
+   LOCATION=eastus2
+   RESOURCE_GROUP_NAME=rg-pipes-and-filters-${LOCATION}
+   az group create -n $RESOURCE_GROUP_NAME -l ${LOCATION}
    ```
 
 1. Deploy the storage account.
