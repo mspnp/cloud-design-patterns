@@ -9,7 +9,7 @@ namespace Pnp.Samples.ClaimCheckPattern
     /// <summary>
     /// A sample Storage Blob uploader/downloader. Uses Azure Entra ID for authentication.
     /// </summary>
-    public class SampleBlobDataMover(ILoggerFactory loggerFactory)
+    public class SampleBlobDataMover(ILoggerFactory loggerFactory) : ISampleBlobDataMover
     {
         readonly ILogger _logger = loggerFactory.CreateLogger<SampleBlobDataMover>();
 
