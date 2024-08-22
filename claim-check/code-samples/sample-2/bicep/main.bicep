@@ -41,7 +41,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     accessTier: 'Hot'
     allowBlobPublicAccess: false
     allowCrossTenantReplication: false
-    allowSharedKeyAccess: true
+    allowSharedKeyAccess: false //Only access by Managed Identity allowed
     isLocalUserEnabled: false
     isHnsEnabled: false
     isNfsV3Enabled: false
@@ -107,7 +107,7 @@ resource eventHubStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' =
     accessTier: 'Hot'
     allowBlobPublicAccess: false
     allowCrossTenantReplication: false
-    allowSharedKeyAccess: true
+    allowSharedKeyAccess: false  //Only access by Managed Identity allowed
     isLocalUserEnabled: false
     isHnsEnabled: false
     isNfsV3Enabled: false
@@ -223,4 +223,7 @@ resource eventGridBlobCreatedEventHubSubscription 'Microsoft.EventGrid/systemTop
     }
     eventDeliverySchema: 'EventGridSchema'
   }
+  dependsOn:[
+    gridEventHubDataOwnwerRoleAssignment
+  ]
 }
