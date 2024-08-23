@@ -29,6 +29,20 @@ resource eventHubDataOwnwerRole 'Microsoft.Authorization/roleDefinitions@2022-04
 
 /*** NEW RESOURCES ***/
 
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
+  name: 'la-${namePrefix}'
+  location: location
+  properties: any({
+    retentionInDays: 30
+    features: {
+      searchVersion: 1
+    }
+    sku: {
+      name: 'PerGB2018'
+    }
+  })
+}
+
 @description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SaS tokens for this blobs in this account.')
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: 'st${namePrefix}cc'
@@ -138,7 +152,11 @@ resource eventHubStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' =
 
 @description('Set permissions to give the user principal access to Storage Blob from the sample applications')
 resource eventProcessorBlobContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(eventHubStorageAccount::blobContainers::eventProcessorContainer.id, storageBlobDataContributorRole.id, principalId)
+  name: guid(
+    eventHubStorageAccount::blobContainers::eventProcessorContainer.id,
+    storageBlobDataContributorRole.id,
+    principalId
+  )
   scope: eventHubStorageAccount::blobContainers::eventProcessorContainer
   properties: {
     principalId: principalId
@@ -176,6 +194,35 @@ resource eventHubNamespace 'Microsoft.EventHub/namespaces@2023-01-01-preview' = 
   }
 }
 
+@description('Diagnostic settings for the Event Hub namespace.')
+resource eventHubDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'evhns-diagnostics'
+  scope: eventHubNamespace
+  properties: {
+    logs: [
+      {
+        category: 'OperationalLogs'
+        enabled: true
+        retentionPolicy: {
+          enabled: false
+          days: 0
+        }
+      }
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          enabled: false
+          days: 0
+        }
+      }
+    ]
+    workspaceId: logAnalytics.id
+  }
+}
+
 @description('Set permissions to give the Event Grid System Managed identity access to Event Hub')
 resource gridEventHubDataOwnwerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(eventHubNamespace.id, eventHubDataOwnwerRole.id, eventGridStorageBlobTopic.id)
@@ -183,7 +230,7 @@ resource gridEventHubDataOwnwerRoleAssignment 'Microsoft.Authorization/roleAssig
   properties: {
     principalId: eventGridStorageBlobTopic.identity.principalId
     roleDefinitionId: eventHubDataOwnwerRole.id
-    principalType: 'ServicePrincipal' 
+    principalType: 'ServicePrincipal'
     description: 'Allows this Microsoft Entra principal to access Event Hub data.'
   }
 }
@@ -215,7 +262,7 @@ resource eventGridBlobCreatedEventHubSubscription 'Microsoft.EventGrid/systemTop
         }
         endpointType: 'EventHub'
       }
-    }    
+    }
     filter: {
       includedEventTypes: [
         'Microsoft.Storage.BlobCreated'
