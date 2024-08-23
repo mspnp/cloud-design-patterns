@@ -13,8 +13,6 @@ param principalId string
 @description('The globally unique prefix naming resources.')
 param namePrefix string
 
-/*** EXISTING RESOURCES ***/
-
 @description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges.')
 resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
@@ -26,7 +24,6 @@ resource serviceBusDataOwnwerRole 'Microsoft.Authorization/roleDefinitions@2022-
   name: '090c5cfd-751d-490a-894a-3ce6f1109419'
   scope: subscription()
 }
-
 
 /*** NEW RESOURCES ***/
 
@@ -96,6 +93,20 @@ resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2023-12-15-
   }
 }
 
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
+  name: 'la-${namePrefix}'
+  location: location
+  properties: any({
+    retentionInDays: 30
+    features: {
+      searchVersion: 1
+    }
+    sku: {
+      name: 'PerGB2018'
+    }
+  })
+}
+
 @description('The Azure Service Bus namespace to use with the sample apps.')
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
   name: 'sbns-${namePrefix}'
@@ -112,6 +123,34 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview
   @description('The Service Bus queue to receive claim-check messages.')
   resource claimCheckBusQueue 'queues' = {
     name: 'esbq-claimcheck'
+  }
+}
+
+resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: '${serviceBusNamespace.name}-diagnostic'
+  scope: serviceBusNamespace
+  properties: {
+    logs: [
+      {
+        category: 'OperationalLogs'
+        enabled: true
+        retentionPolicy: {
+          enabled: false
+          days: 0
+        }
+      }
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          enabled: false
+          days: 0
+        }
+      }
+    ]
+    workspaceId: logAnalytics.id
   }
 }
 
