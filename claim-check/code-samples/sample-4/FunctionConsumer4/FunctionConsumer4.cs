@@ -9,10 +9,10 @@ namespace Pnp.Samples.ClaimCheckPattern
     /// <summary>
     /// Sample function illustrating the processing of Event Hub events containing claim-check style events. 
     /// </summary>
-    public class FunctionConsumer4(ILoggerFactory loggerFactory)
+    public class FunctionConsumer4(ILoggerFactory loggerFactory, ISampleBlobDataMover sampleBlobDataMover)
     {
         readonly ILogger _logger = loggerFactory.CreateLogger<FunctionConsumer4>();
-        readonly SampleBlobDataMover _downloader = new(loggerFactory);
+        readonly ISampleBlobDataMover _downloader = sampleBlobDataMover;
 
         [Function(nameof(FunctionConsumer4))]
         public async Task RunAsync(

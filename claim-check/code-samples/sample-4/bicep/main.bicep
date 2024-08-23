@@ -29,6 +29,20 @@ resource eventHubDataOwnwerRole 'Microsoft.Authorization/roleDefinitions@2022-04
 
 /*** NEW RESOURCES ***/
 
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
+  name: 'la-${namePrefix}'
+  location: location
+  properties: any({
+    retentionInDays: 30
+    features: {
+      searchVersion: 1
+    }
+    sku: {
+      name: 'PerGB2018'
+    }
+  })
+}
+
 @description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SaS tokens for this blobs in this account.')
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: 'st${namePrefix}cc'
@@ -41,7 +55,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     accessTier: 'Hot'
     allowBlobPublicAccess: false
     allowCrossTenantReplication: false
-    allowSharedKeyAccess: true
+    allowSharedKeyAccess: false //Ony managed identiy allowed 
     isLocalUserEnabled: false
     isHnsEnabled: false
     isNfsV3Enabled: false
@@ -109,6 +123,35 @@ resource eventHubNamespace 'Microsoft.EventHub/namespaces@2023-01-01-preview' = 
       messageRetentionInDays: 1
       partitionCount: 2
     }
+  }
+}
+
+@description('Diagnostic settings for the Event Hub namespace.')
+resource eventHubDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'evhns-diagnostics'
+  scope: eventHubNamespace
+  properties: {
+    logs: [
+      {
+        category: 'OperationalLogs'
+        enabled: true
+        retentionPolicy: {
+          enabled: false
+          days: 0
+        }
+      }
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          enabled: false
+          days: 0
+        }
+      }
+    ]
+    workspaceId: logAnalytics.id
   }
 }
 
