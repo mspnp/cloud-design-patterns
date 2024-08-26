@@ -5,8 +5,6 @@ namespace LeaderElectionConsoleWorker
 {
     using System;
     using System.Configuration;
-    using System.Diagnostics;
-    using static System.Configuration.ConfigurationManager;
     using System.Threading;
     using System.Threading.Tasks;
     using DistributedMutex;
@@ -20,15 +18,15 @@ namespace LeaderElectionConsoleWorker
             CancellationToken token = source.Token;
 
             // Get the connection string from app settings
-            var storageConnStr = ConfigurationManager.AppSettings["StorageConnectionString"];
-            if (string.IsNullOrEmpty(storageConnStr))
+            var storageUri = ConfigurationManager.AppSettings["StorageUri"];
+            if (string.IsNullOrEmpty(storageUri))
             {
                 Console.Error.WriteLine("A connection string must be set in the app.config file.");
                 return;
             }
             // Create a BlobSettings object with the connection string and the name of the blob to use for the lease
             BlobSettings blobSettings = new BlobSettings(
-                storageConnStr,
+                storageUri,
                 "leases",
                 "leader");
 
@@ -54,7 +52,7 @@ namespace LeaderElectionConsoleWorker
 
             // Create a new BlobDistributedMutex object with the BlobSettings object and a task
             // to run when the lease is acquired, and an action to run when the lease is not acquired.
-            DistributedMutex.BlobDistributedMutex distributedMutex = new DistributedMutex.BlobDistributedMutex(
+            BlobDistributedMutex distributedMutex = new BlobDistributedMutex(
                 blobSettings,
                 async (CancellationToken token) =>
                 {

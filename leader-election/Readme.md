@@ -5,6 +5,7 @@ This directory contains an example of the [Leader Election cloud design pattern]
 This example shows how a worker process can become a leader among a group of peer instances. The leader could then perform tasks that coordinate and control the other instances; these tasks should be performed by only one worker instance.
 
 This example contains one project showing the implementation of a distributed mutex based on a storage blob lease, and another project showing a simple example worker process, implemented as a console app, that leverages the distributed mutex to ensure only one process runs the leader-specific code.
+The example uses Managed Identity, then de code use [`DefaultAzureCredential`](https://learn.microsoft.com/dotnet/azure/sdk/authentication/#defaultazurecredential) for authentication while accessing Azure resources.
 
 ## :rocket: Deployment guide
 
@@ -16,82 +17,87 @@ Install the prerequisites and follow the steps to run the example and observe th
 - [Azurite emulator for local Azure Storage development](https://learn.microsoft.com/azure/storage/common/storage-use-azurite) or an [Azure Storage Account](https://learn.microsoft.com/azure/storage/common/storage-account-create)
 
 #### Optional
+
 - [Microsoft Visual Studio 2022 Community, Enterprise, or Professional](https://visualstudio.microsoft.com/) or [Visual Studio Code](https://code.visualstudio.com/) with [C# for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp)
 
 ### Steps
 
 1. Clone the repository
 
-    Open a terminal, clone the repository, and navigate to the `leader-election` directory.
+   Open a terminal, clone the repository, and navigate to the `leader-election` directory.
 
-    ```shell
-    git clone https://github.com/mspnp/cloud-design-patterns.git
-    cd cloud-design-patterns
-    cd leader-election
-    ```
+   ```shell
+   git clone https://github.com/mspnp/cloud-design-patterns.git
+   cd cloud-design-patterns
+   cd leader-election
+   ```
 
 1. Build the solution
 
-    Using the existing terminal window, build the solution.
+   Using the existing terminal window, build the solution.
 
-    ```shell
-    dotnet build
-    ```
+   ```shell
+   dotnet build
+   ```
 
 1. Select your storage
 
-    #### Running with Azurite storage emulator
+#### Running with Azurite storage emulator
 
-    The included `app.config` file is set up to use a local Azure Storage emulator. Open a new terminal window, navigate to an empty working directory for the Azurite data files, and start the emulator with the command `azurite`, or `npx azurite` if you installed via `npm`.
+   The included `app.config` file is set up to use a local Azure Storage emulator. Open a new terminal window, navigate to an empty working directory for the Azurite data files, and start the emulator with the command `azurite`, or `npx azurite` if you installed via `npm`.  
+   Azure SDKs by DefaultAzureCredencials needs https, and azurite by default is http. Follow the instructions [here](https://learn.microsoft.com/azure/storage/common/storage-use-azurite?tabs=visual-studio%2Cblob-storage#azure-sdks).  
+   In `LeaderElectionConsoleWorker/app.config` you see `https://127.0.0.1:10000/devstoreaccount1`
 
-    #### Running with Azure Storage account
+#### Running with Azure Storage account
 
-    Using the Azure portal, create a new Azure Storage account, or use an existing account.
+   Using the Azure portal, create a new Azure Storage account, or use an existing account.
 
-    The sample defaults to use a container named `leases`. If you are utilizing an existing storage account, be certain that this container is not already in use.
+   The sample defaults to use a container named `leases`. If you are utilizing an existing storage account, be certain that this container is not already in use.
 
-    Find the connection string in your Storage Account's `Access keys` section in the portal. Copy the Connection string value from either key1 or key2 and replace the `StorageConnectionString` value field in `LeaderElectionConsoleWorker/app.config` with the copied value.
+   Find the storage ur, get the account name of the azure storage, then replace the `StorageUri` value field in `LeaderElectionConsoleWorker/app.config` with the copied value `https://{0}.blob.core.windows.net` where {0} is the accoun name. You need to give `Storage Blob Data Contributor` to the user which you are log in locally, navegate `Access Control (IAM)` and add role.
+
+   On Setting-Configuration be sure to disable `Allow storage account key access` to force Managed Identity use.
 
 ### :checkered_flag: Try it out
 
-4. Running the worker process
+1. Running the worker process
 
-    Navigate to the `leader-election/LeaderElectionConsoleWorker` directory, and start the application.
+   Navigate to the `leader-election/LeaderElectionConsoleWorker` directory, and start the application.
 
-    ```shell
-    cd LeaderElectionConsoleWorker
-    dotnet run
-    ```
+   ```shell
+   cd LeaderElectionConsoleWorker
+   dotnet run
+   ```
 
-    Ideally, you should start multiple instances of the worker process to see the coordination. To do this, open additional terminal windows or tabs, and run the same command. When a worker process is the leader, you will see periodic output like:
+   Ideally, you should start multiple instances of the worker process to see the coordination. To do this, open additional terminal windows or tabs, and run the same command. When a worker process is the leader, you will see periodic output like:
 
-    ```output
-    [14:22:30] This process (51635) is currently the leader. Press any key to exit.
-    ```
+   ```output
+   [14:22:30] This process (51635) is currently the leader. Press any key to exit.
+   ```
 
-    If a worker process is not the leader, you will see:
+   If a worker process is not the leader, you will see:
 
-    ```output
-    [14:23:21] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
-    ```
+   ```output
+   [14:23:21] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
+   ```
 
 1. Observe leader election recovery
 
-    You can terminate the current leader and watch one of the other worker processes acquire the lease and become the new leader:
+   You can terminate the current leader and watch one of the other worker processes acquire the lease and become the new leader:
 
-    ```output
-    [14:24:21] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
-    [14:24:41] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
-    [14:25:01] This process (51686) is currently the leader. Press any key to exit.
-    ```
+   ```output
+   [14:24:21] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
+   [14:24:41] This process (51686) could not acquire lease. Retrying in 20 seconds. Press any key to exit.
+   [14:25:01] This process (51686) is currently the leader. Press any key to exit.
+   ```
 
 1. Run from multiple machines
 
-    If you are using an Azure Storage account, you can run the worker process from multiple machines. Try running it on a second machine, and then temporarily disable or unplug the network on the machine that hosts the leader process. You will see that as the lease expires, one of the still-connected worker processes will claim the lease and assume the role of leader.
+   If you are using an Azure Storage account, you can run the worker process from multiple machines. Try running it on a second machine, and then temporarily disable or unplug the network on the machine that hosts the leader process. You will see that as the lease expires, one of the still-connected worker processes will claim the lease and assume the role of leader.
 
 1. Observe detailed tracing
 
-    You can use the [`dotnet-trace` tool](https://learn.microsoft.com/dotnet/core/diagnostics/dotnet-trace) to observe detailed tracing information on the worker process as it attempts to acquire or renew the lease on the storage blob.
+   You can use the [`dotnet-trace` tool](https://learn.microsoft.com/dotnet/core/diagnostics/dotnet-trace) to observe detailed tracing information on the worker process as it attempts to acquire or renew the lease on the storage blob.
 
 ## :broom: Clean up resources
 
