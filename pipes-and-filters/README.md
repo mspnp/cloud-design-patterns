@@ -35,8 +35,11 @@ Install the prerequisites and follow the steps to have deploy and run a example 
    az login
    az account set -s <Name or ID of subscription>
 
-   RESOURCE_GROUP_NAME=rg-pipes-and-filters
-   az group create -n $RESOURCE_GROUP_NAME -l eastus2
+   NAME_PREFIX=pipes-and-filters
+   LOCATION=eastus2
+   RESOURCE_GROUP_NAME="rg-${NAME_PREFIX}-${LOCATION}"
+   
+   az group create -n "${RESOURCE_GROUP_NAME}" -l ${LOCATION}
    ```
 
 1. Deploy the storage account.
@@ -47,7 +50,7 @@ Install the prerequisites and follow the steps to have deploy and run a example 
    CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show -o tsv --query id)
    STORAGE_ACCOUNT_NAME="stpipe$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 10 | head -n 1)"
    # This takes about one minute
-   az deployment group create -n deploy-pipe -f bicep/main.bicep -g $RESOURCE_GROUP_NAME -p storageAccountName=$STORAGE_ACCOUNT_NAME userObjectId=$CURRENT_USER_OBJECT_ID
+   az deployment group create -n deploy-pipe -f bicep/main.bicep -g "${RESOURCE_GROUP_NAME}" -p storageAccountName=$STORAGE_ACCOUNT_NAME userObjectId=$CURRENT_USER_OBJECT_ID
    ```
 
 1. Configure local Functions project to use the deployed Storage account.
@@ -126,7 +129,7 @@ Now with your pipes deployed and filters ready to execute, it's time to send up 
 Be sure to delete Azure resources when not using them. Since all resources were deployed into a new resource group, you can simply delete the resource group.
 
 ```azurecli
-az group delete -n $RESOURCE_GROUP_NAME
+az group delete -n "${RESOURCE_GROUP_NAME}" -y
 ```
 
 ## Deploying the functions to Azure
