@@ -1,0 +1,5 @@
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+<script src="@Html.StaticContentUrl("~/lib/jquery-validation/dist/jquery.validate.min.js",Configuration)"></script>
+<script src="@Html.StaticContentUrl("~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js",Configuration)"></script>
