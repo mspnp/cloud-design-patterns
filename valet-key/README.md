@@ -6,6 +6,8 @@ This example shows how a client application can obtain necessary permissions to 
 
 Specifically this sample includes an Azure Function that provides a scoped, time-limited shared access signature (SaS) to authorized callers, who would then use that SaS token to perform a data upload to the storage account without consuming the resources of the Azure Function to proxy that request.
 
+The typical way to generate a SAS token in code requires the storage account key. In this scenario, you won’t have a storage account key, so you’ll need to find another way to generate the shared access signatures. To do that, we need to use an approach called “user delegation” SAS . By using a user delegation SAS, we can sign the signature with the Microsoft Entra ID credentials instead of the storage account key. It is disabled storage account key access.
+
 ![A diagram showing a client connecting to the token API, which in turn gets a SaS token for a storage account, and then the client connects to the storage account with that token.](valet-key-example.png)
 
 ## :rocket: Deployment guide
@@ -28,33 +30,37 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 
 1. Clone this repository to your workstation and navigate to the working directory.
 
-   ```shell
+   ```bash
    git clone https://github.com/mspnp/cloud-design-patterns
    cd valet-key
    ```
 
 1. Log into Azure and create an empty resource group.
 
-   ```azurecli
+   ```bash
    az login
    az account set -s <Name or ID of subscription>
 
-   az group create -n rg-valet-key -l eastus2
+   NAME_PREFIX=valet-key
+   LOCATION=eastus2
+   RESOURCE_GROUP_NAME="rg-${NAME_PREFIX}-${LOCATION}"
+
+   az group create -n "${RESOURCE_GROUP_NAME}" -l ${LOCATION}
    ```
 
 1. Deploy destination Azure Storage account.
 
-   ```azurecli
+   ```bash
    CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show -o tsv --query id)
    STORAGE_ACCOUNT_NAME="stvaletblobs$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 7 | head -n 1)"
 
    # This takes about one minute
-   az deployment group create -n deploy-valet-key -f bicep/main.bicep -g rg-valet-key -p storageAccountName=$STORAGE_ACCOUNT_NAME principalId=$CURRENT_USER_OBJECT_ID
+   az deployment group create -n deploy-valet-key -f bicep/main.bicep -g "${RESOURCE_GROUP_NAME}" -p storageAccountName=$STORAGE_ACCOUNT_NAME principalId=$CURRENT_USER_OBJECT_ID
    ```
 
 1. Configure the API to use this Azure Storage account for its delegation.
 
-   ```shell
+   ```bash
    sed "s/STORAGE_ACCOUNT_NAME/${STORAGE_ACCOUNT_NAME}/g" ValetKey.Web/local.settings.template.json > ValetKey.Web/local.settings.json
    ```
 
@@ -94,8 +100,8 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 
 Remove the resource group that you created when you are done with this sample.
 
-```azurecli
-az group delete -n rg-valet-key
+```bash
+az group delete -n "${RESOURCE_GROUP_NAME}" -y
 ```
 
 ## Deploying to Azure
