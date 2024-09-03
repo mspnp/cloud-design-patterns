@@ -6,7 +6,7 @@ This example shows how a client application can obtain necessary permissions to 
 
 Specifically this sample includes an Azure Function that provides a scoped, time-limited shared access signature (SaS) to authorized callers, who would then use that SaS token to perform a data upload to the storage account without consuming the resources of the Azure Function to proxy that request.
 
-The typical way to generate a SAS token in code requires the storage account key. In this scenario, you won’t have a storage account key, so you’ll need to find another way to generate the shared access signatures. To do that, we need to use an approach called “user delegation” SAS . By using a user delegation SAS, we can sign the signature with the Microsoft Entra ID credentials instead of the storage account key. It is disabled storage account key access.
+The typical way to generate a SAS token in code requires the storage account key. In this scenario, storage account keys are disabled and instead an approach called “user delegation” SAS is used. By using a user delegation SAS, you can sign the signature with Microsoft Entra ID credentials instead of the storage account key.
 
 ![A diagram showing a client connecting to the token API, which in turn gets a SaS token for a storage account, and then the client connects to the storage account with that token.](valet-key-example.png)
 
