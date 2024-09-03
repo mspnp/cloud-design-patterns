@@ -41,9 +41,8 @@ Install the prerequisites and follow the steps to deploy and run an example of t
    az login
    az account set -s <Name or ID of subscription>
 
-   NAME_PREFIX=valet-key
    LOCATION=eastus2
-   RESOURCE_GROUP_NAME="rg-${NAME_PREFIX}-${LOCATION}"
+   RESOURCE_GROUP_NAME="rg-valet-key-${LOCATION}"
 
    az group create -n "${RESOURCE_GROUP_NAME}" -l ${LOCATION}
    ```
