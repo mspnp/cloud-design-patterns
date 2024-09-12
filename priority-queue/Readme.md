@@ -16,7 +16,6 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 - [Git](https://git-scm.com/downloads)
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Microsoft Visual Studio 2022](https://visualstudio.microsoft.com/vs/) or later version
 - [Azure Functions Core Tools v4.x](https://learn.microsoft.com/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)
 
 ### Steps
