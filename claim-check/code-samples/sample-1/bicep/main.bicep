@@ -41,7 +41,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     accessTier: 'Hot'
     allowBlobPublicAccess: false
     allowCrossTenantReplication: false
-    allowSharedKeyAccess: true
+    allowSharedKeyAccess: false // Only allowed access by Managed Identity
     isLocalUserEnabled: false
     isHnsEnabled: false
     isNfsV3Enabled: false
