@@ -66,8 +66,6 @@ By maintaining a **distributed array of instances** across the three stages (**P
 3. **Offload Position**:
    - Ensures the current resource finishes its existing work without accepting new requests and then terminates.
 
-### Code Example:
-
 ### Single Instance Code Example
 
 ```javascript
