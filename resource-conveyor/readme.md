@@ -112,7 +112,7 @@ function terminateInstance(instance) {
 function generateId() {
   return Math.random().toString(36).substring(7);
 }
-
+```
 ### Multi-Instance Code Example
 
 ```javascript
