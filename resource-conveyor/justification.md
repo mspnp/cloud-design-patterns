@@ -39,10 +39,9 @@ The effectiveness of the **Resource Conveyor Pattern** has been demonstrated in 
 
 - **Memory Leak Solution**: By applying the Resource Conveyor approach, where XSLT processors were rotated through **Preload**, **Active**, and **Offload** states, memory leaks were effectively managed, improving both stability and performance in a system known for memory-intensive operations.
   
-- **System-Level Implementation**: This pattern was crucial in environments where there were **no feasible alternatives** for managing persistent memory issues. It was easily implemented at the **system level** by rotating **AppDomains**, which effectively **flushed out wasted persistent memory** that would have otherwise degraded performance over time.
+- **System-Level Implementation**: This pattern was crucial in environments where there were **no feasible alternatives** for managing persistent memory issues. It was easily implemented at the **system level** by rotating **AppDomains**, which effectively **flushed out wasted persistent memory** that would have otherwise degraded performance over time and **prevented system crashes due to memory depletion**.
 
 This concrete example showcases the **robustness** and **efficiency** of the pattern, providing proof that the pattern can solve complex memory management challenges in high-demand environments. The **simplicity of its implementation** across different systems further solidifies its utility. This practical success serves as an additional layer of validation for including the pattern in the official catalog.
-
 
 ## Conclusion
 
