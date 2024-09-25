@@ -68,3 +68,26 @@ async function rotateResources() {
     terminateInstance(offloadInstance);
   }, ROTATION_INTERVAL);
 }
+## Advantages
+
+- **Simplicity**: Manages resource rotation automatically, preventing performance degradation over time.
+- **Performance**: Maintains optimal resource performance by periodically refreshing resources.
+- **Self-Healing**: Recovers from resource failures without manual intervention due to the automatic offloading and rotation of resources.
+- **Modular**: Can be applied to various non-managed external resources such as APIs, browser instances, or non-native libraries in cloud environments.
+
+## Trade-offs
+
+- **Overhead**: The continuous rotation of resources introduces overhead, as resources must be regularly preloaded, activated, and offloaded even when not in immediate use.
+- **Latency**: There may be slight latency introduced during the switch between active resources, particularly during resource-heavy operations or resource instantiation.
+
+## Related Patterns
+
+- [Bulkhead Pattern](https://learn.microsoft.com/azure/architecture/patterns/bulkhead)
+- [Circuit Breaker Pattern](https://learn.microsoft.com/azure/architecture/patterns/circuit-breaker)
+- [Competing Consumers Pattern](https://learn.microsoft.com/azure/architecture/patterns/competing-consumers)
+
+## Conclusion
+
+The **Resource Conveyor Pattern** provides an efficient solution for managing the lifecycle of non-managed external resources in cloud-based applications. By ensuring that resources are regularly rotated between preload, active, and offload states, this pattern prevents resource degradation and maintains optimal system performance. It can be applied to various resource-heavy or long-running processes that are prone to memory leaks, performance slowdowns, or resource exhaustion.
+
+With ❤️ from the Azure patterns & practices team, [Azure Architecture Center](https://azure.com/architecture).
