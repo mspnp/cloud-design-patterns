@@ -37,5 +37,4 @@ Existing patterns like **Bulkhead**, **Competing Consumers**, and **Circuit Brea
 
 The **Resource Conveyor Pattern** addresses a clear gap in cloud design patterns by providing a novel, adaptable, and comprehensive approach to managing long-lived external resources. Its potential impact on system stability and performance, combined with its adaptability and focus on lifecycle management, make it a strong candidate for inclusion in the cloud design pattern catalog.
 
----
-With ❤️ from the Azure patterns & practices team, [Azure Architecture Center](https://azure.com/architecture).
+
