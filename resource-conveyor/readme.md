@@ -68,21 +68,103 @@ By maintaining a **distributed array of instances** across the three stages (**P
 
 ### Code Example:
 
+### Single Instance Code Example
+
 ```javascript
 // Pseudo-code for rotating resource management
 async function rotateResources() {
+  // Create a new instance of the resource and preload it
   let preloadInstance = createNewInstance();
+  
+  // Set the preloaded instance as the active instance
   let activeInstance = preloadInstance;
+  
+  // Initialize a variable for the offloaded instance
   let offloadInstance;
 
+  // Rotate resources at regular intervals
   setInterval(() => {
+    // Move the current active instance to the offload stage
     offloadInstance = activeInstance;
+    
+    // Promote the preloaded instance to the active stage
     activeInstance = preloadInstance;
+    
+    // Create a new instance to preload
     preloadInstance = createNewInstance();
 
-    // Terminate offloaded resource
+    // Terminate the offloaded instance
     terminateInstance(offloadInstance);
   }, ROTATION_INTERVAL);
+}
+
+// Simulate instance creation
+function createNewInstance() {
+  return { id: generateId(), status: "preloaded" };
+}
+
+// Simulate instance termination
+function terminateInstance(instance) {
+  console.log(`Terminating instance: ${instance.id}`);
+}
+
+// Simulate ID generation
+function generateId() {
+  return Math.random().toString(36).substring(7);
+}
+
+### Multi-Instance Code Example
+
+```javascript
+// Pseudo-code for rotating resource management with multiple instances
+async function rotateResources() {
+  const MAX_INSTANCES = 3; // Define the maximum number of instances in each stage
+
+  let preloadInstances = [];  // Array to hold preloaded instances
+  let activeInstances = [];   // Array to hold active instances
+  let offloadInstances = [];  // Array to hold offloading instances
+
+  // Preload initial instances
+  for (let i = 0; i < MAX_INSTANCES; i++) {
+    preloadInstances.push(createNewInstance());
+  }
+
+  // Function to rotate instances at intervals
+  setInterval(() => {
+    // Move the oldest active instance to offload
+    const instanceToOffload = activeInstances.shift();
+    offloadInstances.push(instanceToOffload);
+
+    // Move the oldest preload instance to active
+    const instanceToActivate = preloadInstances.shift();
+    activeInstances.push(instanceToActivate);
+
+    // Create a new preload instance
+    const newPreloadInstance = createNewInstance();
+    preloadInstances.push(newPreloadInstance);
+
+    // Terminate the oldest offloaded instance after it completes its tasks
+    const instanceToTerminate = offloadInstances.shift();
+    if (instanceToTerminate) {
+      terminateInstance(instanceToTerminate);
+    }
+
+  }, ROTATION_INTERVAL);
+}
+
+// Simulate instance creation
+function createNewInstance() {
+  return { id: generateId(), status: "preloaded" };
+}
+
+// Simulate instance termination
+function terminateInstance(instance) {
+  console.log(`Terminating instance: ${instance.id}`);
+}
+
+// Simulate ID generation
+function generateId() {
+  return Math.random().toString(36).substring(7);
 }
 ```
 
