@@ -68,14 +68,16 @@ By maintaining a **distributed array of instances** across the three stages (**P
 
 ### Code Example
 
-```javascript
-// Pseudo-code for rotating resource management with multiple instances
-async function rotateResources() {
-  const MAX_INSTANCES = 3; // Define the maximum number of instances in each stage
+### Improved Multi-Instance Resource Conveyor Code
 
-  let preloadInstances = [];  // Array to hold preloaded instances
-  let activeInstances = [];   // Array to hold active instances
-  let offloadInstances = [];  // Array to hold offloading instances
+```javascript
+async function rotateResources() {
+  const MAX_INSTANCES = 3;
+  const ROTATION_INTERVAL = 180000; // Rotate every 3 minutes (180,000 milliseconds)
+
+  let preloadInstances = [];
+  let activeInstances = [];
+  let offloadInstances = [];
 
   // Preload initial instances
   for (let i = 0; i < MAX_INSTANCES; i++) {
@@ -86,11 +88,15 @@ async function rotateResources() {
   setInterval(() => {
     // Move the oldest active instance to offload
     const instanceToOffload = activeInstances.shift();
-    offloadInstances.push(instanceToOffload);
+    if (instanceToOffload) {
+      offloadInstances.push(instanceToOffload);
+    }
 
     // Move the oldest preload instance to active
     const instanceToActivate = preloadInstances.shift();
-    activeInstances.push(instanceToActivate);
+    if (instanceToActivate) {
+      activeInstances.push(instanceToActivate);
+    }
 
     // Create a new preload instance
     const newPreloadInstance = createNewInstance();
@@ -112,13 +118,17 @@ function createNewInstance() {
 
 // Simulate instance termination
 function terminateInstance(instance) {
-  console.log(`Terminating instance: ${instance.id}`);
+  console.log(`Terminating instance: ${instance.id} at ${new Date().toISOString()}`);
+  // Perform any necessary cleanup here
 }
 
 // Simulate ID generation
 function generateId() {
   return Math.random().toString(36).substring(7);
 }
+
+// Start the rotation process
+rotateResources();
 
 ```
 ### Code Description:
