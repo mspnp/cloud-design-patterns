@@ -68,6 +68,8 @@ async function rotateResources() {
     terminateInstance(offloadInstance);
   }, ROTATION_INTERVAL);
 }
+
+
 ## Advantages
 
 - **Simplicity**: Manages resource rotation automatically, preventing performance degradation over time.
