@@ -92,4 +92,4 @@ async function rotateResources() {
 
 The **Resource Conveyor Pattern** provides an efficient solution for managing the lifecycle of non-managed external resources in cloud-based applications. By ensuring that resources are regularly rotated between preload, active, and offload states, this pattern prevents resource degradation and maintains optimal system performance. It can be applied to various resource-heavy or long-running processes that are prone to memory leaks, performance slowdowns, or resource exhaustion.
 
-With ❤️ from the Azure patterns & practices team, [Azure Architecture Center](https://azure.com/architecture).
+For a detailed justification of the Resource Conveyor pattern, please refer to the [justification document](./resource-conveyor/justification.md).
