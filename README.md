@@ -20,7 +20,7 @@ This repository contains companion code for the article series found in the [Clo
 | [Sharding](https://learn.microsoft.com/azure/architecture/patterns/sharding) | ./sharding/ |
 | [Static Content Hosting](https://learn.microsoft.com/azure/architecture/patterns/static-content-hosting) | ./static-content-hosting/ |
 | [Valet Key](https://learn.microsoft.com/en-us/azure/architecture/patterns/valet-key) | ./valet-key/ |
-
+| [Resource Conveyor](./resource-conveyor) | ./resource-conveyor/ | ./resource-conveyor / |
 > Items donated with $^{*}$ are part of the Azure Architecture Center series, but the sample code is hosted in a different repository.
 
 ## Contributions
