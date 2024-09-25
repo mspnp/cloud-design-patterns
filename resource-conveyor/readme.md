@@ -66,52 +66,7 @@ By maintaining a **distributed array of instances** across the three stages (**P
 3. **Offload Position**:
    - Ensures the current resource finishes its existing work without accepting new requests and then terminates.
 
-### Single Instance Code Example
-
-```javascript
-// Pseudo-code for rotating resource management
-async function rotateResources() {
-  // Create a new instance of the resource and preload it
-  let preloadInstance = createNewInstance();
-  
-  // Set the preloaded instance as the active instance
-  let activeInstance = preloadInstance;
-  
-  // Initialize a variable for the offloaded instance
-  let offloadInstance;
-
-  // Rotate resources at regular intervals
-  setInterval(() => {
-    // Move the current active instance to the offload stage
-    offloadInstance = activeInstance;
-    
-    // Promote the preloaded instance to the active stage
-    activeInstance = preloadInstance;
-    
-    // Create a new instance to preload
-    preloadInstance = createNewInstance();
-
-    // Terminate the offloaded instance
-    terminateInstance(offloadInstance);
-  }, ROTATION_INTERVAL);
-}
-
-// Simulate instance creation
-function createNewInstance() {
-  return { id: generateId(), status: "preloaded" };
-}
-
-// Simulate instance termination
-function terminateInstance(instance) {
-  console.log(`Terminating instance: ${instance.id}`);
-}
-
-// Simulate ID generation
-function generateId() {
-  return Math.random().toString(36).substring(7);
-}
-```
-### Multi-Instance Code Example
+### Code Example
 
 ```javascript
 // Pseudo-code for rotating resource management with multiple instances
@@ -141,7 +96,7 @@ async function rotateResources() {
     const newPreloadInstance = createNewInstance();
     preloadInstances.push(newPreloadInstance);
 
-    // Terminate the oldest offloaded instance after it completes its tasks
+    // Terminate the oldest offloaded instance after completing its tasks
     const instanceToTerminate = offloadInstances.shift();
     if (instanceToTerminate) {
       terminateInstance(instanceToTerminate);
@@ -164,7 +119,28 @@ function terminateInstance(instance) {
 function generateId() {
   return Math.random().toString(36).substring(7);
 }
+
 ```
+### Description:
+
+#### Key Steps:
+
+##### 1. Initialization of Instances:
+- Three arrays are initialized: `preloadInstances`, `activeInstances`, and `offloadInstances`, which will hold the instances in their respective lifecycle stages.
+- Initially, a number of instances (defined by `MAX_INSTANCES`) are preloaded into the `preloadInstances` array.
+
+##### 2. Rotation Logic:
+- The rotation of resources is handled by a single `setInterval` function, which runs periodically based on `ROTATION_INTERVAL`.
+  - The oldest active instance is moved from the `activeInstances` array to the `offloadInstances` array.
+  - A new active instance is promoted from the `preloadInstances` array to replace the offloaded instance in the active pool.
+  - A new instance is created and added to the `preloadInstances` array to maintain the pipeline of fresh resources.
+
+##### 3. Termination of Offload Instances:
+- After each interval, the oldest instance in the `offloadInstances` array is terminated. This ensures that the offloaded instances have completed their tasks before they are removed, maintaining system stability.
+
+#### Core Concept:
+The **Resource Conveyor Pattern** ensures that resources are continuously rotated and refreshed across three stages—**Preload**, **Active**, and **Offload**. This prevents resource exhaustion or degradation by terminating older instances after they've been safely moved to the offload stage. The key is that this process is handled by a **single interval**, making the logic simple but effective for automatic lifecycle management.
+
 
 ## Advantages
 
