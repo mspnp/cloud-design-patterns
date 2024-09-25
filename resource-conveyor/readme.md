@@ -12,17 +12,31 @@ Existing patterns like **Bulkhead**, **Competing Consumers**, or **Circuit Break
 
 ## Solution
 
-The **Resource Conveyor Pattern** introduces a rotational queue for managing resources efficiently:
-- **Three Positions**:
-  1. **Preload**: A new instance of the resource is preloaded but not exposed to incoming requests.
-  2. **Active**: The instance is actively handling incoming requests.
-  3. **Offload**: The instance finishes processing current requests but does not accept new ones and is eventually terminated.
-  
-- **Rotating Queue**: The conveyor rotates resources at regular intervals, preloading new ones and offloading old ones, ensuring a constant rotation of healthy resources.
-  
-- **Self-Healing**: If a resource enters a **degraded but still functional state**, the conveyor will eventually rotate it out of the **active pool** and into the **offload stage**, ensuring that it is disposed of before it can further degrade or impact the system.   
-   This prevents the entire system from being compromised by isolated resource issues. In cases where a resource **completely fails** while still active, the system should detect the failure and immediately **evict** the resource from the active pool, triggering the 
-   conveyor to promote a **preloaded resource** to replace it, ensuring continuous operation without manual intervention.
+The **Resource Conveyor Pattern** introduces a **rotational queue** that manages an array of **resource instances** at different stages of their lifecycle, ensuring efficient resource management and system resilience.
+
+### Three Positions:
+
+1. **Preload**:  
+   In this stage, **new instances** of the resource are preloaded and prepared to enter the active pool, but they are **not yet exposed** to incoming requests. These preloaded instances are standing by to replace active resources as soon as needed.
+
+2. **Active**:  
+   **Active instances** are currently handling incoming requests. This is the **live pool** of resources that the system relies on to process tasks in real-time. The conveyor ensures that there is always a **distributed set of healthy active instances** handling the workload.
+
+3. **Offload**:  
+   Once an active instance has served its purpose or has started to degrade (but can still finish its current tasks), it enters the **offload stage**. In this stage, the instance **finishes processing any remaining work** but does not accept new requests. Once the work is complete, the instance is **terminated**, ensuring that resources are flushed out before they become a liability.
+
+### Rotating Queue:
+
+The conveyor mechanism **rotates resources at regular intervals**, ensuring that **preloaded instances** are regularly promoted to the **active pool**, while **offloading instances** are safely terminated after completing their work. This **continuous rotation** maintains a pool of healthy resources, preventing **performance degradation** and system slowdowns caused by long-running or degraded resources.
+
+### Self-Healing:
+
+The **Resource Conveyor** also introduces a **self-healing mechanism**. If an **active instance** begins to degrade but remains functional, the conveyor will eventually rotate it out of the **active pool** and into the **offload stage**, ensuring that it is safely terminated before it can further affect the system.
+
+In cases where an **active instance completely fails** or becomes corrupted, the system should detect the failure and immediately **evict the instance** from the active pool. Upon eviction, the conveyor instantly promotes a **preloaded instance** to replace the failed resource, ensuring that requests are handled seamlessly and that there is no disruption in service.
+
+By maintaining a **distributed array of instances** across the three stages (**Preload**, **Active**, **Offload**), the system ensures that it is always operating with a **fresh set of active resources**, while any degraded or failed instances are automatically handled without manual intervention. This approach effectively prevents **resource failures** from compromising the system's stability and ensures **continuous operation**.
+
 
 ## Use Cases
 
