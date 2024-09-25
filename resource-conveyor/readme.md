@@ -20,7 +20,9 @@ The **Resource Conveyor Pattern** introduces a rotational queue for managing res
   
 - **Rotating Queue**: The conveyor rotates resources at regular intervals, preloading new ones and offloading old ones, ensuring a constant rotation of healthy resources.
   
-- **Self-Healing**: If a resource fails, the conveyor continues rotating, keeping the system running smoothly without manual intervention.
+- **Self-Healing**: If a resource enters a **degraded but still functional state**, the conveyor will eventually rotate it out of the **active pool** and into the **offload stage**, ensuring that it is disposed of before it can further degrade or impact the system.   
+   This prevents the entire system from being compromised by isolated resource issues. In cases where a resource **completely fails** while still active, the system should detect the failure and immediately **evict** the resource from the active pool, triggering the 
+   conveyor to promote a **preloaded resource** to replace it, ensuring continuous operation without manual intervention.
 
 ## Use Cases
 
