@@ -29,35 +29,6 @@ var storageBlobDataOwnerRole = subscriptionResourceId(
   'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
 ) //Storage Blob Data Owner role
 
-// // Define VNet and Subnet
-// resource vnet 'Microsoft.Network/virtualNetworks@2023-02-01' = {
-//   name: vnetName
-//   location: location
-//   properties: {
-//     addressSpace: {
-//       addressPrefixes: ['10.0.0.0/16']
-//     }
-//   }
-// }
-
-// resource storagepesbnt 'Microsoft.Network/virtualNetworks/subnets@2021-05-01' = {
-//   parent: vnet
-//   name: 'storagepesbnt'
-//   properties: {
-//     addressPrefix: '10.0.1.0/24'
-//     privateEndpointNetworkPolicies: 'Enabled'
-//   }
-// }
-
-// resource functiondsbnt 'Microsoft.Network/virtualNetworks/subnets@2021-05-01' = {
-//   parent: vnet
-//   name: 'functiondsbnt'
-//   properties: {
-//     addressPrefix: '10.0.2.0/24'
-//     privateEndpointNetworkPolicies: 'Enabled'
-//   }
-// }
-
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
   name: serviceBusNamespaceName
   location: location
