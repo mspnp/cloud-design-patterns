@@ -108,7 +108,6 @@ namespace asyncpattern
         }
     }
 
-
     public enum OnCompleteEnum
     {
 
