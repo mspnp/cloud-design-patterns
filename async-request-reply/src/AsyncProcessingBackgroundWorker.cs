@@ -1,22 +1,11 @@
 using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 
-namespace asyncpattern
+namespace Asyncpattern
 {
-    public class AsyncProcessingBackgroundWorker
+    public class AsyncProcessingBackgroundWorker(BlobContainerClient _blobContainerClient)
     {
-        private readonly ILogger<AsyncProcessingBackgroundWorker> _logger;
-
-        private readonly BlobContainerClient _blobContainerClient;
-
-        public AsyncProcessingBackgroundWorker(BlobContainerClient blobContainerClient, ILogger<AsyncProcessingBackgroundWorker> logger)
-        {
-            _blobContainerClient = blobContainerClient;
-            _logger = logger;
-        }
-
         [Function(nameof(AsyncProcessingBackgroundWorker))]
         public async Task Run([ServiceBusTrigger("outqueue", Connection = "ServiceBusConnection")] ServiceBusReceivedMessage message)
         {

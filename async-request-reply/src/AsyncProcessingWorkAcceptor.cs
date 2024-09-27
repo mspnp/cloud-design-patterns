@@ -6,19 +6,10 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
-namespace asyncpattern
+namespace Asyncpattern
 {
-    public class AsyncProcessingWorkAcceptor
+    public class AsyncProcessingWorkAcceptor(ILogger<AsyncProcessingWorkAcceptor> _logger, ServiceBusClient _serviceBusClient)
     {
-        private readonly ILogger<AsyncProcessingWorkAcceptor> _logger;
-        private readonly ServiceBusClient _serviceBusClient;
-
-        public AsyncProcessingWorkAcceptor(ILogger<AsyncProcessingWorkAcceptor> logger, ServiceBusClient serviceBusClient)
-        {
-            _serviceBusClient = serviceBusClient;
-            _logger = logger;
-        }
-
         [Function("AsyncProcessingWorkAcceptor")]
         public async Task<IActionResult> RunAsync([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req, [FromBody] CustomerPOCO customer)
         {

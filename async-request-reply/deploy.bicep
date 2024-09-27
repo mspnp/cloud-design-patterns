@@ -147,7 +147,7 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2023-12-01' = {
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
   name: logAnalyticsName
   location: location
-  properties: any({
+  properties: {
     retentionInDays: 30
     features: {
       searchVersion: 1
@@ -155,7 +155,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-previ
     sku: {
       name: 'PerGB2018'
     }
-  })
+  }
 }
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {

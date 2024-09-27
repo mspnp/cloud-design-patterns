@@ -1,4 +1,4 @@
-﻿namespace asyncpattern
+﻿namespace Asyncpattern
 {
     public class CustomerPOCO
     {

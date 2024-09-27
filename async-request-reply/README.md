@@ -105,9 +105,9 @@ The typical way to generate a SAS token in code requires the storage account key
 
    > **Note** the app uses the WEBSITE_HOSTNAME environment variable. This environment variable is set automatically by the Azure App Service runtime environment. For more information, see [Azure runtime environment](https.://github.com/projectkudu/kudu/wiki/Azure-runtime-environment)
 
-### Clean up
+## :broom: Clean up resources
 
-1. Delete all the Azure resources for this Cloud Async Pattern
+Most of the Azure resources deployed in the prior steps will incur ongoing charges unless removed.
 
    ```bash
    az group delete -n ${RESOURCEGROUP} -y
@@ -131,7 +131,9 @@ You could open the solution with Visual Studio, then you need to create on the r
 
 As far the implementation is using manage identity, you need to assign the role to your [developer identity](https://learn.microsoft.com/azure/azure-functions/functions-reference?tabs=blob&pivots=programming-language-csharp#local-development-with-identity-based-connections).
 
-```yarm
+You need to add the following lines to the Bicep file to assign roles for Service Bus and Azure Storage permissions.
+
+```bicep
 // Assign Role to allow sending messages to the Service Bus
 resource serviceBusSenderRoleAssignmentUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, 'LocalUser', 'ServiceBusSenderRole')

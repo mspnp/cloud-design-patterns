@@ -1,22 +1,14 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
-using Azure.Storage.Sas;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace asyncpattern
+namespace Asyncpattern
 {
-    public class AsyncOperationStatusChecker
-    {
-        private readonly ILogger<AsyncOperationStatusChecker> _logger;
-
-        public AsyncOperationStatusChecker(ILogger<AsyncOperationStatusChecker> logger)
-        {
-            _logger = logger;
-        }
-
+    public class AsyncOperationStatusChecker(ILogger<AsyncOperationStatusChecker> _logger)
+    {  
         [Function("AsyncOperationStatusChecker")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "RequestStatus/{thisGUID}")] HttpRequest req,
              [BlobInput("data/{thisGUID}.blobdata", Connection = "DataStorage")] BlockBlobClient inputBlob, string thisGUID)
@@ -83,7 +75,7 @@ namespace asyncpattern
                 case OnCompleteEnum.Redirect:
 
                     {
-                        //The typical way to generate a SAS token in code requires the storage account key.
+                        // The typical way to generate a SAS token in code requires the storage account key.
                         //If you need to use “Managed Identity” to control access to your storage accounts in code, which is something I highly recommend wherever possible as this is a security best practice.
                         // In this scenario, you won't have a storage account key, so you'll need to find another way to generate the shared access signatures.
                         // To do that, we need to use an approach called user delegation SAS . By using a user delegation SAS, we can sign the signature with the Microsoft Entra ID credentials instead of the storage account key.
