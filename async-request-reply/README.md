@@ -36,8 +36,8 @@ The typical way to generate a SAS token in code requires the storage account key
 
    ```bash
    az login
-   # Optionally, set the default subscription:
-   # az account set --subscription <subscription_id>
+   # Set the subscription
+   az account set --subscription <subscription_id>
    ```
 
 4. Environment Setup
