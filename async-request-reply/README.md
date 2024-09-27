@@ -113,7 +113,7 @@ The typical way to generate a SAS token in code requires the storage account key
    az group delete -n ${RESOURCEGROUP} -y
    ```
 
-### Running localy
+## Running locally
 
 You could open the solution with Visual Studio, then you need to create on the root `local.settings.json`
 
