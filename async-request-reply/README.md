@@ -45,9 +45,8 @@ The typical way to generate a SAS token in code requires the storage account key
    We need to prepare our environment:
 
    ```bash
-   export LOCATION=eastus
-   export RESOURCEGROUP_BASE_NAME=rg-asyncrequestreply
-   export RESOURCEGROUP=${RESOURCEGROUP_BASE_NAME}-${LOCATION}
+   LOCATION=eastus
+   RESOURCEGROUP=rg-asyncrequestreply-${LOCATION}
    ```
 
 5. Create a resource group.
