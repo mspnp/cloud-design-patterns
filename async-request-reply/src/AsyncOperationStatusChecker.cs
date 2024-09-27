@@ -84,9 +84,9 @@ namespace asyncpattern
 
                     {
                         //The typical way to generate a SAS token in code requires the storage account key.
-                        //If you need to use ìManaged Identityî to control access to your storage accounts in code, which is something I highly recommend wherever possible as this is a security best practice.
-                        //In this scenario, you wonít have a storage account key, so youíll need to find another way to generate the shared access signatures.
-                        //To do that, we need to use an approach called ìuser delegationî SAS . By using a user delegation SAS, we can sign the signature with the Azure Ad credentials instead of the storage account key.
+                        //If you need to use ‚ÄúManaged Identity‚Äù to control access to your storage accounts in code, which is something I highly recommend wherever possible as this is a security best practice.
+                        // In this scenario, you won't have a storage account key, so you'll need to find another way to generate the shared access signatures.
+                        // To do that, we need to use an approach called user delegation SAS . By using a user delegation SAS, we can sign the signature with the Microsoft Entra ID credentials instead of the storage account key.
                         BlobServiceClient blobServiceClient = inputBlob.GetParentBlobContainerClient().GetParentBlobServiceClient();
                         var userDelegationKey = await blobServiceClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(7));
                         // Redirect to the SAS URI to blob storage
