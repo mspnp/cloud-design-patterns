@@ -80,7 +80,7 @@ The typical way to generate a SAS token in code requires the storage account key
    func azure functionapp publish $FUNC_APP_NAME --dotnetIsolated
    ```
 
-### Validate the Azure Function app
+### Try it out!
 
 1. Send an http request through the Async Processor Work Acceptor
 
