@@ -9,10 +9,10 @@ namespace Pnp.Samples.ClaimCheckPattern
     /// <summary>
     /// Sample function illustrating the processing of Service Bus messages containing claim-check style events forwarded by Event Grid
     /// </summary>
-    public class FunctionConsumer3(ILoggerFactory loggerFactory)
+    public class FunctionConsumer3(ILoggerFactory loggerFactory, ISampleBlobDataMover sampleBlobDataMover)
     {
         readonly ILogger _logger = loggerFactory.CreateLogger<FunctionConsumer3>();
-        readonly SampleBlobDataMover _downloader = new(loggerFactory);
+        readonly ISampleBlobDataMover _downloader = sampleBlobDataMover;
 
         /// <summary>
         /// Function that processes Service Bus events auto-generated using Event Grid when files are uploaded to a storage blob container.
