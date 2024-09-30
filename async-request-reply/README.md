@@ -161,7 +161,7 @@ resource dataStorageBlobDataContributorRoleAssignmentUser 'Microsoft.Authorizati
   name: guid(resourceGroup().id, 'LocalUser', 'StorageBlobDataContributorRole')
   scope: dataStorageAccount
   properties: {
- roleDefinitionId: receiverServiceBusRole
+    roleDefinitionId: receiverServiceBusRole
     principalId: <your user object id>
     principalType: 'User'
   }
