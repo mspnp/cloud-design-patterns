@@ -136,7 +136,7 @@ You need to add the following lines to the Bicep file to assign roles for Servic
 ```bicep
 // Assign Role to allow sending messages to the Service Bus
 resource serviceBusSenderRoleAssignmentUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, 'LocalUser', 'ServiceBusSenderRole')
+  name: guid(resourceGroup().id, functionApp.id, 'LocalUser', 'ServiceBusSenderRole')
   scope: serviceBusNamespace
   properties: {
     roleDefinitionId: senderServiceBusRole
@@ -147,7 +147,7 @@ resource serviceBusSenderRoleAssignmentUser 'Microsoft.Authorization/roleAssignm
 
 // Assign Role to allow receiving messages from the Service Bus
 resource serviceBusReceiverRoleAssignmentUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, 'LocalUser', 'ServiceBusReceiverRole')
+  name: guid(resourceGroup().id, functionApp.id, 'LocalUser', 'ServiceBusReceiverRole')
   scope: serviceBusNamespace
   properties: {
     roleDefinitionId: receiverServiceBusRole
@@ -158,7 +158,7 @@ resource serviceBusReceiverRoleAssignmentUser 'Microsoft.Authorization/roleAssig
 
 // Assign Role to allow Read, write, and delete Azure Storage containers and blobs. 
 resource dataStorageBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, dataStorageAccount.id, 'StorageBlobDataContributorRole')
+  name: guid(resourceGroup().id, dataStorageAccount.id,'LocalUser', 'StorageBlobDataContributorRole')
   scope: dataStorageAccount
   properties: {
     roleDefinitionId: storageBlobDataContributorRole
