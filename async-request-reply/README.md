@@ -17,7 +17,7 @@ The typical way to generate a SAS token in code requires the storage account key
 ### Prerequisites
 
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest)
-- [.NET Core SDK version 8](https://dotnet.microsoft.com/en-us/download)
+- [.NET Core SDK version 8](https://dotnet.microsoft.com/download)
 - [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#v4)
 
 ### Deploy the Azure resources
