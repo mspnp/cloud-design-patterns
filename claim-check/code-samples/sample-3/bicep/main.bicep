@@ -96,7 +96,7 @@ resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2023-12-15-
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
   name: 'la-${namePrefix}'
   location: location
-  properties: any({
+  properties: {
     retentionInDays: 30
     features: {
       searchVersion: 1
@@ -104,7 +104,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-previ
     sku: {
       name: 'PerGB2018'
     }
-  })
+  }
 }
 
 @description('The Azure Service Bus namespace to use with the sample apps.')
@@ -167,7 +167,7 @@ resource userServiceBusDataOwnwerRoleAssignment 'Microsoft.Authorization/roleAss
 }
 
 @description('Set permissions to give the Event Grid System Managed identity access to Service Bus')
-resource gridSErviceBusDataOwnwerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource gridServiceBusDataOwnwerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(serviceBusNamespace.id, serviceBusDataOwnwerRole.id, eventGridStorageBlobTopic.id)
   scope: serviceBusNamespace
   properties: {
@@ -202,7 +202,7 @@ resource eventGridBlobCreatedServiceBusSubscription 'Microsoft.EventGrid/systemT
     eventDeliverySchema: 'EventGridSchema'
   }
   dependsOn:[
-    gridSErviceBusDataOwnwerRoleAssignment
+    gridServiceBusDataOwnwerRoleAssignment
   ]
 }
 
