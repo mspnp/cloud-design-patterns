@@ -41,7 +41,7 @@ Install the prerequisites and follow the steps to deploy and run the examples.
    cd cloud-design-patterns/claim-check/code-samples/sample-4
    ```
 
-1. Log into Azure and create an empty resource group.  
+1. Log into Azure and create an empty resource group.
 
    ```bash
    az login
