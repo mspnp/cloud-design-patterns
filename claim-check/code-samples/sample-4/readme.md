@@ -52,7 +52,6 @@ Install the prerequisites and follow the steps to deploy and run the examples.
    RESOURCE_GROUP_NAME="rg-${NAME_PREFIX}-${LOCATION}"
 
    az group create -n "${RESOURCE_GROUP_NAME}" -l ${LOCATION}
-
    ```
 
 1. Deploy the supporting Azure resources.
