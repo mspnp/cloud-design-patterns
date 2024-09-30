@@ -1,4 +1,4 @@
-namespace Contoso
+﻿namespace Asyncpattern
 {
     public class CustomerPOCO
     {

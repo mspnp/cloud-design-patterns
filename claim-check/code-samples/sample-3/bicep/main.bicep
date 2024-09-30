@@ -13,8 +13,6 @@ param principalId string
 @description('The globally unique prefix naming resources.')
 param namePrefix string
 
-/*** EXISTING RESOURCES ***/
-
 @description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges.')
 resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
@@ -27,6 +25,11 @@ resource serviceBusDataOwnwerRole 'Microsoft.Authorization/roleDefinitions@2022-
   scope: subscription()
 }
 
+@description('Allows for receive access to Azure Service Bus resources.')
+resource serviceBusDataReceiverRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  name: '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0'
+  scope: subscription()
+}
 
 /*** NEW RESOURCES ***/
 
@@ -42,7 +45,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     accessTier: 'Hot'
     allowBlobPublicAccess: false
     allowCrossTenantReplication: false
-    allowSharedKeyAccess: true
+    allowSharedKeyAccess: false //Only Managed Identity allowed
     isLocalUserEnabled: false
     isHnsEnabled: false
     isNfsV3Enabled: false
@@ -96,6 +99,20 @@ resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2023-12-15-
   }
 }
 
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
+  name: 'la-${namePrefix}'
+  location: location
+  properties: {
+    retentionInDays: 30
+    features: {
+      searchVersion: 1
+    }
+    sku: {
+      name: 'PerGB2018'
+    }
+  }
+}
+
 @description('The Azure Service Bus namespace to use with the sample apps.')
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
   name: 'sbns-${namePrefix}'
@@ -115,20 +132,48 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview
   }
 }
 
-@description('Set permissions to give the user principal access to Service Bus.')
-resource userServiceBusDataOwnwerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(serviceBusNamespace.id, serviceBusDataOwnwerRole.id, principalId)
+resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: '${serviceBusNamespace.name}-diagnostic'
+  scope: serviceBusNamespace
+  properties: {
+    logs: [
+      {
+        category: 'OperationalLogs'
+        enabled: true
+        retentionPolicy: {
+          enabled: false
+          days: 0
+        }
+      }
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          enabled: false
+          days: 0
+        }
+      }
+    ]
+    workspaceId: logAnalytics.id
+  }
+}
+
+@description('Set permissions to give the user principal receive data from Service Bus.')
+resource userServiceBusDataReceiverRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(serviceBusNamespace.id, serviceBusDataReceiverRole.id, principalId)
   scope: serviceBusNamespace
   properties: {
     principalId: principalId
-    roleDefinitionId: serviceBusDataOwnwerRole.id
+    roleDefinitionId: serviceBusDataReceiverRole.id
     principalType: 'User'
-    description: 'Allows this Microsoft Entra principal to access Service Bus data.'
+    description: 'Allows for receive access to Azure Service Bus resources..'
   }
 }
 
 @description('Set permissions to give the Event Grid System Managed identity access to Service Bus')
-resource gridSErviceBusDataOwnwerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource gridServiceBusDataOwnwerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(serviceBusNamespace.id, serviceBusDataOwnwerRole.id, eventGridStorageBlobTopic.id)
   scope: serviceBusNamespace
   properties: {
@@ -162,6 +207,9 @@ resource eventGridBlobCreatedServiceBusSubscription 'Microsoft.EventGrid/systemT
     }
     eventDeliverySchema: 'EventGridSchema'
   }
+  dependsOn:[
+    gridServiceBusDataOwnwerRoleAssignment
+  ]
 }
 
 

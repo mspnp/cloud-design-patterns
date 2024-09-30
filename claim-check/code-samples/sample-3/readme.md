@@ -37,34 +37,38 @@ Install the prerequisites and follow the steps to deploy and run the examples.
 
 1. Clone this repository to your workstation and navigate to the working directory.
 
-   ```shell
+   ```bash
    git clone https://github.com/mspnp/cloud-design-patterns
    cd cloud-design-patterns/claim-check/code-samples/sample-3
    ```
 
 1. Log into Azure and create an empty resource group.
 
-   ```azurecli
+   ```bash
    az login
    az account set -s <Name or ID of subscription>
 
    NAME_PREFIX=<unique value between three to five characters>
-   az group create -n "rg-${NAME_PREFIX}" -l eastus2
+   LOCATION=eastus2
+   RESOURCE_GROUP_NAME="rg-${NAME_PREFIX}-${LOCATION}"
+
+
+   az group create -n "${RESOURCE_GROUP_NAME}" -l ${LOCATION}
    ```
 
 1. Deploy the supporting Azure resources.
 
-   ```azurecli
+   ```bash
    CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show -o tsv --query id)
 
    # This could take a few minutes
-   az deployment group create -n deploy-claim-check -f bicep/main.bicep -g "rg-${NAME_PREFIX}" -p namePrefix=$NAME_PREFIX principalId=$CURRENT_USER_OBJECT_ID
+   az deployment group create -n deploy-claim-check -f bicep/main.bicep -g "${RESOURCE_GROUP_NAME}" -p namePrefix=$NAME_PREFIX principalId=$CURRENT_USER_OBJECT_ID
    ```
 
 1. Configure the samples to use the created Azure resources.
 
-   ```shell
-   sed "s/{SERVICE_BUS_NAMESPACE}/evhns-${NAME_PREFIX}/g" FunctionConsumer3/local.settings.json.template > FunctionConsumer3/local.settings.json
+   ```bash
+   sed "s/{SERVICE_BUS_NAMESPACE}/sbns-${NAME_PREFIX}/g" FunctionConsumer3/local.settings.json.template > FunctionConsumer3/local.settings.json
    ```
 
 1. [Run Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite#run-azurite) blob storage emulation service.
@@ -78,7 +82,7 @@ Install the prerequisites and follow the steps to deploy and run the examples.
    Two applications are provided as sample that illustrate consuming the claim check message sent via Azure Event Hubs: one implemented as a Command Line Interface (CLI) application, and the other one implemented as an Azure Function, showcasing the serveless approach.
 
    ```bash
-   cd sample-3\FunctionConsumer3
+   cd FunctionConsumer3
    func start
    ```
 
@@ -92,6 +96,6 @@ To generate a claim check message you just have to drop a file in the created Az
 
 Remove the resource group that you created when you are done with this sample.
 
-```azurecli
-az group delete -n "rg-${NAME_PREFIX}"
+```bash
+az group delete -n "${RESOURCE_GROUP_NAME}" -y
 ```
