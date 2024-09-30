@@ -25,6 +25,12 @@ resource serviceBusDataOwnwerRole 'Microsoft.Authorization/roleDefinitions@2022-
   scope: subscription()
 }
 
+@description('Allows for receive access to Azure Service Bus resources.')
+resource serviceBusDataReceiverRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  name: '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0'
+  scope: subscription()
+}
+
 /*** NEW RESOURCES ***/
 
 @description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SaS tokens for this blobs in this account.')
@@ -154,15 +160,15 @@ resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-pr
   }
 }
 
-@description('Set permissions to give the user principal access to Service Bus.')
-resource userServiceBusDataOwnwerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(serviceBusNamespace.id, serviceBusDataOwnwerRole.id, principalId)
+@description('Set permissions to give the user principal receive data from Service Bus.')
+resource userServiceBusDataReceiverRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(serviceBusNamespace.id, serviceBusDataReceiverRole.id, principalId)
   scope: serviceBusNamespace
   properties: {
     principalId: principalId
-    roleDefinitionId: serviceBusDataOwnwerRole.id
+    roleDefinitionId: serviceBusDataReceiverRole.id
     principalType: 'User'
-    description: 'Allows this Microsoft Entra principal to access Service Bus data.'
+    description: 'Allows for receive access to Azure Service Bus resources..'
   }
 }
 
