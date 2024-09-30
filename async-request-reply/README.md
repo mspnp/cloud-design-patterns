@@ -158,7 +158,7 @@ resource serviceBusReceiverRoleAssignmentUser 'Microsoft.Authorization/roleAssig
 
 // Assign Role to allow Read, write, and delete Azure Storage containers and blobs. 
 resource dataStorageBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, dataStorageAccount.id,'LocalUser', 'StorageBlobDataContributorRole')
+  name: guid(resourceGroup().id, dataStorageAccount.id, 'LocalUser', 'StorageBlobDataContributorRole')
   scope: dataStorageAccount
   properties: {
     roleDefinitionId: storageBlobDataContributorRole
