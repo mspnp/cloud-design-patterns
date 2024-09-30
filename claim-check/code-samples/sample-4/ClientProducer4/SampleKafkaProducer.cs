@@ -1,8 +1,6 @@
-﻿using Azure.Core;
-using Azure.Identity;
+﻿using Azure.Identity;
 using Confluent.Kafka;
 using Microsoft.Extensions.Configuration;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace Pnp.Samples.ClaimCheckPattern
 {
@@ -10,13 +8,13 @@ namespace Pnp.Samples.ClaimCheckPattern
     /// Implements the Kafka producer to send messages to a Kafka-enabled Event Hub namespace
     /// Uses Azure Entra ID to authenticate.
     /// </summary>
-    public class SampleKafkaProducer(IConfiguration configuration)
+    public class SampleKafkaProducer(IConfiguration configuration) : ISampleKafkaProducer
     {
         readonly string _eventHubEndpoint = configuration.GetSection("AppSettings:eventHubEndpoint").Value!;
         readonly string _kafkaFqdn = configuration.GetSection("AppSettings:eventHubFqdn").Value!;
         readonly string _topic = configuration.GetSection("AppSettings:eventHubName").Value!;
 
-        public async Task SendMessage(string message)
+        public async Task SendMessageAsync(string message)
         {
             try
             {

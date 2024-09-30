@@ -31,7 +31,7 @@ Console.WriteLine();
 Console.WriteLine("Sending Claim Check message...");
 var kafkaWorker = new SampleKafkaProducer(configuration);
 
-await kafkaWorker.SendMessage(JsonSerializer.Serialize(new { payloadUri = newBlobUri }));
+await kafkaWorker.SendMessageAsync(JsonSerializer.Serialize(new { payloadUri = newBlobUri }));
 Console.WriteLine();
 
 Console.WriteLine("Done.");
