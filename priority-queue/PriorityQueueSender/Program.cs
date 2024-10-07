@@ -2,6 +2,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Azure.Messaging.ServiceBus;
+using Azure.Identity;
+using System;
+using Microsoft.Extensions.Azure;
 
 var host = new HostBuilder()
   .ConfigureFunctionsWorkerDefaults()
@@ -15,10 +18,10 @@ var host = new HostBuilder()
 
       services.AddSingleton(configuration);
 
-      services.AddSingleton<ServiceBusClient>(sp =>
+      services.AddAzureClients(builder =>
       {
-          var connectionString = configuration.GetValue<string>("ServiceBusConnectionString");
-          return new ServiceBusClient(connectionString);
+          builder.AddServiceBusClientWithNamespace(Environment.GetEnvironmentVariable("ServiceBusConnection__fullyQualifiedNamespace"))
+                 .WithCredential(new DefaultAzureCredential());
       });
   })
   .Build();

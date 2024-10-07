@@ -3,17 +3,12 @@ using Microsoft.Azure.Functions.Worker;
 
 namespace PriorityQueueConsumerLow
 {
-    public class PriorityQueueConsumerLowFn
+    public class PriorityQueueConsumerLowFn(ILogger<PriorityQueueConsumerLowFn> logger)
     {
-        private readonly ILogger _logger;
-
-        public PriorityQueueConsumerLowFn(ILogger<PriorityQueueConsumerLowFn> logger)
-        {
-            _logger = logger;
-        }
+        private readonly ILogger _logger = logger;
 
         [Function("LowPriorityQueueConsumerFunction")]
-        public void Run([ServiceBusTrigger("messages", "lowPriority", Connection = "ServiceBusConnectionString")] string lowPriorityMessage)
+        public void Run([ServiceBusTrigger("messages", "lowPriority", Connection = "ServiceBusConnection")] string lowPriorityMessage)
         {
             _logger.LogInformation($"C# ServiceBus topic trigger function processed message: {lowPriorityMessage}");
         }

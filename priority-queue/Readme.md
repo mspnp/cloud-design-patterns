@@ -1,6 +1,6 @@
 ﻿# Priority Queue pattern example
 
-This directory contains an example of the [Priority Queue pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/priority-queue).
+This directory contains an example of the [Priority Queue pattern](https://learn.microsoft.com/azure/architecture/patterns/priority-queue).
 
 This example demonstrates how priority queues can be implemented by using Service Bus topics and subscriptions. A time-triggered Azure Function is responsible for sending messages to a topic, each with a priority assigned. The receiving Azure Functions read messages from subscriptions that have the corresponding priority. In this example, the _PriorityQueueConsumerHigh_ Azure function can scale out to 200 instances, while the _PriorityQueueConsumerLow_ function runs only with one instance. This example simulates high priority messages being read from the queue more urgently than low priority messages.
 
@@ -16,114 +16,110 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 - [Git](https://git-scm.com/downloads)
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Microsoft Visual Studio 2022](https://visualstudio.microsoft.com/vs/) or later version
 - [Azure Functions Core Tools v4.x](https://learn.microsoft.com/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)
-
 
 ### Steps
 
 1. Clone the repository
 
-    Open a terminal, clone the repository, and navigate to the `priority-queue` directory.
+   Open a terminal, clone the repository, and navigate to the `priority-queue` directory.
 
-    ```shell
-    git clone https://github.com/mspnp/cloud-design-patterns.git
-    cd cloud-design-patterns
-    cd priority-queue
-    ```
+   ```shell
+   git clone https://github.com/mspnp/cloud-design-patterns.git
+   cd cloud-design-patterns
+   cd priority-queue
+   ```
+
 1. Log into Azure and create an empty resource group.
 
    Create an empty resource group to hold the resources for this example. The location you select in the resource group creation command below is the Azure region that your resources will be deployed in; modify as needed.
 
-   ```azurecli
+   ```bash
    az login
    az account set -s <Name or ID of subscription>
 
-   RESOURCE_GROUP_NAME=rg-priority-queue
-   az group create -n $RESOURCE_GROUP_NAME -l eastus2
-   ```
-1. Provision a Service Bus messaging namespace.
-
-   ```azurecli
-   SERVICE_BUS_NAMESPACE_NAME=sbns-priority-queue-pattern
-   az servicebus namespace create -g $RESOURCE_GROUP_NAME -n $SERVICE_BUS_NAMESPACE_NAME
-   ```
-1. Create a Service Bus topic named "messages".
-
-   ```azurecli
-   SERVICE_BUS_TOPIC_NAME=messages
-   az servicebus topic create --name $SERVICE_BUS_TOPIC_NAME --namespace-name $SERVICE_BUS_NAMESPACE_NAME --resource-group $RESOURCE_GROUP_NAME
-   ```
-1. Create a Service Bus subscription for high priority messages.
-
-   ```azurecli
-   SERVICE_BUS_SUBSCRIPTION_NAME_HIGH=highPriority
-   az servicebus topic subscription create --name $SERVICE_BUS_SUBSCRIPTION_NAME_HIGH --namespace-name $SERVICE_BUS_NAMESPACE_NAME --resource-group $RESOURCE_GROUP_NAME --topic-name $SERVICE_BUS_TOPIC_NAME
-   ```
-1. Create a Service Bus subscription for low priority messages.
-
-   ```azurecli
-   SERVICE_BUS_SUBSCRIPTION_NAME_LOW=lowPriority
-   az servicebus topic subscription create --name $SERVICE_BUS_SUBSCRIPTION_NAME_LOW --namespace-name $SERVICE_BUS_NAMESPACE_NAME --resource-group $RESOURCE_GROUP_NAME --topic-name $SERVICE_BUS_TOPIC_NAME
-   ```
-1. Add a filter to the high priority subscription.
-
-   ```azurecli
-   az servicebus topic subscription rule create --name priorityFilter --namespace-name $SERVICE_BUS_NAMESPACE_NAME --resource-group $RESOURCE_GROUP_NAME --topic-name $SERVICE_BUS_TOPIC_NAME --subscription-name $SERVICE_BUS_SUBSCRIPTION_NAME_HIGH --filter-sql-expression "Priority = 'highpriority'"
-   ```
-1. Add a filter to the low priority subscription.
-
-   ```azurecli
-   az servicebus topic subscription rule create --name priorityFilter --namespace-name $SERVICE_BUS_NAMESPACE_NAME --resource-group $RESOURCE_GROUP_NAME --topic-name $SERVICE_BUS_TOPIC_NAME --subscription-name $SERVICE_BUS_SUBSCRIPTION_NAME_LOW --filter-sql-expression "Priority = 'lowpriority'"
-   ```
-1. Retrieve the primary connection string for the Service Bus namespace.  Copy and retain this value as it will be needed in later steps.
-
-   ```azurecli
-   SERVICE_BUS_CONNECTION_STRING=$(az servicebus namespace authorization-rule keys list --resource-group $RESOURCE_GROUP_NAME --namespace-name $SERVICE_BUS_NAMESPACE_NAME --name RootManageSharedAccessKey --query primaryConnectionString --output tsv)
-   echo $SERVICE_BUS_CONNECTION_STRING
+   LOCATION=eastus2
+   RESOURCE_GROUP_NAME=rg-priority-queue-${LOCATION}
+   az group create -n $RESOURCE_GROUP_NAME -l $LOCATION
    ```
 
+1. Deploy the supporting Azure resources.
 
-## Run the example locally
+   ```bash
+   CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show -o tsv --query id)
+   SERVICE_BUS_NAMESPACE_NAME="sbns-priority-queue-$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 7 | head -n 1)"
 
+   # This takes about two minute
+   az deployment group create -n deploy-priority-queue -f bicep/main.bicep -g "${RESOURCE_GROUP_NAME}" -p queueNamespaces=$SERVICE_BUS_NAMESPACE_NAME principalId=$CURRENT_USER_OBJECT_ID
+   ```
 
-1. Open the `priority-queue.sln` file in Visual Studio.
-  
-1. Edit the `local.settings.json` file for each project set the value of `ServiceBusConnectionString` to the **SERVICE_BUS_CONNECTION_STRING** retained from earlier.
+1. Configure the samples to use the created Azure resources.
 
-1. Set the `PriorityQueueSender` project as startup. 
-1. Press F5 in Visual Studio to start running the example. The function will begin sending messages to the topic every 30 seconds.
-1. Stop the execution, change the startup project to either the `PriorityQueueConsumerHigh` or `PriorityQueueConsumerLow`.
-1. Press F5 in Visual Studio to start the execution of the consumer function.
-1. In the Azure Functions Core Tools Console, you can view the diagnostic information generated by statements in the code.
+   ```bash
+   # Retrieve the primary connection string for the Service Bus namespace.
+   SERVICE_BUS_CONNECTION="${SERVICE_BUS_NAMESPACE_NAME}.servicebus.windows.net"
 
+   sed "s|{SERVICE_BUS_CONNECTION}|${SERVICE_BUS_CONNECTION}|g" ./PriorityQueueSender/local.settings.template.json > ./PriorityQueueSender/local.settings.json
+   sed "s|{SERVICE_BUS_CONNECTION}|${SERVICE_BUS_CONNECTION}|g" ./PriorityQueueConsumerHigh/local.settings.template.json > ./PriorityQueueConsumerHigh/local.settings.json
+   sed "s|{SERVICE_BUS_CONNECTION}|${SERVICE_BUS_CONNECTION}|g" ./PriorityQueueConsumerLow/local.settings.template.json > ./PriorityQueueConsumerLow/local.settings.json
+   ```
 
-## Deploy the example to Azure
-To deploy the example to Azure, you need to publish each Azure Functions to Azure. You can do so from Visual Studio by right clicking each function and selecting `Publish` from the menu. Use the same resource group and region from earlier.  Be sure to enable Application Insights.
+1. [Run Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite#run-azurite) blob storage emulation service.
+
+   > The local storage emulator is required as an Azure Storage account is a required "backing resource" for Azure Functions.
+
+1. Launch the Function PriorityQueueSender to generate Low and High messages.  
+
+   ```bash
+   cd ./PriorityQueueSender
+   func start
+   ```
+
+1. In a new terminal, launch the Function PriorityQueueConsumerLow to consume messages.  
+
+   ```bash
+   cd ./PriorityQueueConsumerLow
+   func start -p 15000
+   ```
+
+  > Please note: For demo purposes, the sample application will write content to the the screen.
+
+1. In a new terminal, launch the Function PriorityQueueConsumerHigh to consume messages.  
+
+   ```bash
+   cd ./PriorityQueueConsumerHigh 
+   func start -p 15001
+   ```
+
+  > Please note: For demo purposes, the sample application will write content to the the screen.
+
+## Deploy the example to Azure (Optional)
+
+To deploy the example to Azure, you need to publish each Azure Functions to Azure. You can do so from Visual Studio by right clicking each function and selecting `Publish` from the menu. Use the same resource group and region from earlier. Be sure to enable Application Insights.
 
 Once each function is published, a new App Setting must be added to store the connection string to the Service Bus namespace. This is the same value that was used in the `SERVICE_BUS_CONNECTION_STRING` variable in the previous steps.
 
 For each function, run the following:
-```azurecli
-az webapp config appsettings set -n <function_app_name> -g $RESOURCE_GROUP_NAME --settings ServiceBusConnectionString=$SERVICE_BUS_CONNECTION_STRING
+
+```bash
+az webapp config appsettings set -n <function_app_name> -g $RESOURCE_GROUP_NAME --settings ServiceBusConnection__fullyQualifiedNamespace=$SERVICE_BUS_CONNECTION
 ```
 
 Once the functions are deployed you need to restrict the maximum number of instances the `PriorityQueueConsumerLow` function can scale out to.
 
 From the Azure portal:
+
 - Visit the Function App that contains `PriorityQueueConsumerLow`
 - Navigate to Scale Out on the left menu
 - On the App Scale Out dialog, set the `Enforce Scale Out Limit` to `Yes`
 - Set the `Maximum Scale Out Limit` to `1` instance
 
-
 Once the functions are deployed you can visit Application Insights to view the most recent activity for each function.
-
 
 ## :broom: Clean up resources
 
 Be sure to delete Azure resources when not using them. Since all resources were deployed into a new resource group, you can simply delete the resource group.
 
-```azurecli
-az group delete -n $RESOURCE_GROUP_NAME
+```bash
+az group delete -n $RESOURCE_GROUP_NAME -y
 ```
