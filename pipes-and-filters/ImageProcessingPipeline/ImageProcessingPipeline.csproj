@@ -13,7 +13,7 @@
       Version="6.6.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage.Queues"
       Version="5.3.0" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.16.4" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.18.0" />
     <PackageReference Include="Microsoft.Extensions.Azure" Version="1.7.4" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="8.0.1" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
