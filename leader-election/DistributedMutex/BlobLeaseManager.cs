@@ -8,6 +8,7 @@ namespace DistributedMutex
     using System.Threading;
     using System.Threading.Tasks;
     using Azure;
+    using Azure.Identity;
     using Azure.Storage.Blobs;
     using Azure.Storage.Blobs.Specialized;
 
@@ -17,15 +18,15 @@ namespace DistributedMutex
         public readonly string BlobName;
         public BlobServiceClient BlobServiceClient;
 
-        public BlobSettings(String storageConnStr, string container, string blobName)
+        public BlobSettings(string blobUri, string container, string blobName)
         {
             var blobClientOptions = new BlobClientOptions();
             blobClientOptions.Retry.Delay = TimeSpan.FromSeconds(5);
             blobClientOptions.Retry.MaxRetries = 3;
 
-            this.BlobServiceClient = new BlobServiceClient(storageConnStr, blobClientOptions);
-            this.Container = container;
-            this.BlobName = blobName;
+            BlobServiceClient = new BlobServiceClient(new Uri(blobUri), new DefaultAzureCredential(), blobClientOptions);
+            Container = container;
+            BlobName = blobName;
         }
     }
 
@@ -44,15 +45,17 @@ namespace DistributedMutex
 
         public BlobLeaseManager(BlobServiceClient blobServiceClient, string leaseContainerName, string leaseBlobName)
         {
-            this.leaseContainerClient = blobServiceClient.GetBlobContainerClient(leaseContainerName);
-            this.leaseBlobClient = this.leaseContainerClient.GetPageBlobClient(leaseBlobName);
+            leaseContainerClient = blobServiceClient.GetBlobContainerClient(leaseContainerName);
+            leaseBlobClient = leaseContainerClient.GetPageBlobClient(leaseBlobName);
+            leaseContainerClient.CreateIfNotExists();
+            leaseBlobClient.CreateIfNotExists(512);
         }
 
         public void ReleaseLease(string leaseId)
         {
             try
             {
-                var leaseClient = this.leaseBlobClient.GetBlobLeaseClient(leaseId);
+                var leaseClient = leaseBlobClient.GetBlobLeaseClient(leaseId);
                 leaseClient.Release();
             }
             catch (RequestFailedException e)
@@ -67,7 +70,7 @@ namespace DistributedMutex
             bool blobNotFound = false;
             try
             {
-                var leaseClient = this.leaseBlobClient.GetBlobLeaseClient();
+                var leaseClient = leaseBlobClient.GetBlobLeaseClient();
                 var lease = await leaseClient.AcquireAsync(TimeSpan.FromSeconds(15), null, token);
                 return lease.Value.LeaseId;
             }
@@ -95,8 +98,8 @@ namespace DistributedMutex
 
             if (blobNotFound)
             {
-                await this.CreateBlobAsync(token);
-                return await this.AcquireLeaseAsync(token);
+                await CreateBlobAsync(token);
+                return await AcquireLeaseAsync(token);
             }
 
             return null;
@@ -106,7 +109,7 @@ namespace DistributedMutex
         {
             try
             {
-                var leaseClient = this.leaseBlobClient.GetBlobLeaseClient(leaseId);
+                var leaseClient = leaseBlobClient.GetBlobLeaseClient(leaseId);
                 await leaseClient.RenewAsync(cancellationToken: token);
                 return true;
             }
@@ -120,8 +123,8 @@ namespace DistributedMutex
 
         private async Task CreateBlobAsync(CancellationToken token)
         {
-            await this.leaseContainerClient.CreateIfNotExistsAsync(cancellationToken: token);
-            await this.leaseBlobClient.CreateIfNotExistsAsync(0, cancellationToken: token);
+            await leaseContainerClient.CreateIfNotExistsAsync(cancellationToken: token);
+            await leaseBlobClient.CreateIfNotExistsAsync(0, cancellationToken: token);
         }
     }
 }
