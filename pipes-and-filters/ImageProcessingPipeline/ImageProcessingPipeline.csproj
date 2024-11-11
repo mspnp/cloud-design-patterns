@@ -15,7 +15,7 @@
       Version="5.3.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.18.1" />
     <PackageReference Include="Microsoft.Extensions.Azure" Version="1.7.4" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="8.0.10" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
   </ItemGroup>
   <ItemGroup>
