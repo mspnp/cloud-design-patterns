@@ -24,9 +24,9 @@ namespace DistributedMutex
 
         public async Task RunTaskWhenMutexAcquired(CancellationToken token)
         {
-            var leaseManager = new BlobLeaseManager(this.blobSettings);
+            var leaseManager = new BlobLeaseManager(blobSettings);
 
-            await this.RunTaskWhenBlobLeaseAcquired(leaseManager, token);
+            await RunTaskWhenBlobLeaseAcquired(leaseManager, token);
         }
 
         private static async Task CancelAllWhenAnyCompletes(Task leaderTask, Task renewLeaseTask, CancellationTokenSource cts)
@@ -63,7 +63,7 @@ namespace DistributedMutex
             while (!token.IsCancellationRequested)
             {
                 // Try to acquire the blob lease, otherwise wait for some time before we can try again.
-                string? leaseId = await this.TryAcquireLeaseOrWait(leaseManager, token);
+                string? leaseId = await TryAcquireLeaseOrWait(leaseManager, token);
 
                 if (!string.IsNullOrEmpty(leaseId))
                 {
@@ -71,15 +71,15 @@ namespace DistributedMutex
                     // original token is canceled or the lease cannot be renewed,
                     // then the leader task can be canceled.
                     using (var leaseCts =
-                        CancellationTokenSource.CreateLinkedTokenSource(new[] { token }))
+                        CancellationTokenSource.CreateLinkedTokenSource([token]))
                     {
                         // Run the leader task.
-                        var leaderTask = this.taskToRunWhenLeaseAcquired.Invoke(leaseCts.Token);
+                        var leaderTask = taskToRunWhenLeaseAcquired.Invoke(leaseCts.Token);
 
                         // Keeps renewing the lease in regular intervals.
                         // If the lease cannot be renewed, then the task completes.
                         var renewLeaseTask =
-                            this.KeepRenewingLease(leaseManager, leaseId, leaseCts.Token);
+                            KeepRenewingLease(leaseManager, leaseId, leaseCts.Token);
 
                         // When any task completes (either the leader task or when it could
                         // not renew the lease) then cancel the other task.
@@ -98,7 +98,7 @@ namespace DistributedMutex
                 {
                     return leaseId;
                 }
-                if(onLeaseTimeoutRetry != null)
+                if (onLeaseTimeoutRetry != null)
                 {
                     onLeaseTimeoutRetry();
                 }
