@@ -56,7 +56,7 @@ Install the prerequisites and follow the steps to run the example and observe th
 
    Locate the Azure Storage account and copy the account name. Update the StorageUri field in `LeaderElectionConsoleWorker/app.config` with the value https://{0}.blob.core.windows.net, where {0} is the storage account name. Verify your local user is granted the `Storage Blob Data Contributor` role. You may need to navigate to Access Control (IAM) in the Azure portal and add the role manually.
 
-   In Settings > Configuration, ensure that Allow storage account key access is disabled to enforce the use of Managed Identity.
+   In Settings > Configuration, ensure that `Allow storage account key access` is disabled to enforce the use of Managed Identity.
 
 ### :checkered_flag: Try it out
 
