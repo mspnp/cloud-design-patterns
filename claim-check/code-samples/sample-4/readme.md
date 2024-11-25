@@ -36,33 +36,36 @@ Install the prerequisites and follow the steps to deploy and run the examples.
 
 1. Clone this repository to your workstation and navigate to the working directory.
 
-   ```shell
+   ```bash
    git clone https://github.com/mspnp/cloud-design-patterns
    cd cloud-design-patterns/claim-check/code-samples/sample-4
    ```
 
 1. Log into Azure and create an empty resource group.
 
-  ```azurecli
-  az login
-  az account set -s <Name or ID of subscription>
+   ```bash
+   az login
+   az account set -s <Name or ID of subscription>
 
-  NAME_PREFIX=<unique value between three to five characters of length>
-  az group create -n "rg-${NAME_PREFIX}" -l eastus2
-  ```
+   NAME_PREFIX=<unique value between three to five characters of length>
+   LOCATION=eastus2
+   RESOURCE_GROUP_NAME="rg-${NAME_PREFIX}-${LOCATION}"
+
+   az group create -n "${RESOURCE_GROUP_NAME}" -l ${LOCATION}
+   ```
 
 1. Deploy the supporting Azure resources.
 
-   ```azurecli
+   ```bash
    CURRENT_USER_OBJECT_ID=$(az ad signed-in-user show -o tsv --query id)
 
    # This could take a few minutes
-   az deployment group create -n deploy-claim-check -f bicep/main.bicep -g "rg-${NAME_PREFIX}" -p namePrefix=$NAME_PREFIX principalId=$CURRENT_USER_OBJECT_ID
+   az deployment group create -n deploy-claim-check -f bicep/main.bicep -g "${RESOURCE_GROUP_NAME}" -p namePrefix=$NAME_PREFIX principalId=$CURRENT_USER_OBJECT_ID
    ```
 
 1. Configure the samples to use the created Azure resources.
 
-   ```shell
+   ```bash
    sed "s/{EVENT_HUBS_NAMESPACE}/evhns-${NAME_PREFIX}/g" ClientProducer4/appsettings.json.template >ClientProducer4/appsettings.json
    sed -i "s/{STORAGE_ACCOUNT_NAME}/st${NAME_PREFIX}cc/g" ClientProducer4/appsettings.json
 
@@ -75,10 +78,10 @@ Install the prerequisites and follow the steps to deploy and run the examples.
 
 1. Launch the Function sample that will process the claim check messages as they arrive to Event Hubs.
 
-  ```bash
-  cd ./FunctionConsumer4
-  func start
-  ```
+   ```bash
+   cd ./FunctionConsumer4
+   func start
+   ```
 
   > Please note: For demo purposes, the sample application will write the payload content to the the screen. Keep that in mind before you try sending really large payloads.
 
@@ -96,6 +99,6 @@ Install the prerequisites and follow the steps to deploy and run the examples.
 
 Remove the resource group that you created when you are done with this sample.
 
-```azurecli
-az group delete -n "rg-${NAME_PREFIX}"
+```bash
+az group delete -n "${RESOURCE_GROUP_NAME}" -y
 ```

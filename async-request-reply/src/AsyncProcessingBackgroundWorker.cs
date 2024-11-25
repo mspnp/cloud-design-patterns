@@ -1,31 +1,32 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
+using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Extensions.Logging;
+using Microsoft.Azure.Functions.Worker;
 
-namespace Contoso
+namespace Asyncpattern
 {
-    public static class AsyncProcessingBackgroundWorker
+    public class AsyncProcessingBackgroundWorker(BlobContainerClient _blobContainerClient)
     {
-        [FunctionName("AsyncProcessingBackgroundWorker")]
-        public static async Task RunAsync(
-            [ServiceBusTrigger("outqueue", Connection = "ServiceBusConnectionAppSetting")] BinaryData customer,
-            IDictionary<string, object> applicationProperties,
-            [Blob("data", FileAccess.ReadWrite, Connection = "StorageConnectionAppSetting")] BlobContainerClient inputContainer,
-            ILogger log)
+        [Function(nameof(AsyncProcessingBackgroundWorker))]
+        public async Task Run([ServiceBusTrigger("outqueue", Connection = "ServiceBusConnection")] ServiceBusReceivedMessage message)
         {
-            // Perform an actual action against the blob data source for the async readers to be able to check against.
+            //Perform an actual action against the blob data source for the async readers to be able to check against.
             // This is where your actual service worker processing will be performed
 
-            var id = applicationProperties["RequestGUID"] as string;
-            
-            BlobClient blob = inputContainer.GetBlobClient($"{id}.blobdata");
+            var requestGuid = message.ApplicationProperties["RequestGUID"].ToString();
+            string blobName = $"{requestGuid}.blobdata";
 
-            // Now write away the process 
-            await blob.UploadAsync(customer);
+            await _blobContainerClient.CreateIfNotExistsAsync();
+
+            var blobClient = _blobContainerClient.GetBlobClient(blobName);
+            using (MemoryStream memoryStream = new MemoryStream())
+            using (StreamWriter writer = new StreamWriter(memoryStream))
+            {
+                writer.Write(message.Body.ToString());
+                writer.Flush();
+                memoryStream.Position = 0;
+
+                await blobClient.UploadAsync(memoryStream, overwrite: true);
+            }
         }
     }
 }
