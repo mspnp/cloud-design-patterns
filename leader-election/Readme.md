@@ -54,7 +54,7 @@ Install the prerequisites and follow the steps to run the example and observe th
 
    The sample defaults to use a container named `leases`. If you are utilizing an existing storage account, be certain that this container is not already in use.
 
-   Locate the Azure Storage account and copy its account name. Next, update the StorageUri field in the LeaderElectionConsoleWorker/app.config file by replacing it with the value https://{0}.blob.core.windows.net, where {0} is the storage account name. Ensure that the user you're logged in as locally is granted the Storage Blob Data Contributor role. To do this, navigate to Access Control (IAM) in the Azure portal and add the role.
+   Locate the Azure Storage account and copy the account name. Update the StorageUri field in `LeaderElectionConsoleWorker/app.config` with the value https://{0}.blob.core.windows.net, where {0} is the storage account name. Verify your local user is granted the `Storage Blob Data Contributor` role. You may need to navigate to Access Control (IAM) in the Azure portal and add the role manually.
 
    In Settings > Configuration, ensure that Allow storage account key access is disabled to enforce the use of Managed Identity.
 
