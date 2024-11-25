@@ -5,7 +5,6 @@ This directory contains an example of the [Leader Election cloud design pattern]
 This example shows how a worker process can become a leader among a group of peer instances. The leader could then perform tasks that coordinate and control the other instances; these tasks should be performed by only one worker instance.
 
 This example contains one project showing the implementation of a distributed mutex based on a storage blob lease, and another project showing a simple example worker process, implemented as a console app, that leverages the distributed mutex to ensure only one process runs the leader-specific code.
-The example uses Managed Identity, then de code use [`DefaultAzureCredential`](https://learn.microsoft.com/dotnet/azure/sdk/authentication/#defaultazurecredential) for authentication while accessing Azure resources.
 
 ## :rocket: Deployment guide
 
