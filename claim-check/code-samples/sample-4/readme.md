@@ -1,6 +1,6 @@
 # Sample 4: Manual token generation, Azure Event Hubs with Kafka as messaging system
 
-## Technologies used: Azure Blob Storage, Azure Event Hubs with Kafka API enabled, Azure Functions, .NET 8.0
+## Technologies used: Azure Blob Storage, Azure Event Hubs with Kafka API enabled, Azure Functions, .NET 9.0
 
 In this example the client application uploads the payload to Azure Blob Storage and manually generates the claim check token, which is sent via Event Hubs.
 
