@@ -1,6 +1,6 @@
 # Sample 1: Automatic claim check token generation with Event Grid, Azure Queue Storage as messaging system
 
-## Technologies used: Azure Blob Storage, Azure Event Grid, Azure Functions, Azure Queue Storage, .NET 8.0
+## Technologies used: Azure Blob Storage, Azure Event Grid, Azure Functions, Azure Queue Storage, .NET 9.0
 
 This example uses Azure Blob Storage to store the payload, but any service that supports [Event Grid](https://azure.microsoft.com/services/event-grid/) integration can be used. A client application uploads the payload to Azure Blob Store and Event Grid automatically generates an event, with a reference to the blob, that can be used as a claim check token. The event is forwarded to an Azure Queue Storage queue from where it can be retrieved by the consumer sample app.
 
