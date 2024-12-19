@@ -26,7 +26,7 @@ Install the prerequisites and follow the steps to deploy and run the examples.
   - [Azure Cloud Shell](https://shell.azure.com/)
   - [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/windows/wsl/install)
 - [Git](https://git-scm.com/downloads)
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)
 - [Azurite](/azure/storage/common/storage-use-azurite)
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
