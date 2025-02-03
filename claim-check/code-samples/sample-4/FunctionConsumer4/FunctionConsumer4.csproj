@@ -13,7 +13,7 @@
 				<PackageReference Include="Azure.Messaging.EventHubs" Version="5.11.5" />
 				<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.EventHubs" Version="6.3.6" />
 				<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.0" />
-				<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.0.0" />
+				<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.0.1" />
 				<PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />
 				<PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.0.0" />
 				<PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
