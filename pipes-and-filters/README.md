@@ -14,7 +14,7 @@ Install the prerequisites and follow the steps to have deploy and run a example 
 
 - Permission to create a new resource group and resources in an [Azure subscription](https://azure.com/free).
 - [Git](https://git-scm.com/downloads)
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 
