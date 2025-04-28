@@ -22,7 +22,7 @@
 		<ItemGroup>
 				<PackageReference Include="Azure.Identity" Version="1.13.2" />
 				<PackageReference Include="Azure.Storage.Blobs" Version="12.24.0" />
-				<PackageReference Include="Confluent.Kafka" Version="2.9.0" />
+				<PackageReference Include="Confluent.Kafka" Version="2.10.0" />
 				<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.4" />
 				<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
 				<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.9.0" />
