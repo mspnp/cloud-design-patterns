@@ -21,7 +21,7 @@
 		</ItemGroup>
 
 		<ItemGroup>
-				<PackageReference Include="Azure.Identity" Version="1.14.2" />
+				<PackageReference Include="Azure.Identity" Version="1.15.0" />
 				<PackageReference Include="Azure.Messaging.EventHubs" Version="5.12.2" />
 				<PackageReference Include="Azure.Messaging.EventHubs.Processor" Version="5.12.2" />
 				<PackageReference Include="Azure.Storage.Blobs" Version="12.25.0" />
