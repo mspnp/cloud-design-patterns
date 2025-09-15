@@ -23,7 +23,7 @@
 				<PackageReference Include="Azure.Identity" Version="1.15.0" />
 				<PackageReference Include="Azure.Storage.Blobs" Version="12.25.0" />
 				<PackageReference Include="Confluent.Kafka" Version="2.11.1" />
-				<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
+				<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.9" />
 				<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
 				<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
 				<PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
