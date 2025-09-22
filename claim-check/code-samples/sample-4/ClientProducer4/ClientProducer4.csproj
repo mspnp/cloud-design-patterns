@@ -20,7 +20,7 @@
 		</ItemGroup>
 
 		<ItemGroup>
-				<PackageReference Include="Azure.Identity" Version="1.15.0" />
+				<PackageReference Include="Azure.Identity" Version="1.16.0" />
 				<PackageReference Include="Azure.Storage.Blobs" Version="12.25.0" />
 				<PackageReference Include="Confluent.Kafka" Version="2.11.1" />
 				<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.9" />
