@@ -12,7 +12,7 @@ Install the prerequisites and follow the steps to have deploy and run a example 
 
 ### Prerequisites
 
-- Permission to create a new resource group and resources in an [Azure subscription](https://azure.com/free).
+- Permission to create a new resource group and resources in an [Azure subscription](https://azure.microsoft.com/pricing/purchase-options/azure-account?cid=msft_learn).
 - [Git](https://git-scm.com/downloads)
 - [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)

@@ -16,7 +16,7 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 
 ### Prerequisites
 
-- Permission to create a new resource group and resources in an [Azure subscription](https://azure.com/free)
+- Permission to create a new resource group and resources in an [Azure subscription](https://azure.microsoft.com/pricing/purchase-options/azure-account?cid=msft_learn)
 - Unix-like shell. Also available in:
   - [Azure Cloud Shell](https://shell.azure.com/)
   - [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/windows/wsl/install)
