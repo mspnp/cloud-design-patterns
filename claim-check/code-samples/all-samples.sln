@@ -1,0 +1,81 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FunctionConsumer3", "sample-3\FunctionConsumer3\FunctionConsumer3.csproj", "{67AC55F4-7647-466F-8A3E-83E2878347AF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample-3", "sample-3", "{81F731CC-6F42-4816-BDD4-0FA541895909}"
+	ProjectSection(SolutionItems) = preProject
+		sample-3\readme.md = sample-3\readme.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample-1", "sample-1", "{F1A6CB79-1241-4B93-A011-4A8051228840}"
+	ProjectSection(SolutionItems) = preProject
+		sample-1\readme.md = sample-1\readme.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample-2", "sample-2", "{873C40EF-AF5B-4B46-8BDE-DEA007079812}"
+	ProjectSection(SolutionItems) = preProject
+		sample-2\readme.md = sample-2\readme.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample-4", "sample-4", "{EA1E4C36-059D-41E8-89DF-389985CF5FBD}"
+	ProjectSection(SolutionItems) = preProject
+		sample-4\readme.md = sample-4\readme.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FunctionConsumer1", "sample-1\FunctionConsumer1\FunctionConsumer1.csproj", "{6022107B-519D-4B28-937E-DFC348933E3F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FunctionConsumer4", "sample-4\FunctionConsumer4\FunctionConsumer4.csproj", "{5A7E5D39-BF09-4A3B-A7A1-7084A5359BAA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientProducer4", "sample-4\ClientProducer4\ClientProducer4.csproj", "{CA4D4A68-55B4-496F-B976-D3464076FC62}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4C721EF7-6533-46D2-9BA5-A3639D38B715}"
+	ProjectSection(SolutionItems) = preProject
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientConsumer2", "sample-2\ClientConsumer2\ClientConsumer2.csproj", "{8FD964BC-7351-443C-AC9D-573F821FCF2D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{67AC55F4-7647-466F-8A3E-83E2878347AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67AC55F4-7647-466F-8A3E-83E2878347AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67AC55F4-7647-466F-8A3E-83E2878347AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67AC55F4-7647-466F-8A3E-83E2878347AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6022107B-519D-4B28-937E-DFC348933E3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6022107B-519D-4B28-937E-DFC348933E3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6022107B-519D-4B28-937E-DFC348933E3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6022107B-519D-4B28-937E-DFC348933E3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A7E5D39-BF09-4A3B-A7A1-7084A5359BAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A7E5D39-BF09-4A3B-A7A1-7084A5359BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A7E5D39-BF09-4A3B-A7A1-7084A5359BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A7E5D39-BF09-4A3B-A7A1-7084A5359BAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA4D4A68-55B4-496F-B976-D3464076FC62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA4D4A68-55B4-496F-B976-D3464076FC62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA4D4A68-55B4-496F-B976-D3464076FC62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA4D4A68-55B4-496F-B976-D3464076FC62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FD964BC-7351-443C-AC9D-573F821FCF2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FD964BC-7351-443C-AC9D-573F821FCF2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FD964BC-7351-443C-AC9D-573F821FCF2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FD964BC-7351-443C-AC9D-573F821FCF2D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{67AC55F4-7647-466F-8A3E-83E2878347AF} = {81F731CC-6F42-4816-BDD4-0FA541895909}
+		{6022107B-519D-4B28-937E-DFC348933E3F} = {F1A6CB79-1241-4B93-A011-4A8051228840}
+		{5A7E5D39-BF09-4A3B-A7A1-7084A5359BAA} = {EA1E4C36-059D-41E8-89DF-389985CF5FBD}
+		{CA4D4A68-55B4-496F-B976-D3464076FC62} = {EA1E4C36-059D-41E8-89DF-389985CF5FBD}
+		{8FD964BC-7351-443C-AC9D-573F821FCF2D} = {873C40EF-AF5B-4B46-8BDE-DEA007079812}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1B1FEA88-54B9-477B-927B-F3542A3AA1B6}
+	EndGlobalSection
+EndGlobal

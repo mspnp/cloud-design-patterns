@@ -1,0 +1,12 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+
+    "AzureFunctionsJobHost__logging__applicationInsights__samplingSettings__isEnabled": "false",
+
+    "StorageQueueConnectionString:serviceUri": "https://{STORAGE_ACCOUNT_NAME}.queue.core.windows.net",
+    "StorageQueue": "claimcheckqueue"
+  }
+}

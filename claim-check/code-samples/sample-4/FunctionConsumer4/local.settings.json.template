@@ -1,0 +1,14 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "UseDevelopmentStorage": true,
+    "AzureFunctionsJobHost__logging__applicationInsights__samplingSettings__isEnabled": "false",
+
+    "EventHubConnectionString:fullyQualifiedNamespace": "{EVENT_HUBS_NAMESPACE}.servicebus.windows.net",
+    "EventHubName": "evh-claimcheck"
+  }
+}
+
+
