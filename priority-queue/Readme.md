@@ -66,7 +66,8 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 
 1. [Run Azurite](https://learn.microsoft.com/azure/storage/common/storage-use-azurite#run-azurite) blob storage emulation service.
 
-   > The local storage emulator is required as an Azure Storage account is a required "backing resource" for Azure Functions.
+   > Azure Functions require an Azure Storage account as a backing resource. When running locally, you can use Azurite, the local storage emulator, to fulfill this requirement.
+Alternatively, you may configure the AzureWebJobsStorage setting to use a real Azure Storage account if preferred.
 
 1. Launch the Azure Function PriorityQueueSender to generate Low and High messages.  
 
