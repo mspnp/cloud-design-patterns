@@ -54,7 +54,7 @@ Install the prerequisites and follow the steps to deploy and run an example of t
    SERVICE_BUS_NAMESPACE_NAME="sbns-priority-queue-$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | fold -w 7 | head -n 1)"
 
    # This takes about two minutes
-   az deployment group create -n deploy-priority-queue -f bicep/main.bicep -g "${RESOURCE_GROUP_NAME}" -p queueNamespaces=$SERVICE_BUS_NAMESPACE_NAME principalId=$CURRENT_USER_OBJECT_ID
+   az deployment group create -n deploy-priority-queue -f bicep/main.bicep -g $RESOURCE_GROUP_NAME -p queueNamespaces=$SERVICE_BUS_NAMESPACE_NAME principalId=$CURRENT_USER_OBJECT_ID
    ```
 
 1. Configure the samples to use the created Azure resources.
@@ -99,6 +99,44 @@ Alternatively, you may configure the AzureWebJobsStorage setting to use a real A
   > Please note: For demo purposes, the sample application will write content to the screen.
 
 ## Deploy the example to Azure (Optional)
+
+```bash
+   # This takes about five minutes
+   az deployment group create -n deploy-priority-queue-sites -f bicep/azure/azure-function-app.bicep -g $RESOURCE_GROUP_NAME -p serviceBusNamespaceName=$SERVICE_BUS_NAMESPACE_NAME 
+
+   # Deploy using Azure Functions Core Tools 
+   cd .\PriorityQueueSender\
+   func azure functionapp publish funcPriorityQueueSender
+   cd ..
+   cd .\PriorityQueueConsumerLow\
+   func azure functionapp publish funcPriorityQueueConsumerLow
+   cd ..
+   cd .\PriorityQueueConsumerHigh\
+   func azure functionapp publish funcPriorityQueueConsumerHigh
+```
+
+```
+   // Recent requests with key details
+   requests
+   | project timestamp, operation_Name, cloud_RoleName, id, success, resultCode, duration, operation_Id
+   | order by timestamp desc
+
+   // Count of requests by operation name
+   requests
+   | summarize RequestCount = count() by operation_Name
+   | order by RequestCount desc
+
+   // Traces filtered by keywords
+   traces
+   | where operation_Name contains "High"
+
+   traces
+   | where operation_Name contains "Low"
+
+   traces
+   | where operation_Name contains "Sender"
+```
+
 
 To deploy the example to Azure, you need to publish each Azure Functions to Azure. You can do so from Visual Studio by right clicking each function and selecting `Publish` from the menu. Use the same resource group and region from earlier. Be sure to enable Application Insights.
 
