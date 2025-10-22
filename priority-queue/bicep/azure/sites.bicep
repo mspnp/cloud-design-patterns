@@ -1,9 +1,24 @@
+targetScope = 'resourceGroup'
+
+@minLength(5)
+@description('Location of the resources. Defaults to resource group location.')
 param location string = resourceGroup().location
+
 param functionAppName string
+
+@description('Defines the name of the Storage Account used by the Function Apps.')
 param storageAccountName string
+
+@description('The name of the existing Service Bus namespace used for message queuing between the sender and consumer functions.')
 param serviceBusNamespaceName string
+
+@description('The built-in role definition ID to assign to the Function App for accessing the Service Bus namespace.')
 param roleId string
+
+@description('Sets the name of the Application Insights resource for monitoring and diagnostics. ') 
 param appInsightsName string
+
+@description('Specifies the maximum number of instances to which the Function App can scale out.')
 param scaleUp int = 1
 
 @description('Generates a unique container name for deployments')
