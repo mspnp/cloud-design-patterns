@@ -52,7 +52,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-module functionApp './functionApp.bicep' = [
+module functionApp './sites.bicep' = [
   for name in [
     'funcPriorityQueueSender'
     'funcPriorityQueueConsumerLow'

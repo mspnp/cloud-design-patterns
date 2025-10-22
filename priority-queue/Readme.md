@@ -102,7 +102,7 @@ Alternatively, you may configure the AzureWebJobsStorage setting to use a real A
 
 ```bash
    # This takes about five minutes
-   az deployment group create -n deploy-priority-queue-sites -f bicep/azure/azure-function-app.bicep -g $RESOURCE_GROUP_NAME -p serviceBusNamespaceName=$SERVICE_BUS_NAMESPACE_NAME 
+   az deployment group create -n deploy-priority-queue-sites -f bicep/azure/azure-function-apps.bicep -g $RESOURCE_GROUP_NAME -p serviceBusNamespaceName=$SERVICE_BUS_NAMESPACE_NAME 
 
    # Deploy using Azure Functions Core Tools 
    cd .\PriorityQueueSender\
