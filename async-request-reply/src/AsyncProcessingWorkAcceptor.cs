@@ -1,39 +1,35 @@
-using System;
-using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
-namespace Contoso
+namespace Asyncpattern
 {
-    public static class AsyncProcessingWorkAcceptor
+    public class AsyncProcessingWorkAcceptor(ILogger<AsyncProcessingWorkAcceptor> _logger, ServiceBusClient _serviceBusClient)
     {
-        [FunctionName("AsyncProcessingWorkAcceptor")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] CustomerPOCO customer,
-            [ServiceBus("outqueue", Connection = "ServiceBusConnectionAppSetting")] IAsyncCollector<ServiceBusMessage> OutMessages,
-            ILogger log)
+        [Function("AsyncProcessingWorkAcceptor")]
+        public async Task<IActionResult> RunAsync([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req, [FromBody] CustomerPOCO customer)
         {
-            if (String.IsNullOrEmpty(customer.id) || string.IsNullOrEmpty(customer.customername))
+            if (string.IsNullOrEmpty(customer.id) || string.IsNullOrEmpty(customer.customername))
             {
                 return new BadRequestResult();
             }
 
-            string reqid = Guid.NewGuid().ToString();
-            
-            string rqs = $"http://{Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME")}/api/RequestStatus/{reqid}";
+            var reqid = Guid.NewGuid().ToString();
+
+            var rqs = $"http://{Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME")}/api/RequestStatus/{reqid}";
 
             var messagePayload = JsonConvert.SerializeObject(customer);
             var message = new ServiceBusMessage(messagePayload);
             message.ApplicationProperties.Add("RequestGUID", reqid);
             message.ApplicationProperties.Add("RequestSubmittedAt", DateTime.Now);
             message.ApplicationProperties.Add("RequestStatusURL", rqs);
+            var sender = _serviceBusClient.CreateSender("outqueue");
 
-            await OutMessages.AddAsync(message);
-
+            await sender.SendMessageAsync(message);
             return new AcceptedResult(rqs, $"Request Accepted for Processing{Environment.NewLine}ProxyStatus: {rqs}");
         }
     }
