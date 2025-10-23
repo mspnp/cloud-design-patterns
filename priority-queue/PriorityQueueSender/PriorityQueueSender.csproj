@@ -1,15 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<AzureFunctionsVersion>v4</AzureFunctionsVersion>
 		<OutputType>Exe</OutputType>
 		<ImplicitUsings>enabled</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.17.4" />
-		<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.23.0" />
-		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="5.22.0" />
+	  <Content Include="local.settings.json" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.5" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.1.0" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="5.24.0" />
 		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Timer" Version="4.3.1" />
 	</ItemGroup>
 	<ItemGroup>
