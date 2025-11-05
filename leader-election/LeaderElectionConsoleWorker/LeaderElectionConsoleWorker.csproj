@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.17.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.26.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.9" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.10" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DistributedMutex\DistributedMutex.csproj">
