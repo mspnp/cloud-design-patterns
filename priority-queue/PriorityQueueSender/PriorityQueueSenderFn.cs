@@ -1,30 +1,33 @@
 using System;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
-using Microsoft.Azure.WebJobs;
+using Microsoft.Extensions.Logging;
+using Microsoft.Azure.Functions.Worker;
 
 namespace PriorityQueueSender
 {
-    public static class PriorityQueueSenderFn
+    public class PriorityQueueSenderFn(ILogger<PriorityQueueSenderFn> logger, ServiceBusClient client)
     {
-        [FunctionName("PriorityQueueSenderFunction")]
-        public static async Task Run(
-            [TimerTrigger("0,30 * * * * *")] TimerInfo myTimer,
-            [ServiceBus("messages", Connection = "ServiceBusConnection")] IAsyncCollector<ServiceBusMessage> collector )
+        private readonly ILogger<PriorityQueueSenderFn> _logger = logger;
+        private readonly ServiceBusClient _client = client;
+
+        [Function("PriorityQueueSenderFunction")]
+        public async Task Run([TimerTrigger("0,30 * * * * *")] TimerInfo myTimer)
         {
+            var sender = _client.CreateSender("messages");
             for (int i = 0; i < 10; i++)
             {
                 var messageId = Guid.NewGuid().ToString();
                 var lpMessage = new ServiceBusMessage() { MessageId = messageId };
                 lpMessage.ApplicationProperties["Priority"] = Priority.Low;
                 lpMessage.Body = BinaryData.FromString($"Low priority message with Id: {messageId}");
-                await collector.AddAsync(lpMessage);
+                await sender.SendMessageAsync(lpMessage);
 
                 messageId = Guid.NewGuid().ToString();
                 var hpMessage = new ServiceBusMessage() { MessageId = messageId };
                 hpMessage.ApplicationProperties["Priority"] = Priority.High;
                 hpMessage.Body = BinaryData.FromString($"High priority message with Id: {messageId}");
-                await collector.AddAsync(hpMessage);
+                await sender.SendMessageAsync(hpMessage);
             }
         }
     }
