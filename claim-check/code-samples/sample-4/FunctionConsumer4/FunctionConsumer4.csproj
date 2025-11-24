@@ -9,7 +9,7 @@
 
 		<ItemGroup>
 				<FrameworkReference Include="Microsoft.AspNetCore.App" />
-				<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.2.0" />
+				<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.51.0" />
 				<PackageReference Include="Azure.Messaging.EventHubs" Version="5.12.2" />
 				<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.EventHubs" Version="6.5.0" />
 				<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.5" />
