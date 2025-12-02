@@ -15,7 +15,7 @@ param serviceBusNamespaceName string
 @description('The built-in role definition ID to assign to the Function App for accessing the Service Bus namespace.')
 param roleId string
 
-@description('Sets the name of the Application Insights resource for monitoring and diagnostics. ') 
+@description('Sets the name of the Application Insights resource for monitoring and diagnostics.')
 param appInsightsName string
 
 @description('Specifies the maximum number of instances to which the Function App can scale out.')
