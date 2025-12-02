@@ -111,14 +111,17 @@ All Azure Function Apps share the same Storage Account and Application Insights 
 After deploying the infrastructure, you need to publish each Azure Function to its corresponding Function App using Azure Functions Core Tools:
 
 ```bash
-   cd .\PriorityQueueSender\
+   cd ./PriorityQueueSender
    func azure functionapp publish funcPriorityQueueSender
    cd ..
-   cd .\PriorityQueueConsumerLow\
+
+   cd ./PriorityQueueConsumerLow
    func azure functionapp publish funcPriorityQueueConsumerLow
    cd ..
-   cd .\PriorityQueueConsumerHigh\
+
+   cd ./PriorityQueueConsumerHigh
    func azure functionapp publish funcPriorityQueueConsumerHigh
+   cd ..
 ```
 
 You can view the maximum scaling configuration in the Azure Portal. Go to each Function App, then under Settings, select Scale and concurrency. There, you'll see the Maximum instance count setting.
