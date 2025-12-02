@@ -9,7 +9,7 @@ param location string = resourceGroup().location
 param queueNamespaces string
 
 @minLength(36)
-@description('The guid of the principal running the valet key generation code. In Azure this would be replaced with the managed identity of the Azure Function, when running locally it will be your user.')
+@description('The principal ID used to run the Azure Functions. In Azure, this should be the managed identity (system-assigned or user-assigned) of the Azure Function. When running locally, it should be your user identity.')
 param principalId string
 
 var logAnalyticsName = 'loganalytics-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
@@ -23,7 +23,7 @@ var receiverServiceBusRole = subscriptionResourceId(
   '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0'
 ) // Azure Service Bus Data Receiver
 
-resource queueNamespacesResource 'Microsoft.ServiceBus/namespaces@2023-01-01-preview' = {
+resource queueNamespacesResource 'Microsoft.ServiceBus/namespaces@2025-05-01-preview' = {
   name: queueNamespaces
   location: location
   sku: {
@@ -48,10 +48,9 @@ resource queueNamespacesResource 'Microsoft.ServiceBus/namespaces@2023-01-01-pre
   }
 }
 
-resource queueNamespacesResourceRootManageSharedAccessKey 'Microsoft.ServiceBus/namespaces/authorizationrules@2023-01-01-preview' = {
+resource queueNamespacesResourceRootManageSharedAccessKey 'Microsoft.ServiceBus/namespaces/authorizationrules@2025-05-01-preview' = {
   parent: queueNamespacesResource
   name: 'RootManageSharedAccessKey'
-  location: location
   properties: {
     rights: [
       'Listen'
@@ -61,10 +60,9 @@ resource queueNamespacesResourceRootManageSharedAccessKey 'Microsoft.ServiceBus/
   }
 }
 
-resource queueNamespacesResourceNetworkRules 'Microsoft.ServiceBus/namespaces/networkrulesets@2023-01-01-preview' = {
+resource queueNamespacesResourceNetworkRules 'Microsoft.ServiceBus/namespaces/networkrulesets@2025-05-01-preview' = {
   parent: queueNamespacesResource
   name: 'default'
-  location: location
   properties: {
     publicNetworkAccess: 'Enabled'
     defaultAction: 'Allow'
@@ -74,10 +72,9 @@ resource queueNamespacesResourceNetworkRules 'Microsoft.ServiceBus/namespaces/ne
   }
 }
 
-resource queueNamespacesResourceTopic 'Microsoft.ServiceBus/namespaces/topics@2023-01-01-preview' = {
+resource queueNamespacesResourceTopic 'Microsoft.ServiceBus/namespaces/topics@2025-05-01-preview' = {
   parent: queueNamespacesResource
   name: 'messages'
-  location: location
   properties: {
     maxMessageSizeInKilobytes: 256
     maxSizeInMegabytes: 1024
@@ -91,10 +88,9 @@ resource queueNamespacesResourceTopic 'Microsoft.ServiceBus/namespaces/topics@20
   }
 }
 
-resource queueNamespacesResourceTopicHigPriority 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2023-01-01-preview' = {
+resource queueNamespacesResourceTopicHigPriority 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2025-05-01-preview' = {
   parent: queueNamespacesResourceTopic
   name: 'highPriority'
-  location: location
   properties: {
     isClientAffine: false
     lockDuration: 'PT1M'
@@ -107,10 +103,9 @@ resource queueNamespacesResourceTopicHigPriority 'Microsoft.ServiceBus/namespace
   }
 }
 
-resource queueNamespacesResourceTopicLowPriority 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2023-01-01-preview' = {
+resource queueNamespacesResourceTopicLowPriority 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2025-05-01-preview' = {
   parent: queueNamespacesResourceTopic
   name: 'lowPriority'
-  location: location
   properties: {
     isClientAffine: false
     lockDuration: 'PT1M'
@@ -123,10 +118,9 @@ resource queueNamespacesResourceTopicLowPriority 'Microsoft.ServiceBus/namespace
   }
 }
 
-resource queueNamespacesResourceTopicHigPriorityRules 'Microsoft.ServiceBus/namespaces/topics/subscriptions/rules@2023-01-01-preview' = {
+resource queueNamespacesResourceTopicHigPriorityRules 'Microsoft.ServiceBus/namespaces/topics/subscriptions/rules@2025-05-01-preview' = {
   parent: queueNamespacesResourceTopicHigPriority
   name: 'priorityFilter'
-  location: location
   properties: {
     action: {}
     filterType: 'SqlFilter'
@@ -137,10 +131,9 @@ resource queueNamespacesResourceTopicHigPriorityRules 'Microsoft.ServiceBus/name
   }
 }
 
-resource LqueueNamespacesResourceTopicLowPriorityRules 'Microsoft.ServiceBus/namespaces/topics/subscriptions/rules@2023-01-01-preview' = {
+resource LqueueNamespacesResourceTopicLowPriorityRules 'Microsoft.ServiceBus/namespaces/topics/subscriptions/rules@2025-05-01-preview' = {
   parent: queueNamespacesResourceTopicLowPriority
   name: 'priorityFilter'
-  location: location
   properties: {
     action: {}
     filterType: 'SqlFilter'
@@ -151,7 +144,7 @@ resource LqueueNamespacesResourceTopicLowPriorityRules 'Microsoft.ServiceBus/nam
   }
 }
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-02-01' = {
   name: logAnalyticsName
   location: location
   properties: {
@@ -200,7 +193,7 @@ resource serviceBusSenderRoleAssignment 'Microsoft.Authorization/roleAssignments
   properties: {
     roleDefinitionId: senderServiceBusRole
     principalId: principalId
-    principalType: 'User' // 'ServicePrincipal' if this was a managed identity
+    principalType: 'User' // 'ServicePrincipal' if this was App Service with a managed identity
   }
 }
 
@@ -211,6 +204,6 @@ resource serviceBusReceiverRoleAssignment 'Microsoft.Authorization/roleAssignmen
   properties: {
     roleDefinitionId: receiverServiceBusRole
     principalId: principalId
-    principalType: 'User' // 'ServicePrincipal' if this was a managed identity
+    principalType: 'User' // 'ServicePrincipal' if this was App Service with a managed identity
   }
 }
