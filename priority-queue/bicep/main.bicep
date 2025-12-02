@@ -131,7 +131,7 @@ resource queueNamespacesResourceTopicHigPriorityRules 'Microsoft.ServiceBus/name
   }
 }
 
-resource LqueueNamespacesResourceTopicLowPriorityRules 'Microsoft.ServiceBus/namespaces/topics/subscriptions/rules@2025-05-01-preview' = {
+resource queueNamespacesResourceTopicLowPriorityRules 'Microsoft.ServiceBus/namespaces/topics/subscriptions/rules@2025-05-01-preview' = {
   parent: queueNamespacesResourceTopicLowPriority
   name: 'priorityFilter'
   properties: {
