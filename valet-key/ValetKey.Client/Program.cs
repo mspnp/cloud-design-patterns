@@ -7,8 +7,6 @@
 
     public class Program
     {
-        private static readonly HttpClient httpClient = new();
-
         public static async Task Main()
         {
             Console.WriteLine("Press any key to run the sample...");
@@ -21,47 +19,51 @@
             var tokenServiceEndpoint = configuration.GetSection("AppSettings:ServiceEndpointUrl").Value;
             if (string.IsNullOrWhiteSpace(tokenServiceEndpoint)) throw new InvalidOperationException("Configure AppSettings:ServiceEndpointUrl and run again.");
 
-            // Get the valet key
-            var blobSas = await GetBlobSasAsync(new Uri(tokenServiceEndpoint));
-
-            var sasUri = new UriBuilder(blobSas!.BlobUri!)
+            using (var httpClient = new HttpClient())
             {
-                Query = blobSas.Signature
-            };
+                //  Get the valet key
+                var blobSas = await GetBlobSasAsync(new Uri(tokenServiceEndpoint), httpClient);
+                if (blobSas?.BlobUri == null || string.IsNullOrWhiteSpace(blobSas.Signature))
+                    throw new InvalidOperationException("Invalid SAS response from service.");
 
-            var blob = new BlobClient(sasUri.Uri);
-            try
-            {
-                using (var stream = await GetFileToUploadAsync(10))
+                var sasUri = new UriBuilder(blobSas.BlobUri)
                 {
-                    await blob.UploadAsync(stream);
-                }
+                    Query = blobSas.Signature
+                };
 
-                Console.WriteLine("Blob uploaded successful: {0}", blob.Name);
+                var blob = new BlobClient(sasUri.Uri);
+                try
+                {
+                    using (var stream = await GetFileToUploadAsync(10))
+                    {
+                        await blob.UploadAsync(stream);
+                    }
+
+                    Console.WriteLine("Blob uploaded successful: {0}", blob.Name);
+                }
+                catch (RequestFailedException e)
+                {
+                    // Check for a 403 (Forbidden) error. If the SAS is invalid, 
+                    // Azure Storage returns this error.
+                    if (e.Status == 403)
+                    {
+                        Console.WriteLine("Write operation failed for SAS {0}", sasUri);
+                        Console.WriteLine("Additional error information: " + e.Message);
+                        Console.WriteLine();
+                    }
+                    else
+                    {
+                        Console.WriteLine(e.Message);
+                        throw;
+                    }
+                }
             }
-            catch (RequestFailedException e)
-            {
-                // Check for a 403 (Forbidden) error. If the SAS is invalid, 
-                // Azure Storage returns this error.
-                if (e.Status == 403)
-                {
-                    Console.WriteLine("Write operation failed for SAS {0}", sasUri);
-                    Console.WriteLine("Additional error information: " + e.Message);
-                    Console.WriteLine();
-                }
-                else
-                {
-                    Console.WriteLine(e.Message);
-                    throw;
-                }
-            }
-
             Console.WriteLine();
             Console.WriteLine("Done. Press any key to exit...");
             Console.ReadKey();
         }
 
-        private static async Task<StorageEntitySas?> GetBlobSasAsync(Uri tokenUri)
+        private static async Task<StorageEntitySas?> GetBlobSasAsync(Uri tokenUri, HttpClient httpClient)
         {
             return await httpClient.GetFromJsonAsync<StorageEntitySas>(tokenUri);
         }

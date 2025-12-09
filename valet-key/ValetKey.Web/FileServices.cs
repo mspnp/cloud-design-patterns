@@ -33,9 +33,12 @@ namespace ValetKey.Web
         {
             var blobServiceClient = blobContainerClient.GetParentBlobServiceClient();
             var blobClient = blobContainerClient.GetBlockBlobClient(blobName);
+            
+            var now = DateTimeOffset.UtcNow;
+            var startTime = now.AddMinutes(-1);
+            var expiryTime = now.AddMinutes(3);
 
-            var userDelegationKey = await blobServiceClient.GetUserDelegationKeyAsync(DateTimeOffset.UtcNow.AddMinutes(-3),
-                                                                                      DateTimeOffset.UtcNow.AddMinutes(3), cancellationToken);
+            var userDelegationKey = await blobServiceClient.GetUserDelegationKeyAsync(startTime, expiryTime, cancellationToken);
 
             // Limit the scope of this SaS token to the following:
             //  - The specific blob
@@ -47,8 +50,8 @@ namespace ValetKey.Web
                 BlobContainerName = blobContainerClient.Name,
                 BlobName = blobClient.Name,
                 Resource = "b",
-                StartsOn = DateTimeOffset.UtcNow.AddMinutes(-3),
-                ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(3),
+                StartsOn = startTime,
+                ExpiresOn = expiryTime,
                 Protocol = SasProtocol.Https
             };
             blobSasBuilder.SetPermissions(BlobSasPermissions.Create);

@@ -2,9 +2,9 @@
 
 This directory contains an example of the [Valet Key cloud design pattern](https://learn.microsoft.com/azure/architecture/patterns/valet-key).
 
-This example shows how a client application can obtain necessary permissions to write directly to a storage destination, bypassing a server component that would not add value and introduce additional latency and risk to the operation.
+This example shows how a client application can obtain necessary permissions to write directly to a storage destination, bypassing a server component, which would add unnecessary latency and risk without providing additional value.
 
-Specifically this sample includes an Azure Function that provides a scoped, time-limited shared access signature (SaS) to authorized callers, who would then use that SaS token to perform a data upload to the storage account without consuming the resources of the Azure Function to proxy that request.
+Specifically this sample includes an Azure Function that provides a scoped, time-limited shared access signature (SAS) to authorized callers, who would then use that SAS token to perform a data upload to the storage account without consuming the resources of the Azure Function to proxy that request.
 
 The typical way to generate a SAS token in code requires the storage account key. In this scenario, storage account keys are disabled and instead an approach called “user delegation” SAS is used. By using a user delegation SAS, you can sign the signature with Microsoft Entra ID credentials instead of the storage account key.
 
@@ -21,7 +21,7 @@ Install the prerequisites and follow the steps to deploy and run an example of t
   - [Azure Cloud Shell](https://shell.azure.com/)
   - [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/windows/wsl/install)
 - [Git](https://git-scm.com/downloads)
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)
 - [Azurite](/azure/storage/common/storage-use-azurite)
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
@@ -80,17 +80,17 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 
 1. Run the client that will ask for and use the valet key.
 
-   _You'll need to run this from another terminal._
+   _Open a new terminal window and run:_
 
    ```bash
    dotnet run --project ValetKey.Client/
    ```
 
-   > The client reaches out to the valet key API and requests a scope and time-limited SaS token for a destination of the API's choosing. The API will generate the sas token and return it to the client along with the destination. The client will use that token to upload a file to that destination. Attempting to use that SaS token for any other purpose will be denied.
+   > The client reaches out to the valet key API and requests a scope and time-limited SAS token for a destination of the API's choosing. The API will generate the SAS token and return it to the client along with the destination. The client will use that token to upload a file to that destination. Attempting to use that SAS token for any other purpose will be denied.
 
 1. Validate the blob has been uploaded.
 
-   1. Open the the **Storage browser** on your [Storage account](https://portal.azure.com/#browse/Microsoft.Storage%2FStorageAccounts).
+   1. Open the **Storage browser** on your [Storage account](https://portal.azure.com/#browse/Microsoft.Storage%2FStorageAccounts).
    1. Select **Blob containers**.
    1. Click on the container named `uploads`.
    1. You should be able to see the list of uploaded blobs.
