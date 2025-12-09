@@ -10,14 +10,14 @@ The implementation uses a managed identity to control access to your storage acc
 
 The reference implementation was moved to [Azure Functions Flex Consumption plan hosting](https://learn.microsoft.com/azure/azure-functions/flex-consumption-plan). Flex Consumption is a Linux-based Azure Functions hosting plan that builds on the Consumption pay for what you use serverless billing model. It gives you more flexibility and customizability by introducing private networking, instance memory size selection, and fast/large scale-out features still based on a serverless model. It also allows access the internal storage account by manage identity, it was not possible [before](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/use-managed-identity-instead-of-azurewebjobsstorage-to-connect-a/ba-p/3657606)
 
-The typical way to generate a SAS token in code requires the storage account key. In this scenario, you won’t have a storage account key, so you’ll need to find another way to generate the shared access signatures. To do that, we need to use an approach called “user delegation” SAS . By using a user delegation SAS, we can sign the signature with the Azure Ad credentials instead of the storage account key. It is disabled storage account key access.
+The typical way to generate a SAS token in code requires the storage account key. In this scenario, you won’t have a storage account key, so you’ll need to find another way to generate the shared access signatures. To do that, we need to use an approach called “user delegation” SAS . By using a user delegation SAS, we can sign the signature with the Azure AD credentials instead of the storage account key. It is disabled storage account key access.
 
 ## Deploying the sample
 
 ### Prerequisites
 
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest)
-- [.NET Core SDK version 8](https://dotnet.microsoft.com/download)
+- [.NET Core SDK version 10](https://dotnet.microsoft.com/download)
 - [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#v4)
 
 ### Deploy the Azure resources
@@ -56,7 +56,7 @@ The typical way to generate a SAS token in code requires the storage account key
    ```
 
 6. Deploy the template.
-   All the resources are going to be created on the resouce group location.
+   All the resources are going to be created on the resource group location.
 
    ```bash
    az deployment group create -g ${RESOURCEGROUP} -f deploy.bicep
@@ -129,7 +129,7 @@ You could open the solution with Visual Studio, then you need to create on the r
 }
 ```
 
-As far the implementation is using manage identity, you need to assign the role to your [developer identity](https://learn.microsoft.com/azure/azure-functions/functions-reference?tabs=blob&pivots=programming-language-csharp#local-development-with-identity-based-connections).
+As far the implementation is using managed identity, you need to assign the role to your [developer identity](https://learn.microsoft.com/azure/azure-functions/functions-reference?tabs=blob&pivots=programming-language-csharp#local-development-with-identity-based-connections).
 
 You need to add the following lines to the Bicep file to assign roles for Service Bus and Azure Storage permissions.
 

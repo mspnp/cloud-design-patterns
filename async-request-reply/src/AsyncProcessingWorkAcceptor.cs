@@ -2,13 +2,12 @@ using Azure.Messaging.ServiceBus;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using FromBodyAttribute = Microsoft.Azure.Functions.Worker.Http.FromBodyAttribute;
 
 namespace Asyncpattern
 {
-    public class AsyncProcessingWorkAcceptor(ILogger<AsyncProcessingWorkAcceptor> _logger, ServiceBusClient _serviceBusClient)
+    public class AsyncProcessingWorkAcceptor(ServiceBusClient _serviceBusClient)
     {
         [Function("AsyncProcessingWorkAcceptor")]
         public async Task<IActionResult> RunAsync([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req, [FromBody] CustomerPOCO customer)
