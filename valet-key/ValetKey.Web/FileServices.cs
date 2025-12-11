@@ -35,7 +35,7 @@ namespace ValetKey.Web
             var blobClient = blobContainerClient.GetBlockBlobClient(blobName);
             
             var now = DateTimeOffset.UtcNow;
-            var startTime = now.AddMinutes(-1);
+            var startTime = now.AddMinutes(-3);
             var expiryTime = now.AddMinutes(3);
 
             var userDelegationKey = await blobServiceClient.GetUserDelegationKeyAsync(startTime, expiryTime, cancellationToken);
