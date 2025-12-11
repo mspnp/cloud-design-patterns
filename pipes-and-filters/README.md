@@ -8,13 +8,13 @@ The sample takes a source image, resizes it (first filter), adds a watermark (se
 
 ## :rocket: Deployment guide
 
-Install the prerequisites and follow the steps to have deploy and run a example of the Pipes and Filters pattern.
+Install the prerequisites and follow the steps to deploy and run an example of the Pipes and Filters pattern.
 
 ### Prerequisites
 
 - Permission to create a new resource group and resources in an [Azure subscription](https://azure.microsoft.com/pricing/purchase-options/azure-account?cid=msft_learn).
 - [Git](https://git-scm.com/downloads)
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 
@@ -75,7 +75,7 @@ Install the prerequisites and follow the steps to have deploy and run a example 
 
 ### :checkered_flag: Try it out
 
-Now with your pipes deployed and filters ready to execute, it's time to send up a request for an image to be processed.
+Now with your pipes deployed and filters ready to execute, it's time to submit a request for an image to be processed.
 
 1. Open a sample image to see a "before" state.
 

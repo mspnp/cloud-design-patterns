@@ -20,10 +20,13 @@ namespace ImageProcessingPipeline
         {
             _logger.LogDebug("Starting copying {source} into {destination}.", imageBlob.Uri, _destinationContainerClient.Uri);
 
-            // Copy blob and delete orginal
+            // Copy blob and delete original
             var newBlobClient = _destinationContainerClient.GetBlobClient(imageBlob.Name);
-            await newBlobClient.UploadAsync(await imageBlob.OpenReadAsync(null, cancellationToken), overwrite: true, cancellationToken);
-            await imageBlob.DeleteAsync(DeleteSnapshotsOption.None, null, cancellationToken);
+            using (var sourceStream = await imageBlob.OpenReadAsync(cancellationToken: cancellationToken))
+            {
+                await newBlobClient.UploadAsync(sourceStream, overwrite: true, cancellationToken);
+            }
+            await imageBlob.DeleteAsync(DeleteSnapshotsOption.None, cancellationToken: cancellationToken);
 
             _logger.LogInformation("Copied {source} into {destination} and deleted original.", imageBlob.Uri, _destinationContainerClient.Uri);
         }
