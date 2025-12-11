@@ -14,13 +14,13 @@ param storageAccountName string
 
 /*** EXISTING RESOURCES ***/
 
-@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges. Used by the managed identity of the valet key Azure Function as for being able to delegate permissions to create blobs.')
+@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges. Used by the managed identity of the valet key Azure Function so it can delegate permissions to create blobs.')
 resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
   scope: subscription()
 }
 
-@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Delegator" privileges. Used by the managed identity of the valet key Azure Function to manage generate SaS tokens.')
+@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Delegator" privileges. Used by the managed identity of the valet key Azure Function to generate SAS tokens.')
 resource storageBlobDelegatorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   name: 'db58b8e5-c6ad-4a2a-8342-4190687cbf4a'
   scope: subscription()
@@ -29,7 +29,7 @@ resource storageBlobDelegatorRole 'Microsoft.Authorization/roleDefinitions@2022-
 /*** NEW RESOURCES ***/
 
 @description('Workload logs.')
-resource workloadLogs 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
+resource workloadLogs 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {
   name: 'la-logs'
   location: location
   properties: {
@@ -49,7 +49,7 @@ resource workloadLogs 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
 }
 
 @description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SaS tokens for this blobs in this account.')
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   name: storageAccountName
   location: location
   sku: {
@@ -76,7 +76,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
       sasExpirationPeriod: '00.00:10:00' // Log the creation of SaS tokens over 10 minutes long
     }
     keyPolicy: {
-      keyExpirationPeriodInDays: 10 // Storage account key isn't used, require agressive rotation
+      keyExpirationPeriodInDays: 10 // Storage account key isn't used, require aggressive rotation
     }
     networkAcls: {
       defaultAction: 'Allow' // For this sample, public Internet access is expected
@@ -123,7 +123,7 @@ resource blobUploadStorageDelegator 'Microsoft.Authorization/roleAssignments@202
   }
 }
 
-@description('User delegation requires the user doing the delegating to SaS to also have the permissions being delgated. So scoping a Data Contributor to the container. In this scenario, technically this principal only needs permissions to create blobs.')
+@description('User delegation requires the user doing the delegating to SaS to also have the permissions being delegated. So scoping a Data Contributor to the container. In this scenario, technically this principal only needs permissions to create blobs.')
 resource blobContributorUploadStorage 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(storageAccount::blobContainers::uploadsContainer.id, storageBlobDataContributorRole.id, principalId)
   scope: storageAccount::blobContainers::uploadsContainer
