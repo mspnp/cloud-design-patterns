@@ -7,20 +7,13 @@ namespace DistributedMutex
     using System.Threading;
     using System.Threading.Tasks;
 
-    public class BlobDistributedMutex
+    public class BlobDistributedMutex(BlobSettings blobSettings, Func<CancellationToken, Task> taskToRunWhenLeaseAcquired, Action? onLeaseTimeoutRetry = null)
     {
         private static readonly TimeSpan RenewInterval = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan AcquireAttemptInterval = TimeSpan.FromSeconds(20);
-        private readonly BlobSettings blobSettings;
-        private readonly Func<CancellationToken, Task> taskToRunWhenLeaseAcquired;
-        private readonly Action? onLeaseTimeoutRetry;
-
-        public BlobDistributedMutex(BlobSettings blobSettings, Func<CancellationToken, Task> taskToRunWhenLeaseAcquired, Action? onLeaseTimeoutRetry = null)
-        {
-            this.blobSettings = blobSettings;
-            this.taskToRunWhenLeaseAcquired = taskToRunWhenLeaseAcquired;
-            this.onLeaseTimeoutRetry = onLeaseTimeoutRetry;
-        }
+        private readonly BlobSettings blobSettings = blobSettings;
+        private readonly Func<CancellationToken, Task> taskToRunWhenLeaseAcquired = taskToRunWhenLeaseAcquired;
+        private readonly Action? onLeaseTimeoutRetry = onLeaseTimeoutRetry;
 
         public async Task RunTaskWhenMutexAcquiredAsync(CancellationToken token)
         {
@@ -43,18 +36,15 @@ namespace DistributedMutex
             }
             catch (Exception)
             {
-                if (allTasks.Exception != null)
-                {
-                    allTasks.Exception.Handle(ex =>
+                allTasks.Exception?.Handle(ex =>
                     {
-                        if (!(ex is OperationCanceledException))
+                        if (ex is not OperationCanceledException)
                         {
                             Trace.TraceError(ex.Message);
                         }
 
                         return true;
                     });
-                }
             }
         }
 
@@ -70,21 +60,19 @@ namespace DistributedMutex
                     // Create a new linked cancellation token source, so if either the
                     // original token is canceled or the lease cannot be renewed,
                     // then the leader task can be canceled.
-                    using (var leaseCts =
-                        CancellationTokenSource.CreateLinkedTokenSource([token]))
-                    {
-                        // Run the leader task.
-                        var leaderTask = taskToRunWhenLeaseAcquired.Invoke(leaseCts.Token);
+                    using var leaseCts =
+                        CancellationTokenSource.CreateLinkedTokenSource([token]);
+                    // Run the leader task.
+                    var leaderTask = taskToRunWhenLeaseAcquired.Invoke(leaseCts.Token);
 
-                        // Keeps renewing the lease in regular intervals.
-                        // If the lease cannot be renewed, then the task completes.
-                        var renewLeaseTask =
-                            KeepRenewingLeaseAsync(leaseManager, leaseId, leaseCts.Token);
+                    // Keeps renewing the lease in regular intervals.
+                    // If the lease cannot be renewed, then the task completes.
+                    var renewLeaseTask =
+                        KeepRenewingLeaseAsync(leaseManager, leaseId, leaseCts.Token);
 
-                        // When any task completes (either the leader task or when it could
-                        // not renew the lease) then cancel the other task.
-                        await CancelAllWhenAnyCompletesAsync(leaderTask, renewLeaseTask, leaseCts);
-                    }
+                    // When any task completes (either the leader task or when it could
+                    // not renew the lease) then cancel the other task.
+                    await CancelAllWhenAnyCompletesAsync(leaderTask, renewLeaseTask, leaseCts);
                 }
             }
         }
@@ -98,10 +86,7 @@ namespace DistributedMutex
                 {
                     return leaseId;
                 }
-                if (onLeaseTimeoutRetry != null)
-                {
-                    onLeaseTimeoutRetry();
-                }
+                onLeaseTimeoutRetry?.Invoke();
                 await Task.Delay(AcquireAttemptInterval, token);
                 return null;
             }

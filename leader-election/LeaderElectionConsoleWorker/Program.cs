@@ -14,7 +14,7 @@ namespace LeaderElectionConsoleWorker
         static async Task Main(string[] args)
         {
             // Create a new shared cancellation token source
-            CancellationTokenSource source = new CancellationTokenSource();
+            CancellationTokenSource source = new();
             CancellationToken token = source.Token;
 
             // Get the connection string from app settings
@@ -25,13 +25,13 @@ namespace LeaderElectionConsoleWorker
                 return;
             }
             // Create a BlobSettings object with the connection string and the name of the blob to use for the lease
-            BlobSettings blobSettings = new BlobSettings(
+            BlobSettings blobSettings = new(
                 storageUri,
                 "leases",
                 "leader");
 
             // Get the current process ID for output
-            var pid = System.Diagnostics.Process.GetCurrentProcess().Id;
+            var pid = Environment.ProcessId;
 
             // Start an async task that will wait for a keypress and cancel the token when a key is pressed
             var uiTask = Task.Run(async () =>
@@ -41,28 +41,28 @@ namespace LeaderElectionConsoleWorker
                     if (Console.KeyAvailable)
                     {
                         Console.ReadKey(true);
-                        Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] Requesting shutdown.");
+                        Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Requesting shutdown.");
                         source.Cancel();
                     }
                     await Task.Delay(500);
                 }
-                Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] This process ({pid}) is shutting down.");
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] This process ({pid}) is shutting down.");
 
             });
 
             // Create a new BlobDistributedMutex object with the BlobSettings object and a task
             // to run when the lease is acquired, and an action to run when the lease is not acquired.
-            BlobDistributedMutex distributedMutex = new BlobDistributedMutex(
+            BlobDistributedMutex distributedMutex = new(
                 blobSettings,
-                async (CancellationToken token) =>
+                async token =>
                 {
                     while (!token.IsCancellationRequested)
                     {
-                        Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] This process ({pid}) is currently the leader. Press any key to exit.");
-                        await Task.Delay(15000);
+                        Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] This process ({pid}) is currently the leader. Press any key to exit.");
+                        await Task.Delay(15000, token);
                     }
                 },  async () => {
-                    Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] This process ({pid}) could not acquire lease. Retrying in 20 seconds. Press any key to exit.");
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] This process ({pid}) could not acquire lease. Retrying in 20 seconds. Press any key to exit.");
                 });
 
             // Wait for completion of the DistributedMutex and the UI task before exiting
