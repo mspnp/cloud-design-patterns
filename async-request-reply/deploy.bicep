@@ -6,7 +6,7 @@ var hostingPlanName = 'app-reqrep'
 var functionAppName = 'fapp-reqrep-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var serviceBusNamespaceName = toLower('sb-reqrep-${uniqueString(subscription().subscriptionId, resourceGroup().id)}')
 var deploymentStorageContainerName = 'app-package-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
-var appInsigthName = 'appinsigth-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
+var appInsightName = 'appinsight-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var logAnalyticsName = 'loganalytics-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 //var vnetName = 'asycReplyVnet'
 
@@ -29,7 +29,7 @@ var storageBlobDataOwnerRole = subscriptionResourceId(
   'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
 ) //Storage Blob Data Owner role
 
-resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
+resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2025-05-01-preview' = {
   name: serviceBusNamespaceName
   location: location
   sku: {
@@ -39,7 +39,7 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview
   properties: {}
 }
 
-resource serviceBusNamespace_outqueue 'Microsoft.ServiceBus/namespaces/queues@2022-10-01-preview' = {
+resource serviceBusNamespace_outqueue 'Microsoft.ServiceBus/namespaces/queues@2025-05-01-preview' = {
   parent: serviceBusNamespace
   name: 'outqueue'
   properties: {
@@ -75,7 +75,7 @@ resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-pr
   }
 }
 
-resource appStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+resource appStorageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   name: appStorageAccountName
   sku: {
     name: 'Standard_LRS'
@@ -110,7 +110,7 @@ resource appStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   }
 }
 
-resource dataStorageAccount 'Microsoft.Storage/storageAccounts@2019-04-01' = {
+resource dataStorageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   name: dataStorageAccountName
   sku: {
     name: 'Standard_RAGRS'
@@ -124,14 +124,14 @@ resource dataStorageAccount 'Microsoft.Storage/storageAccounts@2019-04-01' = {
   }
 }
 
-resource dataStorageAccountNameContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+resource dataStorageAccountNameContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2025-06-01' = {
   name: '${dataStorageAccountName}/default/data'
   dependsOn: [
     dataStorageAccount
   ]
 }
 
-resource hostingPlan 'Microsoft.Web/serverfarms@2023-12-01' = {
+resource hostingPlan 'Microsoft.Web/serverfarms@2025-03-01' = {
   name: hostingPlanName
   location: location
   kind: 'functionapp'
@@ -144,7 +144,7 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   }
 }
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {
   name: logAnalyticsName
   location: location
   properties: {
@@ -159,7 +159,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-previ
 }
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: appInsigthName
+  name: appInsightName
   location: location
   kind: 'web'
   properties: {
@@ -168,7 +168,7 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
+resource functionApp 'Microsoft.Web/sites@2025-03-01' = {
   name: functionAppName
   location: location
   kind: 'functionapp,linux'
@@ -182,14 +182,9 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
     redundancyMode: 'None'
     publicNetworkAccess: 'Enabled'
     keyVaultReferenceIdentity: 'SystemAssigned'
-    //virtualNetworkSubnetId: functiondsbnt.id // Adding VNet Integration
     siteConfig: {
-      netFrameworkVersion: 'v8.0'
-      numberOfWorkers: 1
       alwaysOn: false
-      http20Enabled: false
-      minimumElasticInstanceCount: 0
-      use32BitWorkerProcess: false
+      http20Enabled: true
       appSettings: [
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -209,9 +204,6 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
         }
       ]
     }
-    clientCertEnabled: true
-    clientCertMode: 'OptionalInteractiveUser'
-    clientCertExclusionPaths: '/public'
     functionAppConfig: {
       deployment: {
         storage: {
@@ -228,7 +220,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
       }
       runtime: {
         name: 'dotnet-isolated'
-        version: '8.0'
+        version: '10.0'
       }
     }
   }
@@ -268,7 +260,7 @@ resource dataStorageBlobDataContributorRoleAssignment 'Microsoft.Authorization/r
 }
 
 // Allow access from function app to storage account using a managed identity
-resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(resourceGroup().id, appStorageAccount.id, 'StorageBlobDataOwnerRole')
   scope: appStorageAccount
   properties: {

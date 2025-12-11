@@ -2,7 +2,7 @@
 {
     public class CustomerPOCO
     {
-        public string id { get; set; }
-        public string customername { get; set; }
+        public required string id { get; set; }
+        public required string customername { get; set; }
     }
 }
