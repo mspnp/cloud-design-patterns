@@ -6,7 +6,7 @@ var hostingPlanName = 'app-reqrep'
 var functionAppName = 'fapp-reqrep-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var serviceBusNamespaceName = toLower('sb-reqrep-${uniqueString(subscription().subscriptionId, resourceGroup().id)}')
 var deploymentStorageContainerName = 'app-package-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
-var appInsightName = 'appinsigth-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
+var appInsightName = 'appinsight-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var logAnalyticsName = 'loganalytics-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 //var vnetName = 'asycReplyVnet'
 
