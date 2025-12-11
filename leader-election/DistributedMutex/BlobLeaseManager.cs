@@ -38,6 +38,9 @@ namespace DistributedMutex
         private readonly BlobContainerClient leaseContainerClient;
         private readonly PageBlobClient leaseBlobClient;
 
+        private const int LeaseAcquireTimeoutSeconds = 15;
+        private const int LeaseAlreadyPresentStatusCode = 412;
+
         public BlobLeaseManager(BlobSettings settings)
             : this(settings.BlobServiceClient, settings.Container, settings.BlobName)
         {
@@ -48,7 +51,15 @@ namespace DistributedMutex
             leaseContainerClient = blobServiceClient.GetBlobContainerClient(leaseContainerName);
             leaseBlobClient = leaseContainerClient.GetPageBlobClient(leaseBlobName);
             leaseContainerClient.CreateIfNotExists();
-            leaseBlobClient.CreateIfNotExists(512);
+            try
+            {
+                leaseBlobClient.CreateIfNotExists(512);
+            }
+            catch (RequestFailedException leaseAlreadyPresentException)
+            {
+                // There is currently a lease on the blob and no lease ID was specified in the request. Status=412. It throws an Exception if the lease exists and It is already taken.
+                if (leaseAlreadyPresentException.Status != LeaseAlreadyPresentStatusCode) throw;
+            }
         }
 
         public void ReleaseLease(string leaseId)
@@ -71,7 +82,7 @@ namespace DistributedMutex
             try
             {
                 var leaseClient = leaseBlobClient.GetBlobLeaseClient();
-                var lease = await leaseClient.AcquireAsync(TimeSpan.FromSeconds(15), null, token);
+                var lease = await leaseClient.AcquireAsync(TimeSpan.FromSeconds(LeaseAcquireTimeoutSeconds), null, token);
                 return lease.Value.LeaseId;
             }
             catch (RequestFailedException storageException)
@@ -79,7 +90,7 @@ namespace DistributedMutex
                 Trace.TraceError(storageException.ErrorCode);
 
                 var status = storageException.Status;
-                if (status == (int) HttpStatusCode.NotFound)
+                if (status == (int)HttpStatusCode.NotFound)
                 {
                     blobNotFound = true;
                 }

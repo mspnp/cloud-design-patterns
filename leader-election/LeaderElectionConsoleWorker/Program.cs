@@ -61,12 +61,12 @@ namespace LeaderElectionConsoleWorker
                         Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] This process ({pid}) is currently the leader. Press any key to exit.");
                         await Task.Delay(15000);
                     }
-                }, () => {
+                },  async () => {
                     Console.WriteLine($"[{DateTime.Now.ToString("HH:mm:ss")}] This process ({pid}) could not acquire lease. Retrying in 20 seconds. Press any key to exit.");
                 });
 
             // Wait for completion of the DistributedMutex and the UI task before exiting
-            await distributedMutex.RunTaskWhenMutexAcquired(token);
+            await distributedMutex.RunTaskWhenMutexAcquiredAsync(token);
             await uiTask;
         }
     }

@@ -22,14 +22,14 @@ namespace DistributedMutex
             this.onLeaseTimeoutRetry = onLeaseTimeoutRetry;
         }
 
-        public async Task RunTaskWhenMutexAcquired(CancellationToken token)
+        public async Task RunTaskWhenMutexAcquiredAsync(CancellationToken token)
         {
             var leaseManager = new BlobLeaseManager(blobSettings);
 
-            await RunTaskWhenBlobLeaseAcquired(leaseManager, token);
+            await RunTaskWhenBlobLeaseAcquiredAsync(leaseManager, token);
         }
 
-        private static async Task CancelAllWhenAnyCompletes(Task leaderTask, Task renewLeaseTask, CancellationTokenSource cts)
+        private static async Task CancelAllWhenAnyCompletesAsync(Task leaderTask, Task renewLeaseTask, CancellationTokenSource cts)
         {
             await Task.WhenAny(leaderTask, renewLeaseTask);
 
@@ -58,12 +58,12 @@ namespace DistributedMutex
             }
         }
 
-        private async Task RunTaskWhenBlobLeaseAcquired(BlobLeaseManager leaseManager, CancellationToken token)
+        private async Task RunTaskWhenBlobLeaseAcquiredAsync(BlobLeaseManager leaseManager, CancellationToken token)
         {
             while (!token.IsCancellationRequested)
             {
                 // Try to acquire the blob lease, otherwise wait for some time before we can try again.
-                string? leaseId = await TryAcquireLeaseOrWait(leaseManager, token);
+                string? leaseId = await TryAcquireLeaseOrWaitAsync(leaseManager, token);
 
                 if (!string.IsNullOrEmpty(leaseId))
                 {
@@ -79,17 +79,17 @@ namespace DistributedMutex
                         // Keeps renewing the lease in regular intervals.
                         // If the lease cannot be renewed, then the task completes.
                         var renewLeaseTask =
-                            KeepRenewingLease(leaseManager, leaseId, leaseCts.Token);
+                            KeepRenewingLeaseAsync(leaseManager, leaseId, leaseCts.Token);
 
                         // When any task completes (either the leader task or when it could
                         // not renew the lease) then cancel the other task.
-                        await CancelAllWhenAnyCompletes(leaderTask, renewLeaseTask, leaseCts);
+                        await CancelAllWhenAnyCompletesAsync(leaderTask, renewLeaseTask, leaseCts);
                     }
                 }
             }
         }
 
-        private async Task<string?> TryAcquireLeaseOrWait(BlobLeaseManager leaseManager, CancellationToken token)
+        private async Task<string?> TryAcquireLeaseOrWaitAsync(BlobLeaseManager leaseManager, CancellationToken token)
         {
             try
             {
@@ -111,7 +111,7 @@ namespace DistributedMutex
             }
         }
 
-        private async Task KeepRenewingLease(BlobLeaseManager leaseManager, string leaseId, CancellationToken token)
+        private async Task KeepRenewingLeaseAsync(BlobLeaseManager leaseManager, string leaseId, CancellationToken token)
         {
             var renewOffset = new Stopwatch();
 
@@ -136,7 +136,7 @@ namespace DistributedMutex
                     // If the adjusted interval is greater than zero wait for that long
                     if (renewIntervalAdjusted > TimeSpan.Zero)
                     {
-                        await Task.Delay(RenewInterval - renewOffset.Elapsed, token);
+                        await Task.Delay(renewIntervalAdjusted, token);
                     }
                 }
                 catch (OperationCanceledException)
