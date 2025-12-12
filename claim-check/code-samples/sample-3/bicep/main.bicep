@@ -14,19 +14,19 @@ param principalId string
 param namePrefix string
 
 @description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges.')
-resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
   scope: subscription()
 }
 
 @description('Built-in Azure RBAC role that is applied to a Service Bus to grant "Service Bus Data Owner" privileges.')
-resource serviceBusDataOwnwerRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+resource serviceBusDataOwnwerRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
   name: '090c5cfd-751d-490a-894a-3ce6f1109419'
   scope: subscription()
 }
 
 @description('Allows for receive access to Azure Service Bus resources.')
-resource serviceBusDataReceiverRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+resource serviceBusDataReceiverRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
   name: '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0'
   scope: subscription()
 }
@@ -34,7 +34,7 @@ resource serviceBusDataReceiverRole 'Microsoft.Authorization/roleDefinitions@202
 /*** NEW RESOURCES ***/
 
 @description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SaS tokens for this blobs in this account.')
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   name: 'st${namePrefix}cc'
   location: location
   sku: {
@@ -87,7 +87,7 @@ resource blobContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@
 }
 
 @description('The Azure Event Grid system topic to use with the sample apps. This will be used to forward BlobCreated events to the Service Bus Queue.')
-resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2023-12-15-preview' = {
+resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2025-04-01-preview' = {
   name: '${storageAccount.name}${guid(namePrefix, 'storage')}'
   location: location
   identity: {
@@ -99,7 +99,7 @@ resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2023-12-15-
   }
 }
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {
   name: 'la-${namePrefix}'
   location: location
   properties: {
@@ -114,7 +114,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-previ
 }
 
 @description('The Azure Service Bus namespace to use with the sample apps.')
-resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
+resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2025-05-01-preview' = {
   name: 'sbns-${namePrefix}'
   location: location
   sku: {
@@ -185,7 +185,7 @@ resource gridServiceBusDataOwnwerRoleAssignment 'Microsoft.Authorization/roleAss
 }
 
 @description('Event Grid subscription to forward BlobCreated events to our Service Bus Queue.')
-resource eventGridBlobCreatedServiceBusSubscription 'Microsoft.EventGrid/systemTopics/eventSubscriptions@2023-12-15-preview' = {
+resource eventGridBlobCreatedServiceBusSubscription 'Microsoft.EventGrid/systemTopics/eventSubscriptions@2025-04-01-preview' = {
   parent: eventGridStorageBlobTopic
   name: 'eventhub'
   properties: {
