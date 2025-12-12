@@ -224,7 +224,7 @@ resource eventHubDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-p
 }
 
 @description('Set permissions to give the Event Grid System Managed identity access to Event Hub')
-resource grideventHubDataOwnerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource gridEventHubDataOwnerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(eventHubNamespace.id, eventHubDataOwnerRole.id, eventGridStorageBlobTopic.id)
   scope: eventHubNamespace
   properties: {
@@ -236,7 +236,7 @@ resource grideventHubDataOwnerRoleAssignment 'Microsoft.Authorization/roleAssign
 }
 
 @description('Set permissions to give the user principal access to  Event Hub')
-resource usereventHubDataOwnerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource userEventHubDataOwnerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(eventHubNamespace.id, eventHubDataOwnerRole.id, principalId)
   scope: eventHubNamespace
   properties: {
@@ -271,6 +271,6 @@ resource eventGridBlobCreatedEventHubSubscription 'Microsoft.EventGrid/systemTop
     eventDeliverySchema: 'EventGridSchema'
   }
   dependsOn:[
-    grideventHubDataOwnerRoleAssignment
+    gridEventHubDataOwnerRoleAssignment
   ]
 }
