@@ -79,7 +79,7 @@ Install the prerequisites and follow the steps to deploy and run the examples.
    The message consumer sample application for this scenario is implemented as an Azure Function, showcasing the serverless approach. Run the sample application to connect to the queue and process messages as they arrive.
 
    ```bash
-   cd sample-1\FunctionConsumer1
+   cd FunctionConsumer1
    func start
    ```
 
