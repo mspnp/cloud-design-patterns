@@ -16,20 +16,20 @@ param namePrefix string
 /*** EXISTING RESOURCES ***/
 
 @description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges.')
-resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
   scope: subscription()
 }
 
 @description('Built-in Azure RBAC role that is applied to an Event Hub  to grant "Azure Event Hubs Data Owner" privileges.')
-resource eventHubDataOwnwerRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+resource eventHubDataOwnerRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
   name: 'f526a384-b230-433a-b45c-95f59c4a2dec'
   scope: subscription()
 }
 
 /*** NEW RESOURCES ***/
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-preview' = {
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {
   name: 'la-${namePrefix}'
   location: location
   properties: any({
@@ -44,7 +44,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-previ
 }
 
 @description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SaS tokens for this blobs in this account.')
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   name: 'st${namePrefix}cc'
   location: location
   sku: {
@@ -97,7 +97,7 @@ resource blobContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@
 }
 
 @description('The Azure Event Grid system topic to use with the sample apps. This topic will be used to forward BlobCreated events to the Azure Event Hub.')
-resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2023-12-15-preview' = {
+resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2025-04-01-preview' = {
   name: '${storageAccount.name}${guid(namePrefix, 'storage')}'
   location: location
   identity: {
@@ -110,7 +110,7 @@ resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2023-12-15-
 }
 
 @description('The Azure Storage account to use together with Event Hubs. Used to support the functionality of the EventProcessor class')
-resource eventHubStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+resource eventHubStorageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   name: 'st${namePrefix}ehub'
   location: location
   sku: {
@@ -167,7 +167,7 @@ resource eventProcessorBlobContributorRoleAssignment 'Microsoft.Authorization/ro
 }
 
 @description('The Azure Event Hubs namespace to use with the sample apps.')
-resource eventHubNamespace 'Microsoft.EventHub/namespaces@2023-01-01-preview' = {
+resource eventHubNamespace 'Microsoft.EventHub/namespaces@2025-05-01-preview' = {
   name: 'evhns-${namePrefix}'
   location: location
   sku: {
@@ -224,31 +224,31 @@ resource eventHubDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-p
 }
 
 @description('Set permissions to give the Event Grid System Managed identity access to Event Hub')
-resource gridEventHubDataOwnwerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(eventHubNamespace.id, eventHubDataOwnwerRole.id, eventGridStorageBlobTopic.id)
+resource grideventHubDataOwnerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(eventHubNamespace.id, eventHubDataOwnerRole.id, eventGridStorageBlobTopic.id)
   scope: eventHubNamespace
   properties: {
     principalId: eventGridStorageBlobTopic.identity.principalId
-    roleDefinitionId: eventHubDataOwnwerRole.id
+    roleDefinitionId: eventHubDataOwnerRole.id
     principalType: 'ServicePrincipal'
     description: 'Allows this Microsoft Entra principal to access Event Hub data.'
   }
 }
 
 @description('Set permissions to give the user principal access to  Event Hub')
-resource userEventHubDataOwnwerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(eventHubNamespace.id, eventHubDataOwnwerRole.id, principalId)
+resource usereventHubDataOwnerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(eventHubNamespace.id, eventHubDataOwnerRole.id, principalId)
   scope: eventHubNamespace
   properties: {
     principalId: principalId
-    roleDefinitionId: eventHubDataOwnwerRole.id
+    roleDefinitionId: eventHubDataOwnerRole.id
     principalType: 'User'
     description: 'Allows this Microsoft Entra principal to access Event Hub data.'
   }
 }
 
 @description('Event Grid subscription to forward BlobCreated events to our Azure Hub.')
-resource eventGridBlobCreatedEventHubSubscription 'Microsoft.EventGrid/systemTopics/eventSubscriptions@2023-12-15-preview' = {
+resource eventGridBlobCreatedEventHubSubscription 'Microsoft.EventGrid/systemTopics/eventSubscriptions@2025-04-01-preview' = {
   parent: eventGridStorageBlobTopic
   name: 'eventhub'
   properties: {
@@ -271,6 +271,6 @@ resource eventGridBlobCreatedEventHubSubscription 'Microsoft.EventGrid/systemTop
     eventDeliverySchema: 'EventGridSchema'
   }
   dependsOn:[
-    gridEventHubDataOwnwerRoleAssignment
+    grideventHubDataOwnerRoleAssignment
   ]
 }
