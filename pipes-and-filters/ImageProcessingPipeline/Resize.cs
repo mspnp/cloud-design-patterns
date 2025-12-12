@@ -23,7 +23,7 @@ namespace ImageProcessingPipeline
 
             // Download image and resize it
             using BlobDownloadStreamingResult imageBlobContents = await imageBlob.DownloadStreamingAsync(null, cancellationToken);
-            var image = await Image.LoadAsync(imageBlobContents.Content, cancellationToken);
+            using var image = await Image.LoadAsync(imageBlobContents.Content, cancellationToken);
             image.Mutate(i =>
             {
                 i.Resize(new ResizeOptions
