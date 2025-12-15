@@ -14,14 +14,14 @@ param location string = resourceGroup().location
 
 /*** EXISTING RESOURCES ***/
 
-@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges. Granted to the user provided in the paramters.')
-resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges. Granted to the user provided in the parameters.')
+resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
   scope: subscription()
 }
 
-@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Queue Data Contributor" privileges. Granted to the user provided in the paramters.')
-resource storageQueueDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+@description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Queue Data Contributor" privileges. Granted to the user provided in the parameters.')
+resource storageQueueDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
   name: '974c5e8b-45b9-4653-ba55-5f855dd0fb88'
   scope: subscription()
 }
@@ -29,7 +29,7 @@ resource storageQueueDataContributorRole 'Microsoft.Authorization/roleDefinition
 /*** NEW RESOURCES ***/
 
 @description('The Azure Storage account which will contain the pipes (queues) and the images to be sent through the filters (Azure Functions).')
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   name: storageAccountName
   location: location
   sku: {
@@ -50,7 +50,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     publicNetworkAccess: 'Enabled'   // This sample does not use private networking, but could be configured to use Private Link connections if fully deploy to Azure
     supportsHttpsTrafficOnly: true
   }
-
   resource blobContainers 'blobServices' = {
     name: 'default'
     
@@ -68,6 +67,14 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     
     resource pipexfty 'queues' = {
       name: 'pipe-xfty'
+    }
+
+    resource pipefjur 'queues' = {
+      name: 'pipe-fjur'
+    }
+
+    resource pipeyhrb 'queues' = {
+      name: 'pipe-yhrb'
     }
   }
 }
