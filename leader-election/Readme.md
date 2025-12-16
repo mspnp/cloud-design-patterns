@@ -12,7 +12,7 @@ Install the prerequisites and follow the steps to run the example and observe th
 
 ### Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [Azurite emulator for local Azure Storage development](https://learn.microsoft.com/azure/storage/common/storage-use-azurite) or an [Azure Storage Account](https://learn.microsoft.com/azure/storage/common/storage-account-create)
 
 #### Optional
@@ -44,8 +44,8 @@ Install the prerequisites and follow the steps to run the example and observe th
 #### Running with Azurite storage emulator
 
    The included `app.config` file is set up to use a local Azure Storage emulator. Open a new terminal window, navigate to an empty working directory for the Azurite data files, and start the emulator with the command `azurite`, or `npx azurite` if you installed via `npm`.  
-   Azure SDKs by DefaultAzureCredencials needs https, and azurite by default is http. Follow the instructions [here](https://learn.microsoft.com/azure/storage/common/storage-use-azurite?tabs=visual-studio%2Cblob-storage#azure-sdks).  
-   In `LeaderElectionConsoleWorker/app.config` you see `https://127.0.0.1:10000/devstoreaccount1`
+   Azure SDKs by DefaultAzureCredential needs https, and Azurite by default is http. Follow the instructions [here](https://learn.microsoft.com/azure/storage/common/storage-use-azurite?tabs=visual-studio%2Cblob-storage#azure-sdks).  
+   In `LeaderElectionConsoleWorker/app.config` you see `https://127.0.0.1:10000/devstoreaccount1` (This is the Blob service endpoint Azurite exposes for the devstoreaccount1 account.)
 
 #### Running with Azure Storage account
 
