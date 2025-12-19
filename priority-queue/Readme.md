@@ -59,7 +59,7 @@ All Azure Function Apps share the same Storage Account and Application Insights 
 After deploying the infrastructure, you need to publish each Azure Function to its corresponding Function App using Azure Functions Core Tools:
 
 ```bash
-   # Retrieve the primary connection string for the Service Bus namespace.
+   # Construct the fully qualified namespace (hostname) for the Service Bus.
    SERVICE_BUS_FULLY_QUALIFIED_NAMESPACE="${SERVICE_BUS_NAMESPACE_NAME}.servicebus.windows.net"
 
    sed "s|{SERVICE_BUS_FULLY_QUALIFIED_NAMESPACE}|${SERVICE_BUS_FULLY_QUALIFIED_NAMESPACE}|g" ./PriorityQueueSender/local.settings.template.json > ./PriorityQueueSender/local.settings.json
