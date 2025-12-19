@@ -1,21 +1,21 @@
 # Sample 4: Manual token generation, Azure Event Hubs with Kafka as messaging system
 
-## Technologies used: Azure Blob Storage, Azure Event Hubs with Kafka API enabled, Azure Functions, .NET 9.0
+## Technologies used: Azure Blob Storage, Azure Event Hubs with Kafka API enabled, Azure Functions, .NET 10.0
 
 In this example the client application uploads the payload to Azure Blob Storage and manually generates the claim check token, which is sent via Event Hubs.
 
-The sample producer CLI application uses the Apache Kafka libraries to send the messages to [Event Hubs with Kafka enabled](https://learn.microsoft.com/azure/event-hubs/event-hubs-create-kafka-enabled), to demonstrate the ease of using other Azure services like Azure Blob Storage, Azure functions etc. with a different messaging protocol like Kafka. The Azure Function is used to demonstrate a client application that acts as the consumer for the payload.
+The sample producer CLI application uses the Apache Kafka libraries to send messages to [Event Hubs with Kafka enabled](https://learn.microsoft.com/azure/event-hubs/event-hubs-create-kafka-enabled), demonstrating how to use Azure services such as Azure Blob Storage and Azure Functions, etc., with a different messaging protocol such as Kafka. The Azure Function demonstrates a consumer application for the payload.
 
-> This example uses [`DefaultAzureCredential`](https://learn.microsoft.com/dotnet/azure/sdk/authentication/#defaultazurecredential) for authentication while accessing Azure resources. the user principal must be provided as a parameter to the included Bicep script. The Bicep script is responsible for assigning the necessary RBAC (Role-Based Access Control) permissions for accessing the various Azure resources. While the principal can be the account associated with the interactive user, there are alternative [configurations](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods) available.
+> This example uses [`DefaultAzureCredential`](https://learn.microsoft.com/dotnet/azure/sdk/authentication/#defaultazurecredential) for authentication while accessing Azure resources. The user principal must be provided as a parameter to the included Bicep script. The Bicep script is responsible for assigning the necessary RBAC (Role-Based Access Control) permissions for accessing the various Azure resources. While the principal can be the account associated with the interactive user, there are alternative [configurations](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods) available.
 
-![A diagram showing a client CLI application acting as a producer and an Azure Function as the consumer, with Azure Blob Storage serving as the data store and Event Hubs as the messaging syste. The producer uploads the payload to Blob Storage, manually creates the claim-check message containing the blob location, and sends the message using the Kafka API to Event Hubs. The consumer Function receives the message from Event Hubs, extracts the reference, and dowloads the blob from the storage account.](images/sample-4-diagram.png)
+![A diagram showing a client CLI application acting as a producer and an Azure Function as the consumer, with Azure Blob Storage serving as the data store and Event Hubs as the messaging system. The producer uploads the payload to Blob Storage, manually creates the claim-check message containing the blob location, and sends the message using the Kafka API to Event Hubs. The consumer Function receives the message from Event Hubs, extracts the reference, and downloads the blob from the storage account.](images/sample-4-diagram.png)
 
 1. The producer CLI application uploads the payload to Azure Blob Storage.
 1. The producer creates the claim-check message containing the blob location, and sends the message using the Kafka API to Event Hubs.
 1. The consumer Function receives the message from Event Hubs.
 1. The Function extracts the reference to the payload blob from the message and downloads the blob directly from storage.
 
-## :rocket: Deployment guide
+## :rocket: Deployment Guide
 
 Install the prerequisites and follow the steps to deploy and run the examples.
 
@@ -26,11 +26,11 @@ Install the prerequisites and follow the steps to deploy and run the examples.
   - [Azure Cloud Shell](https://shell.azure.com/)
   - [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/windows/wsl/install)
 - [Git](https://git-scm.com/downloads)
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools)
 - [Azurite](/azure/storage/common/storage-use-azurite)
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-- Optionally, an IDE, like  [Visual Studio](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/).
+- Optionally, an IDE, like [Visual Studio](https://visualstudio.microsoft.com/downloads/) or [Visual Studio Code](https://code.visualstudio.com/).
 
 ### Steps
 
@@ -83,7 +83,7 @@ Install the prerequisites and follow the steps to deploy and run the examples.
    func start
    ```
 
-  > Please note: For demo purposes, the sample application will write the payload content to the the screen. Keep that in mind before you try sending really large payloads.
+> Please note: For demo purposes, the sample application will write the payload content to the screen. Keep that in mind before you try sending really large payloads.
 
 ### :checkered_flag: Try it out
 
