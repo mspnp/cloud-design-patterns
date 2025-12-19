@@ -16,8 +16,8 @@ param appInsightsName string = 'ai${uniqueString(resourceGroup().id)}'
 
 var logAnalyticsName = 'loganalytics-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 
-var senderRoleId = '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39' //Azure Service Bus Data Sender
-var receiverRoleId = '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0' //Azure Service Bus Data Receiver
+var senderRoleId = '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39' // Azure Service Bus Data Sender
+var receiverRoleId = '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0' // Azure Service Bus Data Receiver
 
 resource queueNamespacesResource 'Microsoft.ServiceBus/namespaces@2025-05-01-preview' = {
   name: serviceBusNamespaceName
