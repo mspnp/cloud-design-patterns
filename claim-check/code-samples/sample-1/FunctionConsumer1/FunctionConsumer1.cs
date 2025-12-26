@@ -32,7 +32,7 @@ namespace Pnp.Samples.ClaimCheckPattern
 
             // download the payload
             var payload = await _downloader.DownloadAsync(payloadUri);
-            _logger.LogInformation("Payload content (Url {Uri)}\n {Payload}", payloadUri, payload);
+            _logger.LogInformation("Payload content (Url {Uri})\n {Payload}", payloadUri, payload);
         }
     }
 }
