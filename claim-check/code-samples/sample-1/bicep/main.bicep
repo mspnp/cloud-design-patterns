@@ -5,7 +5,7 @@ targetScope = 'resourceGroup'
 param location string = resourceGroup().location
 
 @minLength(36)
-@description('The guid of the principal running the valet key generation code. In Azure this would be replaced with the managed identity of the Azure Function, when running locally it will be your user.')
+@description('The GUID of the principal running the valet key generation code. In Azure this would be replaced with the managed identity of the Azure Function, when running locally it will be your user.')
 param principalId string
 
 @minLength(3)
@@ -16,22 +16,22 @@ param namePrefix string
 /*** EXISTING RESOURCES ***/
 
 @description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Blob Data Contributor" privileges.')
-resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
   scope: subscription()
 }
 
 @description('Built-in Azure RBAC role that is applied to a Storage account to grant "Storage Queue Data Contributor" privileges.')
-resource storageQueueDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+resource storageQueueDataContributorRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
   name: '974c5e8b-45b9-4653-ba55-5f855dd0fb88'
   scope: subscription()
 }
 
 /*** NEW RESOURCES ***/
 
-@description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SaS tokens for this blobs in this account.')
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: 'st${namePrefix}cc'
+@description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SAS tokens for this blobs in this account.')
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
+  name: 'st${toLower(namePrefix)}cc'
   location: location
   sku: {
     name: 'Standard_LRS'
@@ -69,7 +69,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
     }
   }
 
-  resource QueueServices 'queueServices' = {
+  resource queueServices 'queueServices' = {
     name: 'default'
 
     @description('The queue to serve as the message queue for the sample.')
@@ -93,8 +93,8 @@ resource blobContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@
 
 @description('Set permissions to give the user principal access to Storage Queues from the sample applications')
 resource queueContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storageAccount::QueueServices::claimcheckqueue.id, storageQueueDataContributorRole.id, principalId)
-  scope: storageAccount::QueueServices::claimcheckqueue
+  name: guid(storageAccount::queueServices::claimcheckqueue.id, storageQueueDataContributorRole.id, principalId)
+  scope: storageAccount::queueServices::claimcheckqueue
   properties: {
     principalId: principalId
     roleDefinitionId: storageQueueDataContributorRole.id
@@ -104,7 +104,7 @@ resource queueContributorRoleAssignment 'Microsoft.Authorization/roleAssignments
 }
 
 @description('Event Grid system topic to subscribe to blob created events.')
-resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2023-12-15-preview' = {
+resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2025-04-01-preview' = {
   name: '${storageAccount.name}${guid(namePrefix, 'storage')}'
   location: location
   identity: {
@@ -117,7 +117,7 @@ resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2023-12-15-
 }
 
 @description('Event Grid system topic subscription to queue blob created events.')
-resource eventGridBlobCreatedQueueSubscription 'Microsoft.EventGrid/systemTopics/eventSubscriptions@2023-12-15-preview' = {
+resource eventGridBlobCreatedQueueSubscription 'Microsoft.EventGrid/systemTopics/eventSubscriptions@2025-04-01-preview' = {
   parent: eventGridStorageBlobTopic
   name: 'storagequeue'
   properties: {
