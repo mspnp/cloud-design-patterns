@@ -6,25 +6,21 @@ param location string = resourceGroup().location
 
 @minLength(15)
 @description('Service Bus Namespace Name.')
-param queueNamespaces string
+param serviceBusNamespaceName string
 
-@minLength(36)
-@description('The principal ID used to run the Azure Functions. In Azure, this should be the managed identity (system-assigned or user-assigned) of the Azure Function. When running locally, it should be your user identity.')
-param principalId string
+@description('Defines the name of the Storage Account used by the Function Apps. It uses a unique string based on the resource group ID to ensure global uniqueness.')
+param storageAccountName string = 'st${uniqueString(resourceGroup().id)}'
+
+@description('Sets the name of the Application Insights resource for monitoring and diagnostics. Like the storage account, it uses a unique string based on the resource group ID.')
+param appInsightsName string = 'ai${uniqueString(resourceGroup().id)}'
 
 var logAnalyticsName = 'loganalytics-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 
-var senderServiceBusRole = subscriptionResourceId(
-  'Microsoft.Authorization/roleDefinitions',
-  '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39'
-) // Azure Service Bus Data Sender
-var receiverServiceBusRole = subscriptionResourceId(
-  'Microsoft.Authorization/roleDefinitions',
-  '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0'
-) // Azure Service Bus Data Receiver
+var senderRoleId = '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39' // Azure Service Bus Data Sender
+var receiverRoleId = '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0' // Azure Service Bus Data Receiver
 
 resource queueNamespacesResource 'Microsoft.ServiceBus/namespaces@2025-05-01-preview' = {
-  name: queueNamespaces
+  name: serviceBusNamespaceName
   location: location
   sku: {
     name: 'Standard'
@@ -186,24 +182,67 @@ resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-pr
   }
 }
 
-// Assign Role to allow sending messages to the Service Bus
-resource serviceBusSenderRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, principalId, 'ServiceBusSenderRole')
-  scope: queueNamespacesResource
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' = {
+  name: storageAccountName
+  location: location
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
   properties: {
-    roleDefinitionId: senderServiceBusRole
-    principalId: principalId
-    principalType: 'User' // 'ServicePrincipal' if this was App Service with a managed identity
+    defaultToOAuthAuthentication: true
+    publicNetworkAccess: 'Enabled'
+    allowCrossTenantReplication: false
+    minimumTlsVersion: 'TLS1_2'
+    allowBlobPublicAccess: false
+    allowSharedKeyAccess: false
+    networkAcls: {
+      bypass: 'AzureServices'
+      virtualNetworkRules: []
+      ipRules: []
+      defaultAction: 'Allow'
+    }
+    supportsHttpsTrafficOnly: true
+    encryption: {
+      services: {
+        file: {
+          keyType: 'Account'
+          enabled: true
+        }
+        blob: {
+          keyType: 'Account'
+          enabled: true
+        }
+      }
+      keySource: 'Microsoft.Storage'
+    }
   }
 }
 
-// Assign Role to allow receiving messages from the Service Bus
-resource serviceBusReceiverRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(resourceGroup().id, principalId, 'ServiceBusReceiverRole')
-  scope: queueNamespacesResource
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: appInsightsName
+  location: location
+  kind: 'web'
   properties: {
-    roleDefinitionId: receiverServiceBusRole
-    principalId: principalId
-    principalType: 'User' // 'ServicePrincipal' if this was App Service with a managed identity
+    Application_Type: 'web'
   }
 }
+
+module functionApp './sites.bicep' = [
+  for name in [
+    'funcPriorityQueueSender'
+    'funcPriorityQueueConsumerLow'
+    'funcPriorityQueueConsumerHigh'
+  ]: {
+    name: name
+    params: {
+      location: location
+      functionAppName: name
+      storageAccountName: storageAccount.name
+      serviceBusNamespaceName: serviceBusNamespaceName
+      roleId: name == 'funcPriorityQueueSender' ? senderRoleId : receiverRoleId
+      appInsightsName: appInsights.name
+      scaleUp: name == 'funcPriorityQueueConsumerHigh' ? 200 : 40
+    }
+  }
+]
