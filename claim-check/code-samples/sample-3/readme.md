@@ -83,14 +83,14 @@ Install the prerequisites and follow the steps to deploy and run the examples.
 
    ```bash
    cd FunctionConsumer3
-   func start
+   func start --dotnet-isolated   
    ```
 
   > Please note: For demo purposes, the sample application will write the payload content to the screen. Keep that in mind before you try sending really large payloads.
 
 ### :checkered_flag: Try it out
 
-To generate a claim check message you just have to drop a file in the created Azure Storage account. You can use Azure **Storage browser** to do that. [Refer this to know how to upload blobs to a container using Storage Explorer](https://learn.microsoft.com/azure/storage/blobs/quickstart-storage-explorer#upload-blobs-to-the-container).
+To generate a claim check message you just have to drop a file in the created Azure Storage account. You can use Azure **Storage browser** to do that. [Refer this to know how to upload blobs to a container using Storage Explorer](https://learn.microsoft.com/azure/storage/blobs/quickstart-storage-explorer#upload-blobs-to-the-container). Inside the **payloads** Container.
 
 ### :broom: Clean up
 
