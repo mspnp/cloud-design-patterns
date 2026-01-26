@@ -80,7 +80,7 @@ Install the prerequisites and follow the steps to deploy and run the examples.
 
    ```bash
    cd FunctionConsumer1
-   func start
+   func start --dotnet-isolated
    ```
 
   > Please note: For demo purposes, the sample consumer application will write the payload content to the the screen. Keep that in mind before you try sending really large payloads.
