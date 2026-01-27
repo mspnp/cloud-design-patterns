@@ -5,7 +5,7 @@ public static class SampleSettingsValidator
     /// <summary>
     /// Ensure the required app settings are present
     /// </summary>
-    /// <param name="settings"></param>
+    /// <param name="requiredSettings">The list of configuration keys that must be present.</param>
     /// <exception cref="ApplicationException"></exception>
     public static void ThrowIfMissingSettings(this IConfiguration configuration, List<string> requiredSettings)
     {
