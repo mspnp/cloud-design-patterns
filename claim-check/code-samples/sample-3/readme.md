@@ -79,7 +79,7 @@ Install the prerequisites and follow the steps to deploy and run the examples.
 
    The message consumer sample application for this scenario is implemented as an Azure Function, showcasing the serverless approach. Run the sample application to connect to the Service Bus queue and process messages as they arrive.
 
-   Two sample applications illustrate consuming the claim check message sent via Azure Event Hubs: one implemented as a Command Line Interface (CLI) application and the other as an Azure Function, showcasing the serverless approach.
+   Two sample applications illustrate consuming the claim check message sent via Azure Service Bus: one implemented as a Command Line Interface (CLI) application and the other as an Azure Function, showcasing the serverless approach.
 
    ```bash
    cd FunctionConsumer3
