@@ -20,7 +20,7 @@ resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions
 }
 
 @description('Built-in Azure RBAC role that is applied to a Service Bus to grant "Service Bus Data Owner" privileges.')
-resource serviceBusDataOwnwerRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+resource serviceBusDataOwnerRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
   name: '090c5cfd-751d-490a-894a-3ce6f1109419'
   scope: subscription()
 }
