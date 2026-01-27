@@ -47,7 +47,7 @@ Install the prerequisites and follow the steps to deploy and run the examples.
    az login
    az account set -s <Name or ID of subscription>
 
-   NAME_PREFIX=<unique value between three to five characters of length>
+   NAME_PREFIX=<unique value between three to five characters lowercase>
    LOCATION=eastus2
    RESOURCE_GROUP_NAME="rg-${NAME_PREFIX}-${LOCATION}"
 

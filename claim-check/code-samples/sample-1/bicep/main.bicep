@@ -31,7 +31,7 @@ resource storageQueueDataContributorRole 'Microsoft.Authorization/roleDefinition
 
 @description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SAS tokens for this blobs in this account.')
 resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
-  name: 'st${toLower(namePrefix)}cc'
+  name: 'st${namePrefix}cc'
   location: location
   sku: {
     name: 'Standard_LRS'

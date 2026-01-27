@@ -174,11 +174,11 @@ resource userServiceBusDataReceiverRoleAssignment 'Microsoft.Authorization/roleA
 
 @description('Set permissions to give the Event Grid System Managed identity access to Service Bus')
 resource gridServiceBusDataOwnwerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(serviceBusNamespace.id, serviceBusDataOwnwerRole.id, eventGridStorageBlobTopic.id)
+  name: guid(serviceBusNamespace.id, serviceBusDataOwnerRole.id, eventGridStorageBlobTopic.id)
   scope: serviceBusNamespace
   properties: {
     principalId: eventGridStorageBlobTopic.identity.principalId
-    roleDefinitionId: serviceBusDataOwnwerRole.id
+    roleDefinitionId: serviceBusDataOwnerRole.id
     principalType: 'ServicePrincipal' 
     description: 'Allows this Microsoft Entra principal to access Event Hub data.'
   }
