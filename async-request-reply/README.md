@@ -10,7 +10,7 @@ The implementation uses a managed identity to control access to your storage acc
 
 The reference implementation was uses the [Azure Functions Flex Consumption](https://learn.microsoft.com/azure/azure-functions/flex-consumption-plan). Flex Consumption is a Linux-based serverless hosting plan that extends the Consumption billing model with additional enterprise capabilities: private networking (virtual network integration), selectable instance sizes, and faster/larger scale-out over other plans.
 
-The typical way to generate a SAS token in code requires the storage account key. In this scenario, you won't have a storage account key, so you'll need to find another way to generate the shared access signatures. To do that, we need to use an approach called *user delegation* SAS. By using a [user delegation SAS](https://learn.microsoft.com/azure/storage/common/storage-sas-overview#user-delegation-sas), we can sign the signature with the Microsoft Entra ID credentials instead of the storage account key. It is disabled storage account key access.
+The typical way to generate a SAS token in code requires the storage account key. In this scenario, you won't have a storage account key, as that feature is distable in this implementation, so you'll need to find another way to generate the shared access signatures. To do that, we need to use an approach called *user delegation* SAS. By using a [user delegation SAS](https://learn.microsoft.com/azure/storage/common/storage-sas-overview#user-delegation-sas), we can sign the signature with the Microsoft Entra ID credentials instead of the storage account key.
 
 ## Deploying the sample
 
