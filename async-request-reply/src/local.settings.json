@@ -4,7 +4,6 @@
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
     "ServiceBusConnection__fullyQualifiedNamespace": "<yourData>",
-    "DataStorage__blobServiceUri": "<yourData>",
-    "AZURE_FUNCTIONS_ENVIRONMENT": "Development"
+    "DataStorage__blobServiceUri": "<yourData>"
   }
 }
