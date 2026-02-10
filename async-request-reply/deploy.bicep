@@ -202,6 +202,10 @@ resource functionApp 'Microsoft.Web/sites@2025-03-01' = {
           name: 'DataStorage__blobServiceUri'
           value: 'https://${dataStorageAccount.name}.blob.${environment().suffixes.storage}'
         }
+        {
+          name: 'AZURE_FUNCTIONS_ENVIRONMENT'
+          value: 'Production'
+        }
       ]
     }
     functionAppConfig: {
