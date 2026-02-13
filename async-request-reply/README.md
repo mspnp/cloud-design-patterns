@@ -98,7 +98,7 @@ The typical way to generate a SAS token in code requires the storage account key
     Content-Length: 155
     Content-Type: application/json; charset=utf-8
     Date: Wed, 13 Dec 2023 20:18:55 GMT
-    Location: http://<appservice-name>.azurewebsites.net/api/RequestStatus/<guid>
+    Location: https://<appservice-name>.azurewebsites.net/api/RequestStatus/<guid>
    ```
 
    Using a browser open the url from the _Location_ field in the response. A file with the data you have sent will be downloaded.

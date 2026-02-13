@@ -18,8 +18,8 @@ namespace Asyncpattern
             }
 
             var reqid = Guid.NewGuid().ToString();
-
-            var rqs = $"http://{Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME")}/api/RequestStatus/{reqid}";
+            string scheme = Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") == "Development" ? "http" : "https";
+            var rqs = $"{scheme}://{Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME")}/api/RequestStatus/{reqid}";
 
             var messagePayload = JsonConvert.SerializeObject(customer);
             var message = new ServiceBusMessage(messagePayload);
