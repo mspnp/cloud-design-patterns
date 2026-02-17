@@ -1,141 +1,140 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-namespace DistributedMutex
+
+using System.Diagnostics;
+using System.Net;
+using Azure;
+using Azure.Identity;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Specialized;
+
+namespace DistributedMutex;
+
+public readonly record struct BlobSettings(string BlobUri, string Container, string BlobName)
 {
-    using System;
-    using System.Diagnostics;
-    using System.Net;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Azure;
-    using Azure.Identity;
-    using Azure.Storage.Blobs;
-    using Azure.Storage.Blobs.Specialized;
-
-    public struct BlobSettings
+    public BlobServiceClient CreateBlobServiceClient()
     {
-        public readonly string Container;
-        public readonly string BlobName;
-        public BlobServiceClient BlobServiceClient;
+        var options = new BlobClientOptions();
+        options.Retry.Delay = TimeSpan.FromSeconds(5);
+        options.Retry.MaxRetries = 3;
 
-        public BlobSettings(string blobUri, string container, string blobName)
+        return new BlobServiceClient(new Uri(BlobUri), new DefaultAzureCredential(), options);
+    }
+}
+
+/// <summary>
+/// Wrapper around a Windows Azure Blob Lease
+/// </summary>
+internal class BlobLeaseManager
+{
+    private readonly BlobContainerClient leaseContainerClient;
+    private readonly PageBlobClient leaseBlobClient;
+
+    private const int LeaseAcquireTimeoutSeconds = 15;
+    private const int LeaseAlreadyPresentStatusCode = 412;
+
+    private BlobLeaseManager(BlobServiceClient blobServiceClient, string leaseContainerName, string leaseBlobName)
+    {
+        leaseContainerClient = blobServiceClient.GetBlobContainerClient(leaseContainerName);
+        leaseBlobClient = leaseContainerClient.GetPageBlobClient(leaseBlobName);
+    }
+
+    public static async Task<BlobLeaseManager> CreateAsync(BlobSettings settings, CancellationToken token = default)
+    {
+        var client = settings.CreateBlobServiceClient();
+        var manager = new BlobLeaseManager(client, settings.Container, settings.BlobName);
+        await manager.InitializeAsync(token);
+        return manager;
+    }
+
+    private async Task InitializeAsync(CancellationToken token)
+    {
+        await leaseContainerClient.CreateIfNotExistsAsync(cancellationToken: token);
+        try
         {
-            var blobClientOptions = new BlobClientOptions();
-            blobClientOptions.Retry.Delay = TimeSpan.FromSeconds(5);
-            blobClientOptions.Retry.MaxRetries = 3;
-
-            BlobServiceClient = new BlobServiceClient(new Uri(blobUri), new DefaultAzureCredential(), blobClientOptions);
-            Container = container;
-            BlobName = blobName;
+            await leaseBlobClient.CreateIfNotExistsAsync(512, cancellationToken: token);
+        }
+        catch (RequestFailedException leaseAlreadyPresentException)
+        {
+            // There is currently a lease on the blob and no lease ID was specified in the request.
+            // Status=412. It throws an Exception if the lease exists and is already taken.
+            if (leaseAlreadyPresentException.Status != LeaseAlreadyPresentStatusCode) throw;
         }
     }
 
-    /// <summary>
-    /// Wrapper around a Windows Azure Blob Lease
-    /// </summary>
-    internal class BlobLeaseManager
+    public void ReleaseLease(string leaseId)
     {
-        private readonly BlobContainerClient leaseContainerClient;
-        private readonly PageBlobClient leaseBlobClient;
-
-        private const int LeaseAcquireTimeoutSeconds = 15;
-        private const int LeaseAlreadyPresentStatusCode = 412;
-
-        public BlobLeaseManager(BlobSettings settings)
-            : this(settings.BlobServiceClient, settings.Container, settings.BlobName)
+        try
         {
+            var leaseClient = leaseBlobClient.GetBlobLeaseClient(leaseId);
+            leaseClient.Release();
         }
-
-        public BlobLeaseManager(BlobServiceClient blobServiceClient, string leaseContainerName, string leaseBlobName)
+        catch (RequestFailedException e)
         {
-            leaseContainerClient = blobServiceClient.GetBlobContainerClient(leaseContainerName);
-            leaseBlobClient = leaseContainerClient.GetPageBlobClient(leaseBlobName);
-            leaseContainerClient.CreateIfNotExists();
-            try
-            {
-                leaseBlobClient.CreateIfNotExists(512);
-            }
-            catch (RequestFailedException leaseAlreadyPresentException)
-            {
-                // There is currently a lease on the blob and no lease ID was specified in the request. Status=412. It throws an Exception if the lease exists and It is already taken.
-                if (leaseAlreadyPresentException.Status != LeaseAlreadyPresentStatusCode) throw;
-            }
+            // Lease will eventually be released.
+            Trace.TraceError(e.ErrorCode);
         }
+    }
 
-        public void ReleaseLease(string leaseId)
+    public async Task<string?> AcquireLeaseAsync(CancellationToken token)
+    {
+        bool blobNotFound = false;
+        try
         {
-            try
-            {
-                var leaseClient = leaseBlobClient.GetBlobLeaseClient(leaseId);
-                leaseClient.Release();
-            }
-            catch (RequestFailedException e)
-            {
-                // Lease will eventually be released.
-                Trace.TraceError(e.ErrorCode);
-            }
+            var leaseClient = leaseBlobClient.GetBlobLeaseClient();
+            var lease = await leaseClient.AcquireAsync(TimeSpan.FromSeconds(LeaseAcquireTimeoutSeconds), null, token);
+            return lease.Value.LeaseId;
         }
-
-        public async Task<string?> AcquireLeaseAsync(CancellationToken token)
+        catch (RequestFailedException storageException)
         {
-            bool blobNotFound = false;
-            try
-            {
-                var leaseClient = leaseBlobClient.GetBlobLeaseClient();
-                var lease = await leaseClient.AcquireAsync(TimeSpan.FromSeconds(LeaseAcquireTimeoutSeconds), null, token);
-                return lease.Value.LeaseId;
-            }
-            catch (RequestFailedException storageException)
-            {
-                Trace.TraceError(storageException.ErrorCode);
+            Trace.TraceError(storageException.ErrorCode);
 
-                var status = storageException.Status;
-                if (status == (int)HttpStatusCode.NotFound)
-                {
-                    blobNotFound = true;
-                }
-
-                if (status == (int)HttpStatusCode.Conflict)
-                {
-                    return null;
-                }
-            }
-            catch (Exception e)
+            var status = storageException.Status;
+            if (status == (int)HttpStatusCode.NotFound)
             {
-                // If the storage account is unavailable or we fail for any other reason we still want to keep retrying
-                Trace.TraceError(e.Message);
+                blobNotFound = true;
+            }
+
+            if (status == (int)HttpStatusCode.Conflict)
+            {
                 return null;
             }
-
-            if (blobNotFound)
-            {
-                await CreateBlobAsync(token);
-                return await AcquireLeaseAsync(token);
-            }
-
+        }
+        catch (Exception e)
+        {
+            // If the storage account is unavailable or we fail for any other reason we still want to keep retrying
+            Trace.TraceError(e.Message);
             return null;
         }
 
-        public async Task<bool> RenewLeaseAsync(string leaseId, CancellationToken token)
+        if (blobNotFound)
         {
-            try
-            {
-                var leaseClient = leaseBlobClient.GetBlobLeaseClient(leaseId);
-                await leaseClient.RenewAsync(cancellationToken: token);
-                return true;
-            }
-            catch (RequestFailedException storageException)
-            {
-                Trace.TraceError(storageException.ErrorCode);
-
-                return false;
-            }
+            await CreateBlobAsync(token);
+            return await AcquireLeaseAsync(token);
         }
 
-        private async Task CreateBlobAsync(CancellationToken token)
+        return null;
+    }
+
+    public async Task<bool> RenewLeaseAsync(string leaseId, CancellationToken token)
+    {
+        try
         {
-            await leaseContainerClient.CreateIfNotExistsAsync(cancellationToken: token);
-            await leaseBlobClient.CreateIfNotExistsAsync(0, cancellationToken: token);
+            var leaseClient = leaseBlobClient.GetBlobLeaseClient(leaseId);
+            await leaseClient.RenewAsync(cancellationToken: token);
+            return true;
         }
+        catch (RequestFailedException storageException)
+        {
+            Trace.TraceError(storageException.ErrorCode);
+
+            return false;
+        }
+    }
+
+    private async Task CreateBlobAsync(CancellationToken token)
+    {
+        await leaseContainerClient.CreateIfNotExistsAsync(cancellationToken: token);
+        await leaseBlobClient.CreateIfNotExistsAsync(0, cancellationToken: token);
     }
 }

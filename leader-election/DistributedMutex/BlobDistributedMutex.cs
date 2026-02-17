@@ -1,135 +1,133 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-namespace DistributedMutex
+
+using System.Diagnostics;
+
+namespace DistributedMutex;
+
+public class BlobDistributedMutex(BlobSettings blobSettings, Func<CancellationToken, Task> taskToRunWhenLeaseAcquired, Action? onLeaseTimeoutRetry = null)
 {
-    using System;
-    using System.Diagnostics;
-    using System.Threading;
-    using System.Threading.Tasks;
+    private static readonly TimeSpan RenewInterval = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan AcquireAttemptInterval = TimeSpan.FromSeconds(20);
+    private readonly BlobSettings blobSettings = blobSettings;
+    private readonly Func<CancellationToken, Task> taskToRunWhenLeaseAcquired = taskToRunWhenLeaseAcquired;
+    private readonly Action? onLeaseTimeoutRetry = onLeaseTimeoutRetry;
 
-    public class BlobDistributedMutex(BlobSettings blobSettings, Func<CancellationToken, Task> taskToRunWhenLeaseAcquired, Action? onLeaseTimeoutRetry = null)
+    public async Task RunTaskWhenMutexAcquiredAsync(CancellationToken token)
     {
-        private static readonly TimeSpan RenewInterval = TimeSpan.FromSeconds(10);
-        private static readonly TimeSpan AcquireAttemptInterval = TimeSpan.FromSeconds(20);
-        private readonly BlobSettings blobSettings = blobSettings;
-        private readonly Func<CancellationToken, Task> taskToRunWhenLeaseAcquired = taskToRunWhenLeaseAcquired;
-        private readonly Action? onLeaseTimeoutRetry = onLeaseTimeoutRetry;
+        var leaseManager = await BlobLeaseManager.CreateAsync(blobSettings, token);
 
-        public async Task RunTaskWhenMutexAcquiredAsync(CancellationToken token)
+        await RunTaskWhenBlobLeaseAcquiredAsync(leaseManager, token);
+    }
+
+    private static async Task CancelAllWhenAnyCompletesAsync(Task leaderTask, Task renewLeaseTask, CancellationTokenSource cts)
+    {
+        await Task.WhenAny(leaderTask, renewLeaseTask);
+
+        // Cancel the user's leader task or the renewLease Task, as it is no longer the leader.
+        await cts.CancelAsync();
+
+        var allTasks = Task.WhenAll(leaderTask, renewLeaseTask);
+        try
         {
-            var leaseManager = new BlobLeaseManager(blobSettings);
-
-            await RunTaskWhenBlobLeaseAcquiredAsync(leaseManager, token);
+            await allTasks;
         }
-
-        private static async Task CancelAllWhenAnyCompletesAsync(Task leaderTask, Task renewLeaseTask, CancellationTokenSource cts)
+        catch (Exception)
         {
-            await Task.WhenAny(leaderTask, renewLeaseTask);
-
-            // Cancel the user's leader task or the renewLease Task, as it is no longer the leader.
-            cts.Cancel();
-
-            var allTasks = Task.WhenAll(leaderTask, renewLeaseTask);
-            try
-            {
-                await Task.WhenAll(allTasks);
-            }
-            catch (Exception)
-            {
-                allTasks.Exception?.Handle(ex =>
+            allTasks.Exception?.Handle(ex =>
+                {
+                    if (ex is not OperationCanceledException)
                     {
-                        if (ex is not OperationCanceledException)
-                        {
-                            Trace.TraceError(ex.Message);
-                        }
+                        Trace.TraceError(ex.Message);
+                    }
 
-                        return true;
-                    });
-            }
+                    return true;
+                });
         }
+    }
 
-        private async Task RunTaskWhenBlobLeaseAcquiredAsync(BlobLeaseManager leaseManager, CancellationToken token)
+    private async Task RunTaskWhenBlobLeaseAcquiredAsync(BlobLeaseManager leaseManager, CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
         {
-            while (!token.IsCancellationRequested)
+            // Try to acquire the blob lease, otherwise wait for some time before we can try again.
+            string? leaseId = await TryAcquireLeaseOrWaitAsync(leaseManager, token);
+
+            if (!string.IsNullOrEmpty(leaseId))
             {
-                // Try to acquire the blob lease, otherwise wait for some time before we can try again.
-                string? leaseId = await TryAcquireLeaseOrWaitAsync(leaseManager, token);
+                // Create a new linked cancellation token source, so if either the
+                // original token is canceled or the lease cannot be renewed,
+                // then the leader task can be canceled.
+                using var leaseCts =
+                    CancellationTokenSource.CreateLinkedTokenSource(token);
 
-                if (!string.IsNullOrEmpty(leaseId))
-                {
-                    // Create a new linked cancellation token source, so if either the
-                    // original token is canceled or the lease cannot be renewed,
-                    // then the leader task can be canceled.
-                    using var leaseCts =
-                        CancellationTokenSource.CreateLinkedTokenSource([token]);
-                    // Run the leader task.
-                    var leaderTask = taskToRunWhenLeaseAcquired.Invoke(leaseCts.Token);
+                // Run the leader task.
+                var leaderTask = taskToRunWhenLeaseAcquired(leaseCts.Token);
 
-                    // Keeps renewing the lease in regular intervals.
-                    // If the lease cannot be renewed, then the task completes.
-                    var renewLeaseTask =
-                        KeepRenewingLeaseAsync(leaseManager, leaseId, leaseCts.Token);
+                // Keeps renewing the lease in regular intervals.
+                // If the lease cannot be renewed, then the task completes.
+                var renewLeaseTask =
+                    KeepRenewingLeaseAsync(leaseManager, leaseId, leaseCts.Token);
 
-                    // When any task completes (either the leader task or when it could
-                    // not renew the lease) then cancel the other task.
-                    await CancelAllWhenAnyCompletesAsync(leaderTask, renewLeaseTask, leaseCts);
-                }
+                // When any task completes (either the leader task or when it could
+                // not renew the lease) then cancel the other task.
+                await CancelAllWhenAnyCompletesAsync(leaderTask, renewLeaseTask, leaseCts);
             }
         }
+    }
 
-        private async Task<string?> TryAcquireLeaseOrWaitAsync(BlobLeaseManager leaseManager, CancellationToken token)
+    private async Task<string?> TryAcquireLeaseOrWaitAsync(BlobLeaseManager leaseManager, CancellationToken token)
+    {
+        try
+        {
+            var leaseId = await leaseManager.AcquireLeaseAsync(token);
+            if (!string.IsNullOrEmpty(leaseId))
+            {
+                return leaseId;
+            }
+            onLeaseTimeoutRetry?.Invoke();
+            await Task.Delay(AcquireAttemptInterval, token);
+            return null;
+        }
+        catch (OperationCanceledException)
+        {
+            return null;
+        }
+    }
+
+    private async Task KeepRenewingLeaseAsync(BlobLeaseManager leaseManager, string leaseId, CancellationToken token)
+    {
+        var renewOffset = new Stopwatch();
+
+        while (!token.IsCancellationRequested)
         {
             try
             {
-                var leaseId = await leaseManager.AcquireLeaseAsync(token);
-                if (!string.IsNullOrEmpty(leaseId))
+                // Immediately attempt to renew the lease
+                // We cannot be sure how much time has passed since the lease was actually acquired
+                renewOffset.Restart();
+                var renewed = await leaseManager.RenewLeaseAsync(leaseId, token);
+                renewOffset.Stop();
+
+                if (!renewed)
                 {
-                    return leaseId;
+                    return;
                 }
-                onLeaseTimeoutRetry?.Invoke();
-                await Task.Delay(AcquireAttemptInterval, token);
-                return null;
+
+                // We delay based on the time from the start of the last renew request to ensure
+                var renewIntervalAdjusted = RenewInterval - renewOffset.Elapsed;
+
+                // If the adjusted interval is greater than zero wait for that long
+                if (renewIntervalAdjusted > TimeSpan.Zero)
+                {
+                    await Task.Delay(renewIntervalAdjusted, token);
+                }
             }
             catch (OperationCanceledException)
             {
-                return null;
-            }
-        }
+                leaseManager.ReleaseLease(leaseId);
 
-        private async Task KeepRenewingLeaseAsync(BlobLeaseManager leaseManager, string leaseId, CancellationToken token)
-        {
-            var renewOffset = new Stopwatch();
-
-            while (!token.IsCancellationRequested)
-            {
-                try
-                {
-                    // Immediately attempt to renew the lease
-                    // We cannot be sure how much time has passed since the lease was actually acquired
-                    renewOffset.Restart();
-                    var renewed = await leaseManager.RenewLeaseAsync(leaseId, token);
-                    renewOffset.Stop();
-
-                    if (!renewed)
-                    {
-                        return;
-                    }
-
-                    // We delay based on the time from the start of the last renew request to ensure
-                    var renewIntervalAdjusted = RenewInterval - renewOffset.Elapsed;
-
-                    // If the adjusted interval is greater than zero wait for that long
-                    if (renewIntervalAdjusted > TimeSpan.Zero)
-                    {
-                        await Task.Delay(renewIntervalAdjusted, token);
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    leaseManager.ReleaseLease(leaseId);
-
-                    return;
-                }
+                return;
             }
         }
     }

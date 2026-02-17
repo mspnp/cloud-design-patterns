@@ -43,9 +43,18 @@ Install the prerequisites and follow the steps to run the example and observe th
 
 #### Running with Azurite storage emulator
 
-   The included `app.config` file is set up to use a local Azure Storage emulator. Open a new terminal window, navigate to an empty working directory for the Azurite data files, and start the emulator with the command `azurite`, or `npx azurite` if you installed via `npm`.  
-   Azure SDKs by DefaultAzureCredential needs https, and Azurite by default is http. Follow the instructions [here](https://learn.microsoft.com/azure/storage/common/storage-use-azurite?tabs=visual-studio%2Cblob-storage#azure-sdks).  
-   In `LeaderElectionConsoleWorker/app.config` you see `https://127.0.0.1:10000/devstoreaccount1` (This is the Blob service endpoint Azurite exposes for the devstoreaccount1 account.)
+   The included `app.config` file is set up to use a local Azure Storage emulator. This sample uses `DefaultAzureCredential` for authentication, which requires two things from Azurite:
+
+   1. **HTTPS**: `DefaultAzureCredential` requires an HTTPS endpoint. Because Azurite uses HTTP by default, you must configure it to use HTTPS. Follow the instructions [here](https://learn.microsoft.com/azure/storage/common/storage-use-azurite?tabs=visual-studio%2Cblob-storage#azure-sdks).
+   1. **OAuth**: You must start Azurite with the `--oauth basic` flag to enable OAuth authentication.
+
+   For example, to start Azurite with both HTTPS and OAuth enabled (after generating certificates per the instructions above):
+
+   ```shell
+   azurite --oauth basic --cert cert.pem --key key.pem
+   ```
+
+   In `LeaderElectionConsoleWorker/app.config`, the `StorageUri` is set to `https://127.0.0.1:10000/devstoreaccount1` (the Blob service endpoint Azurite exposes for the devstoreaccount1 account).
 
 #### Running with Azure Storage account
 
@@ -55,7 +64,7 @@ Install the prerequisites and follow the steps to run the example and observe th
 
    Locate the Azure Storage account and copy the account name. Update the StorageUri field in `LeaderElectionConsoleWorker/app.config` with the value https://{0}.blob.core.windows.net, where {0} is the storage account name. Verify your local user is granted the `Storage Blob Data Contributor` role. You may need to navigate to Access Control (IAM) in the Azure portal and add the role manually.
 
-   In Settings > Configuration, ensure that `Allow storage account key access` is disabled to enforce the use of Managed Identity.
+   In Settings > Configuration, ensure that `Allow storage account key access` is disabled to enforce the use of Microsoft Entra ID authentication.
 
 ### :checkered_flag: Try it out
 
