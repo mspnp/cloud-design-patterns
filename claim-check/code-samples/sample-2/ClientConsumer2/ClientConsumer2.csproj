@@ -25,10 +25,10 @@
 				<PackageReference Include="Azure.Messaging.EventHubs" Version="5.12.2" />
 				<PackageReference Include="Azure.Messaging.EventHubs.Processor" Version="5.12.2" />
 				<PackageReference Include="Azure.Storage.Blobs" Version="12.27.0" />
-				<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.2" />
-				<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.2" />
-				<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.2" />
-				<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.2" />
+				<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.3" />
+				<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
+				<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.3" />
+				<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.3" />
 		</ItemGroup>
 
 </Project>
