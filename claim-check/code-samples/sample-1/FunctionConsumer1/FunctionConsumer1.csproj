@@ -17,7 +17,7 @@
 				<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.1.0" />
 				<PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="3.0.0" />
 				<PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.50.0" />
-				<PackageReference Include="Azure.Identity" Version="1.17.1" />
+				<PackageReference Include="Azure.Identity" Version="1.18.0" />
 		</ItemGroup>
 
 		<ItemGroup>
