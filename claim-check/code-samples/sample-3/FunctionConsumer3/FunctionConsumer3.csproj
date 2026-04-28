@@ -8,6 +8,7 @@
 		</PropertyGroup>
 
 		<ItemGroup>
+				<PackageReference Include="OpenTelemetry.Api" Version="1.15.3" />
 				<FrameworkReference Include="Microsoft.AspNetCore.App" />
 				<PackageReference Include="Azure.Storage.Blobs" Version="12.27.0" />
 				<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.51.0" />
