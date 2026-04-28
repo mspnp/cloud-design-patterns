@@ -1,4 +1,4 @@
-﻿# Priority Queue Pattern Example
+﻿# Priority Queue pattern example
 
 This directory contains an example of the [Priority Queue pattern](https://learn.microsoft.com/azure/architecture/patterns/priority-queue).
 
@@ -45,7 +45,7 @@ Install the prerequisites and follow the steps to deploy and run this Priority Q
    az group create -n $RESOURCE_GROUP_NAME -l $LOCATION
    ```
 
-## Deploy the Example to Azure
+## Deploy the example to Azure
 
 This Bicep template sets up the core infrastructure for a priority-based message processing system on Azure Functions. It creates a secure Storage Account, an Application Insights instance for monitoring, and a Service Bus namespace to enable communication between the sender and consumer functions. The deployment includes three Azure Function Apps: one sender and two consumers, each with different scaling limits to simulate message prioritization.
 The `funcPriorityQueueConsumerHigh` function can scale out to 200 instances, allowing it to process high-priority messages quickly. The `funcPriorityQueueConsumerLow` function is limited to 40 instances, handling lower-priority messages with less urgency. All function apps use the Flex Consumption plan and are connected to Application Insights for diagnostics and monitoring. Role assignments are configured to grant secure access to Service Bus and Storage by using managed identities.
@@ -81,7 +81,7 @@ After deploying the infrastructure, publish each Azure Function to its correspon
 
 You can view the maximum scaling configuration in the Azure portal. Go to each Function App, and then under Settings, select Scale and concurrency. There, you can see the Maximum instance count setting.
 
-Once the Azure Functions are deployed, you can use Application Insights to monitor activity. In the Azure portal, go to the Application Insights resource, select Logs, switch to KQL mode, and run the following queries to view trace logs for each function:
+Once the Azure Functions are deployed, you can use Application Insights to monitor activity. In the Azure portal, go to the Application Insights resource and select Logs. Switch to KQL mode and run the following queries to view trace logs for each function:
 
 ```
    // Traces for the High priority consumer
