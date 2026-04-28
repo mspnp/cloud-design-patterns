@@ -34,12 +34,12 @@ resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2025-05-01-preview
   name: serviceBusNamespaceName
 }
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' existing = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-08-01' existing = {
   name: storageAccountName
 }
 
 // Define the blob service under the existing storage account for deployments
-resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2021-09-01' = {
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2025-08-01' = {
   parent: storageAccount
   name: 'default'
   properties: {
@@ -61,7 +61,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: appInsightsName
 }
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2024-11-01' = {
+resource appServicePlan 'Microsoft.Web/serverfarms@2025-03-01' = {
   name: '${functionAppName}-plan'
   location: location
   sku: {
@@ -74,7 +74,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2024-11-01' = {
   }
 }
 
-resource functionApp 'Microsoft.Web/sites@2024-11-01' = {
+resource functionApp 'Microsoft.Web/sites@2025-03-01' = {
   name: functionAppName
   location: location
   kind: 'functionapp,linux'

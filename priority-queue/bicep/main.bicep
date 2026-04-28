@@ -140,7 +140,7 @@ resource queueNamespacesResourceTopicLowPriorityRules 'Microsoft.ServiceBus/name
   }
 }
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-02-01' = {
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {
   name: logAnalyticsName
   location: location
   properties: {
@@ -182,7 +182,7 @@ resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-pr
   }
 }
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2025-01-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2025-08-01' = {
   name: storageAccountName
   location: location
   sku: {
