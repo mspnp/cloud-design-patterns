@@ -24,7 +24,7 @@
 				<PackageReference Include="Azure.Identity" Version="1.21.0" />
 				<PackageReference Include="Azure.Messaging.EventHubs" Version="5.12.2" />
 				<PackageReference Include="Azure.Messaging.EventHubs.Processor" Version="5.12.2" />
-				<PackageReference Include="Azure.Storage.Blobs" Version="12.27.0" />
+				<PackageReference Include="Azure.Storage.Blobs" Version="12.28.0" />
 				<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.7" />
 				<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.7" />
 				<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.7" />
