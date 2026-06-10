@@ -14,7 +14,7 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.7" />
     <PackageReference Include="Microsoft.Extensions.Azure" Version="1.14.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.8" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
