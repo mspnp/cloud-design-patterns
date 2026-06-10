@@ -1,0 +1,46 @@
+name: "Periodic CodeQL"
+
+on:
+  schedule:
+    # Weekly scan so newly-disclosed query packs catch existing code.
+    - cron: "27 4 * * 1"
+  # Allow manual runs from the Actions tab in the GitHub UI.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      # Required to upload results to the GitHub code scanning dashboard.
+      security-events: write
+      # Required to read the repository contents.
+      contents: read
+      actions: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: csharp
+            build-mode: none
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # Run the standard plus security-extended query suite for deeper coverage.
+          queries: security-extended
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        with:
+          category: "/language:${{ matrix.language }}"

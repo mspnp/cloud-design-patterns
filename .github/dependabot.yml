@@ -15,3 +15,13 @@ updates:
       - "/valet-key/ValetKey.*"
     schedule:
       interval: "weekly"
+  - package-ecosystem: "github-actions" # Keep CI workflow actions patched
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "devcontainers" # Patch dev container base images & features
+    directories:
+      - "/"
+      - "/pipes-and-filters"
+    schedule:
+      interval: "weekly"
