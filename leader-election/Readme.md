@@ -43,9 +43,40 @@ Install the prerequisites and follow the steps to run the example and observe th
 
 #### Running with Azurite storage emulator
 
-   The included `app.config` file is set up to use a local Azure Storage emulator. Open a new terminal window, navigate to an empty working directory for the Azurite data files, and start the emulator with the command `azurite`, or `npx azurite` if you installed via `npm`.  
-   Azure SDKs by DefaultAzureCredential needs https, and Azurite by default is http. Follow the instructions [here](https://learn.microsoft.com/azure/storage/common/storage-use-azurite?tabs=visual-studio%2Cblob-storage#azure-sdks).  
-   In `LeaderElectionConsoleWorker/app.config` you see `https://127.0.0.1:10000/devstoreaccount1` (This is the Blob service endpoint Azurite exposes for the devstoreaccount1 account.)
+   The included `app.config` file is configured to use a local Azure Storage emulator over HTTPS.
+
+   In `LeaderElectionConsoleWorker/app.config`, `StorageUri` is set to `https://127.0.0.1:10000/devstoreaccount1` (the Blob service endpoint Azurite exposes for the `devstoreaccount1` account).
+
+   For official guidance on Azurite HTTPS setup and certificates, see [Use Azurite emulator for local Azure Storage development](https://learn.microsoft.com/azure/storage/common/storage-use-azurite).
+
+   Because `DefaultAzureCredential` is used, run Azurite with HTTPS and OAuth support:
+
+    ```bash
+    # Create a folder for Azurite certificate and data files
+    mkdir -p ~/.azurite
+
+    # Generate a local self-signed certificate for localhost
+    openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes \
+       -keyout ~/.azurite/azurite.key \
+       -out ~/.azurite/azurite.crt \
+       -subj "/CN=localhost" \
+       -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+
+    # Trust the certificate inside WSL so .NET can validate TLS
+    sudo cp ~/.azurite/azurite.crt /usr/local/share/ca-certificates/azurite.crt
+    sudo update-ca-certificates
+
+     # If "azurite: command not found", run via npx instead
+    npx --yes azurite --oauth basic \
+       --cert ~/.azurite/azurite.crt \
+       --key ~/.azurite/azurite.key \
+       --location ~/.azurite/data \
+       --skipApiVersionCheck
+    ```
+
+    If you run from WSL, run both `azurite` and `dotnet run` inside WSL.
+
+   Keep Azurite running while the worker processes are running.
 
 #### Running with Azure Storage account
 
