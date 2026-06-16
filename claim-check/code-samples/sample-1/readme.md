@@ -87,7 +87,7 @@ Install the prerequisites and follow the steps to deploy and run the examples.
 
 ### :checkered_flag: Try it out
 
-To generate a claim check message you just have to drop a file in the created Azure Storage account. You can use Azure **Storage browser** to do that. [See this guide to learn how to upload blobs to a container using Storage Explorer](https://learn.microsoft.com/azure/storage/blobs/quickstart-storage-explorer#upload-blobs-to-the-container). Inside the **payloads** Container.
+To generate a claim check message, drop a file in the `payloads` container in the created Azure Storage account. You can use Azure **Storage browser** to do that. [See this guide to learn how to upload blobs to a container using Storage Explorer](https://learn.microsoft.com/azure/storage/blobs/quickstart-storage-explorer#upload-blobs-to-the-container).
 
 ### :broom: Clean up
 
