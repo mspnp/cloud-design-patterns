@@ -26,8 +26,9 @@ namespace ImageProcessingPipeline
             using BlobDownloadStreamingResult imageBlobContents = await imageBlob.DownloadStreamingAsync(null, cancellationToken);
             using var image = await Image.LoadAsync(imageBlobContents.Content, cancellationToken);
 
-            var resources = _files.GetDirectoryContents("/");
-            using var watermarkStream = resources.First(resource => resource.Name.Equals("resources/watermark.png")).CreateReadStream();
+            var resourcesDir = _files.GetDirectoryContents("resources");
+            var watermarkFile = resourcesDir.First(resource => resource.Name.Equals("watermark.png"));
+            using var watermarkStream = watermarkFile.CreateReadStream();
             using var watermarkImage = await Image.LoadAsync(watermarkStream, cancellationToken);
 
             image.Mutate(i =>
