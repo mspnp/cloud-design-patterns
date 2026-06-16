@@ -44,7 +44,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {
 }
 
 @description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SaS tokens for this blobs in this account.')
-resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2026-04-01' = {
   name: 'st${namePrefix}cc'
   location: location
   sku: {
@@ -97,7 +97,7 @@ resource blobContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@
 }
 
 @description('The Azure Event Grid system topic to use with the sample apps. This topic will be used to forward BlobCreated events to the Azure Event Hub.')
-resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2025-04-01-preview' = {
+resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2025-07-15-preview' = {
   name: '${storageAccount.name}${guid(namePrefix, 'storage')}'
   location: location
   identity: {
@@ -110,7 +110,7 @@ resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2025-04-01-
 }
 
 @description('The Azure Storage account to use together with Event Hubs. Used to support the functionality of the EventProcessor class')
-resource eventHubStorageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
+resource eventHubStorageAccount 'Microsoft.Storage/storageAccounts@2026-04-01' = {
   name: 'st${namePrefix}ehub'
   location: location
   sku: {
@@ -248,7 +248,7 @@ resource userEventHubDataOwnerRoleAssignment 'Microsoft.Authorization/roleAssign
 }
 
 @description('Event Grid subscription to forward BlobCreated events to our Azure Hub.')
-resource eventGridBlobCreatedEventHubSubscription 'Microsoft.EventGrid/systemTopics/eventSubscriptions@2025-04-01-preview' = {
+resource eventGridBlobCreatedEventHubSubscription 'Microsoft.EventGrid/systemTopics/eventSubscriptions@2025-07-15-preview' = {
   parent: eventGridStorageBlobTopic
   name: 'eventhub'
   properties: {
