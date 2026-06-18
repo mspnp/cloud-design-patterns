@@ -66,7 +66,7 @@ Install the prerequisites and follow the steps to run the example and observe th
     sudo cp ~/.azurite/azurite.crt /usr/local/share/ca-certificates/azurite.crt
     sudo update-ca-certificates
 
-     # If "azurite: command not found", run via npx instead
+    # If "azurite: command not found", run via npx instead
     npx --yes azurite --oauth basic \
        --cert ~/.azurite/azurite.crt \
        --key ~/.azurite/azurite.key \
