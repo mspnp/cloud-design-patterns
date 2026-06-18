@@ -29,7 +29,7 @@ resource storageQueueDataContributorRole 'Microsoft.Authorization/roleDefinition
 /*** NEW RESOURCES ***/
 
 @description('The Azure Storage account which will contain the pipes (queues) and the images to be sent through the filters (Azure Functions).')
-resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2026-04-01' = {
   name: storageAccountName
   location: location
   sku: {
