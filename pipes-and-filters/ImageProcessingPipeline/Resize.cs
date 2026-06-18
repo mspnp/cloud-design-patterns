@@ -31,6 +31,12 @@ namespace ImageProcessingPipeline
                 using var data = SKData.Create(memoryStream);
                 using var original = SKBitmap.Decode(data);
 
+                if (original is null)
+                {
+                    _logger.LogError("Failed to decode image {filePath}: decode returned null.", imageFilePath);
+                    throw new InvalidOperationException($"Image decode failed: {imageFilePath}");
+                }
+
                 // Validate image decode succeeded
                 if (original is null || original.Width <= 0 || original.Height <= 0)
                 {

@@ -31,6 +31,12 @@ namespace ImageProcessingPipeline
                 using var data = SKData.Create(memoryStream);
                 using var original = SKBitmap.Decode(data);
 
+                if (original is null)
+                {
+                    _logger.LogError("Failed to decode image {filePath}: decode returned null.", imageFilePath);
+                    throw new InvalidOperationException($"Image decode failed: {imageFilePath}");
+                }
+
                 // Validate image decode succeeded
                 if (original.Width <= 0 || original.Height <= 0)
                 {
@@ -47,6 +53,12 @@ namespace ImageProcessingPipeline
                 }
 
                 using var watermarkBitmap = SKBitmap.Decode(watermarkPath);
+
+                if (watermarkBitmap is null)
+                {
+                    _logger.LogError("Failed to decode watermark image at {path}: decode returned null.", watermarkPath);
+                    throw new InvalidOperationException($"Watermark decode failed: {watermarkPath}");
+                }
 
                 // Validate watermark fits in image
                 if (watermarkBitmap.Width > original.Width || watermarkBitmap.Height > original.Height)
