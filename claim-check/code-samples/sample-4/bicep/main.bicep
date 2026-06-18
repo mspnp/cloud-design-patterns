@@ -44,7 +44,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {
 }
 
 @description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SaS tokens for this blobs in this account.')
-resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2026-04-01' = {
   name: 'st${namePrefix}cc'
   location: location
   sku: {
@@ -55,7 +55,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
     accessTier: 'Hot'
     allowBlobPublicAccess: false
     allowCrossTenantReplication: false
-    allowSharedKeyAccess: false //Ony managed identiy allowed 
+    allowSharedKeyAccess: false // Only managed identity is allowed
     isLocalUserEnabled: false
     isHnsEnabled: false
     isNfsV3Enabled: false
