@@ -32,9 +32,9 @@ namespace ImageProcessingPipeline
                 using var original = SKBitmap.Decode(data);
 
                 // Validate image decode succeeded
-                if (original.Width <= 0 || original.Height <= 0)
+                if (original is null || original.Width <= 0 || original.Height <= 0)
                 {
-                    _logger.LogError("Failed to decode image {filePath}: invalid dimensions {width}x{height}", imageFilePath, original.Width, original.Height);
+                    _logger.LogError("Failed to decode image {filePath}: invalid or unsupported image", imageFilePath);
                     throw new InvalidOperationException($"Image decode failed or image is empty: {imageFilePath}");
                 }
 
