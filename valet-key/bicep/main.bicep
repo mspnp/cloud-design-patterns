@@ -49,7 +49,7 @@ resource workloadLogs 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {
 }
 
 @description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SaS tokens for this blobs in this account.')
-resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2026-04-01' = {
   name: storageAccountName
   location: location
   sku: {
