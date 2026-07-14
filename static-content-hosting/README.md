@@ -33,7 +33,7 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 1. Clone/download this repo locally.
 
    ```bash
-   git clone https://github.com/mspnp/cloud-design-patterns.git
+   git clone https://github.com/Azure-Samples/cloud-design-patterns.git
    cd cloud-design-patterns/static-content-hosting
    ```
 
