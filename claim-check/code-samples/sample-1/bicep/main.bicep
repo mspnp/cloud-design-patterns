@@ -30,7 +30,7 @@ resource storageQueueDataContributorRole 'Microsoft.Authorization/roleDefinition
 /*** NEW RESOURCES ***/
 
 @description('The Azure Storage account which will be where authorized clients upload large blobs to. The Azure Function will hand out scoped, time-limited SAS tokens for this blobs in this account.')
-resource storageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2026-04-01' = {
   name: 'st${namePrefix}cc'
   location: location
   sku: {
@@ -104,7 +104,7 @@ resource queueContributorRoleAssignment 'Microsoft.Authorization/roleAssignments
 }
 
 @description('Event Grid system topic to subscribe to blob created events.')
-resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2025-04-01-preview' = {
+resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2025-07-15-preview' = {
   name: '${storageAccount.name}${guid(namePrefix, 'storage')}'
   location: location
   identity: {
@@ -117,7 +117,7 @@ resource eventGridStorageBlobTopic 'Microsoft.EventGrid/systemTopics@2025-04-01-
 }
 
 @description('Event Grid system topic subscription to queue blob created events.')
-resource eventGridBlobCreatedQueueSubscription 'Microsoft.EventGrid/systemTopics/eventSubscriptions@2025-04-01-preview' = {
+resource eventGridBlobCreatedQueueSubscription 'Microsoft.EventGrid/systemTopics/eventSubscriptions@2025-07-15-preview' = {
   parent: eventGridStorageBlobTopic
   name: 'storagequeue'
   properties: {

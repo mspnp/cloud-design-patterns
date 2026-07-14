@@ -1,10 +1,10 @@
-# Sample 4: Manual token generation, Azure Event Hubs with Kafka as messaging system
+# Sample 4: Manual token generation with Azure Event Hubs using Kafka as the messaging system
 
 ## Technologies used: Azure Blob Storage, Azure Event Hubs with Kafka API enabled, Azure Functions, .NET 10.0
 
-In this example the client application uploads the payload to Azure Blob Storage and manually generates the claim check token, which is sent via Event Hubs.
+In this example, the client application uploads the payload to Azure Blob Storage and manually generates the claim check token, which is sent via Event Hubs.
 
-The sample producer CLI application uses the Apache Kafka libraries to send messages to [Event Hubs with Kafka enabled](https://learn.microsoft.com/azure/event-hubs/event-hubs-create-kafka-enabled), demonstrating how to use Azure services such as Azure Blob Storage and Azure Functions, etc., with a different messaging protocol such as Kafka. The Azure Function demonstrates a consumer application for the payload.
+The sample producer CLI application uses the Apache Kafka libraries to send messages to [Event Hubs with Kafka enabled](https://learn.microsoft.com/azure/event-hubs/event-hubs-create-kafka-enabled), demonstrating how to use Azure services such as Azure Blob Storage and Azure Functions with a different messaging protocol. The Azure Function demonstrates a consumer application for the payload.
 
 > This example uses [`DefaultAzureCredential`](https://learn.microsoft.com/dotnet/azure/sdk/authentication/#defaultazurecredential) for authentication while accessing Azure resources. The user principal must be provided as a parameter to the included Bicep script. The Bicep script is responsible for assigning the necessary RBAC (Role-Based Access Control) permissions for accessing the various Azure resources. While the principal can be the account associated with the interactive user, there are alternative [configurations](https://learn.microsoft.com/dotnet/azure/sdk/authentication/?tabs=command-line#exploring-the-sequence-of-defaultazurecredential-authentication-methods) available.
 
@@ -15,7 +15,7 @@ The sample producer CLI application uses the Apache Kafka libraries to send mess
 1. The consumer Function receives the message from Event Hubs.
 1. The Function extracts the reference to the payload blob from the message and downloads the blob directly from storage.
 
-## :rocket: Deployment Guide
+## :rocket: Deployment guide
 
 Install the prerequisites and follow the steps to deploy and run the examples.
 
@@ -76,18 +76,18 @@ Install the prerequisites and follow the steps to deploy and run the examples.
 
    > The local storage emulator is required as an Azure Storage account is a required "backing resource" for Azure Functions.
 
-1. Launch the Function sample that will process the claim check messages as they arrive to Event Hubs.
+1. Launch the Function sample that will process the claim check messages as they arrive in Event Hubs.
 
    ```bash
    cd ./FunctionConsumer4
-   func start --dotnet-isolated  
+   func start --dotnet-isolated
    ```
 
 > Please note: For demo purposes, the sample application will write the payload content to the screen. Keep that in mind before you try sending really large payloads.
 
 ### :checkered_flag: Try it out
 
-1. Run the CLI sample that will generate a claim check message and send it to Event Hubs using the Kafka Api.
+1. Run the CLI sample that will generate a claim check message and send it to Event Hubs using the Kafka API.
 
    _You'll need to run this from another terminal._
 
