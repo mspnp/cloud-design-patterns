@@ -25,7 +25,7 @@ resource storageBlobDataContributorRole 'Microsoft.Authorization/roleDefinitions
 /*** NEW RESOURCES ***/
 
 @description('The Azure Storage account with static website support enabled and where operations upload static content to.')
-resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2026-04-01' = {
   name: storageAccountName
   location: location
   sku: {
@@ -56,7 +56,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   }
 }
 
-resource storageAccountUserStorageBlobDataContributorRole_roleAssignment 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+resource storageAccountUserStorageBlobDataContributorRole_roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: storageAccount
   name: guid(storageAccount.id, storageBlobDataContributorRole.id, assigneeObjectId)
   properties: {
