@@ -23,7 +23,7 @@ Install the prerequisites and follow the steps to deploy and run an example of t
 1. Clone this repository to your workstation and navigate to the working directory.
 
    ```shell
-   git clone https://github.com/mspnp/cloud-design-patterns
+   git clone https://github.com/Azure-Samples/cloud-design-patterns
    cd pipes-and-filters
    ```
 

@@ -37,7 +37,7 @@ Install the prerequisites and follow the steps to deploy and run the examples.
 1. Clone this repository to your workstation and navigate to the working directory.
 
    ```bash
-   git clone https://github.com/mspnp/cloud-design-patterns
+   git clone https://github.com/Azure-Samples/cloud-design-patterns
    cd cloud-design-patterns/claim-check/code-samples/sample-4
    ```
 

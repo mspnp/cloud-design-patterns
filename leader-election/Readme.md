@@ -26,7 +26,7 @@ Install the prerequisites and follow the steps to run the example and observe th
    Open a terminal, clone the repository, and navigate to the `leader-election` directory.
 
    ```shell
-   git clone https://github.com/mspnp/cloud-design-patterns.git
+   git clone https://github.com/Azure-Samples/cloud-design-patterns.git
    cd cloud-design-patterns
    cd leader-election
    ```

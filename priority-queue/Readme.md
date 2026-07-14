@@ -27,7 +27,7 @@ Install the prerequisites and follow the steps to deploy and run this Priority Q
    Open a terminal, clone the repository, and navigate to the `priority-queue` directory.
 
    ```shell
-   git clone https://github.com/mspnp/cloud-design-patterns.git
+   git clone https://github.com/Azure-Samples/cloud-design-patterns.git
    cd cloud-design-patterns
    cd priority-queue
    ```

@@ -44,13 +44,13 @@ features, by not reporting duplicate issues.  Providing the following informatio
 - **Suggest a Fix** - if you can't fix the bug yourself, perhaps you can point to what might be
   causing the problem (line of code or commit)
 
-You can file new issues by providing the above information this repository's [issues list](https://github.com/mspnp/cloud-design-patterns/issues/new).
+You can file new issues by providing the above information this repository's [issues list](https://github.com/Azure-Samples/cloud-design-patterns/issues/new).
 
 ### <a name="submit-pr"></a> Submitting a Pull Request (PR)
 
 Before you submit your Pull Request (PR) consider the following guidelines:
 
-* Search the repository's [pull requests](https://github.com/mspnp/cloud-design-patterns/pulls) for an open or closed PR that relates to your submission. You don't want to duplicate effort.
+* Search the repository's [pull requests](https://github.com/Azure-Samples/cloud-design-patterns/pulls) for an open or closed PR that relates to your submission. You don't want to duplicate effort.
 
 - Make your changes in a new git fork:
 - Commit your changes using a descriptive commit message
