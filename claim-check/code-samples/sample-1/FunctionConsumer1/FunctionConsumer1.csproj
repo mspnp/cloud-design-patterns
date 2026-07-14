@@ -9,7 +9,7 @@
 
 		<ItemGroup>
 				<FrameworkReference Include="Microsoft.AspNetCore.App" />
-				<PackageReference Include="Azure.Storage.Blobs" Version="12.29.0" />
+				<PackageReference Include="Azure.Storage.Blobs" Version="12.29.1" />
 				<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="2.52.0" />
 				<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage" Version="6.8.1" />
 				<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage.Queues" Version="5.5.4" />
