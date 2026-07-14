@@ -75,7 +75,7 @@ resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-pr
   }
 }
 
-resource appStorageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
+resource appStorageAccount 'Microsoft.Storage/storageAccounts@2026-04-01' = {
   name: appStorageAccountName
   sku: {
     name: 'Standard_LRS'
@@ -110,7 +110,7 @@ resource appStorageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   }
 }
 
-resource dataStorageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
+resource dataStorageAccount 'Microsoft.Storage/storageAccounts@2026-04-01' = {
   name: dataStorageAccountName
   sku: {
     name: 'Standard_RAGRS'
@@ -124,7 +124,7 @@ resource dataStorageAccount 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   }
 }
 
-resource dataStorageAccountNameContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2025-06-01' = {
+resource dataStorageAccountNameContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2026-04-01' = {
   name: '${dataStorageAccountName}/default/data'
   dependsOn: [
     dataStorageAccount
